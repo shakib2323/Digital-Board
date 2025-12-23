@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduFlow Ultimate-ZinqFitness | Pro Teaching Board</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+             --bg-dark: #0f172a; 
+             --board-bg: #1e1e1e;
+            --line-color: #333;
+             --sidebar-w: 75px;
+              --admin-card: #1e293b;
+        }
+        * {
+             margin: 0;
+              padding: 0; 
+              box-sizing: border-box;
+               font-family: 'Inter', sans-serif; }
+        body { 
+            background: var(--bg-dark);
+             color: white;
+             }
+
+        
+        .sidebar {
+            position: fixed; 
+            left: 0; top: 0;
+             height: 100%;
+              width: var(--sidebar-w);
+            background: #000; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            padding-top: 25px;
+             gap: 35px; 
+             border-right: 1px solid #334155; 
+             z-index: 2000;
+        }
+        .sidebar i { 
+            font-size: 1.5rem;
+             color: #94a3b8; 
+             cursor: pointer; 
+             transition: 0.3s; }
+        .sidebar i.active {
+             color: var(--primary);
+             }
+
+        .main-container { 
+            margin-left: var(--sidebar-w);
+             min-height: 100vh;
+              position: relative; }
+
+        
+        .board-container {
+            width: 100%; min-height: 100vh; background-color: var(--board-bg);
+            background-image: linear-gradient(var(--line-color) 1px, transparent 1px);
+            background-size: 100% 40px; position: relative; padding-top: 80px;
+        }
+        #teachingBoard { cursor: crosshair; display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+        
+        #teacherEditor {
+            position: absolute; top: 80px; left: 0; width: 100%; min-height: 100vh;
+            z-index: 2; padding: 20px; outline: none; background: transparent;
+            color: white; font-size: 20px; line-height: 40px; pointer-events: auto;
+        }
+
+        .toolbar-top {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(30,41,59,0.95); padding: 10px 25px; border-radius: 12px;
+            display: flex; gap: 12px; align-items: center; z-index: 1500; border: 1px solid #475569;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .toolbar-top button, .toolbar-top label { background: #334155; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+
+        
+        .student-paper {
+            background: white; color: black; padding: 60px; width: 90%; max-width: 900px;
+            margin: 40px auto; min-height: 100vh; position: relative;
+            background-image: repeating-linear-gradient(white 0px, white 34px, #e5e7eb 35px);
+            line-height: 35px; font-size: 18px; outline: none; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+       
+        .admin-view { padding: 40px; }
+        .data-card {
+            background: var(--admin-card); padding: 25px; border-radius: 12px;
+            margin-bottom: 25px; border-left: 5px solid var(--primary);
+        }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .stats-bar { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-box { background: #334155; padding: 15px; border-radius: 8px; flex: 1; text-align: center; border: 1px solid var(--primary); }
+
+        
+        .img-adjustable { position: absolute; border: 2px dashed var(--primary); cursor: move; z-index: 500; }
+        .image-controls-panel {
+            position: fixed; bottom: 30px; right: 30px; background: #1e293b; padding: 20px;
+            border-radius: 15px; display: none; z-index: 3000; box-shadow: 0 0 20px black;
+        }
+        .grid-ctrl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .grid-ctrl button { padding: 10px; border: none; background: #334155; color: white; cursor: pointer; border-radius: 5px; }
+
+        
+        #toast { position: fixed; top: 20px; right: -300px; background: var(--primary); color: white; padding: 15px 30px; border-radius: 10px; transition: 0.5s; z-index: 5000; font-weight: bold; }
+        .hidden { display: none !important; }
+        .q-text { color: red; font-weight: bold; }
+        .a-text { color: inherit; font-weight: normal; }
+        
+        .voice-btn { background: #ef4444 !important; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="toast">New Update!</div>
+
+    <nav class="sidebar no-print">
+        <i class="fas fa-chalkboard-teacher active" id="nav-teacher" onclick="nav('teacher')" title="Teacher Board"></i>
+        <i class="fas fa-edit" id="nav-student" onclick="nav('student')" title="Student Notes"></i>
+        <i class="fas fa-user-shield" id="nav-admin" onclick="openAdmin()" title="Admin Control"></i>
+        <i class="fas fa-file-pdf" onclick="downloadMasterPDF()" title="Download as PDF"></i>
+    </nav>
+
+    <div class="main-container">
+        <div id="section-teacher" class="view-div">
+            <div class="toolbar-top no-print">
+                <span title="Pen Color"><i class="fas fa-paint-brush"></i> <input type="color" id="teachColor" value="#ffffff"></span>
+                <button onclick="setMode('pen')" title="Pen Mode"><i class="fas fa-pen"></i></button>
+                <button onclick="setMode('rect')" title="Shape Mode"><i class="fas fa-draw-polygon"></i></button>
+                <div style="width:1px; height:25px; background:#475569; margin:0 5px;"></div>
+                <button onclick="addTeacherText('Q')" style="color:red; font-weight:bold;">Q</button>
+                <button onclick="addTeacherText('A')" style="color:white; font-weight:bold;">A</button>
+                <span title="Text Color">T <input type="color" id="textColorPicker" value="#ffffff" onchange="styleSelectedText('foreColor', this.value)"></span>
+                <span title="Highlight">H <input type="color" id="textHilitePicker" value="#ffff00" onchange="styleSelectedText('hiliteColor', this.value)"></span>
+                <button onclick="changeFontSize(1)" title="Increase Font"><i class="fas fa-plus"></i></button>
+                <button onclick="changeFontSize(-1)" title="Decrease Font"><i class="fas fa-minus"></i></button>
+                <div style="width:1px; height:25px; background:#475569; margin:0 5px;"></div>
+                <label for="teachImg" style="cursor:pointer;"><i class="fas fa-image"></i></label>
+                <input type="file" id="teachImg" hidden accept="image/*">
+                <button onclick="clearCanvas()" style="color:#ef4444;"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="board-container" id="teacher-wrap">
+                <canvas id="teachingBoard"></canvas>
+                <div id="teacherEditor" contenteditable="true">Teacher: Click to type, or use Pen...created by Shakib Ali</div>
+            </div>
+        </div>
+
+        <div id="section-student" class="view-div hidden">
+            <div class="no-print" style="background:#1e293b; padding:15px; position:sticky; top:0; z-index:100; display:flex; gap:15px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
+                <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Question</button>
+                <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Answer</button>
+                <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;"><i class="fas fa-microphone"></i> Voice Note</button>
+                <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px 20px; border-radius:6px; cursor:pointer;">Upload Image</label>
+                <input type="file" id="studentImgInp" hidden accept="image/*">
+                <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save Data</button>
+            </div>
+            <div id="studentEditor" class="student-paper" contenteditable="true">
+                Student: Write or use Voice Note...
+            </div>
+        </div>
+
+        <div id="section-admin" class="view-div hidden admin-view">
+            <div class="admin-header no-print">
+                <h1>Master Admin Panel</h1>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="exportBackup()" style="background:orange; color:black; border:none; padding:10px; border-radius:5px; cursor:pointer;">Backup JSON</button>
+                    <p id="total-logs" style="align-self:center;">Logs: 0</p>
+                </div>
+            </div>
+            <div class="stats-bar no-print">
+                <div class="stat-box"><h4>Active Users</h4><p>Live</p></div>
+                <div class="stat-box"><h4>Storage</h4><p>Local</p></div>
+                <div class="stat-box"><h4>System</h4><p>Online</p></div>
+            </div>
+            <div id="admin-content-list"></div>
+        </div>
+    </div>
+
+    <div id="image-adjuster" class="image-controls-panel no-print">
+        <h4 style="margin-bottom:15px; color:var(--primary);">Adjust Image Position</h4>
+        <div class="grid-ctrl">
+            <div></div><button onclick="moveImage('up')"><i class="fas fa-arrow-up"></i></button><div></div>
+            <button onclick="moveImage('left')"><i class="fas fa-arrow-left"></i></button>
+            <button onclick="activeImg=null; document.getElementById('image-adjuster').style.display='none';" style="background:green;"><i class="fas fa-check"></i></button>
+            <button onclick="moveImage('right')"><i class="fas fa-arrow-right"></i></button>
+            <div></div><button onclick="moveImage('down')"><i class="fas fa-arrow-down"></i></button><div></div>
+        </div>
+        <p style="margin-top:15px; font-size:12px;">Resize Image:</p>
+        <input type="range" min="50" max="1500" style="width:100%;" oninput="resizeImage(this.value)">
+    </div>
+
+    <script>
+        const canvas = document.getElementById('teachingBoard');
+        const ctx = canvas.getContext('2d');
+        const teacherWrap = document.getElementById('teacher-wrap');
+        const studentArea = document.getElementById('studentEditor');
+        const teacherArea = document.getElementById('teacherEditor');
+        let drawing = false, activeImg = null, currentMode = 'pen';
+        let startX, startY;
+        
+        
+        let isSaved = false;
+        studentArea.addEventListener('input', () => { isSaved = false; }); 
+
+        window.onload = () => {
+            canvas.width = window.innerWidth - 75;
+            canvas.height = 3000;
+            ctx.lineCap = 'round';
+            ctx.lineWidth = 3;
+            renderAdminLogs();
+        };
+
+        function setMode(m) {
+            currentMode = m;
+            showToast("Mode: " + m);
+            teacherArea.style.pointerEvents = (m === 'pen' || m === 'rect') ? 'none' : 'auto';
+        }
+
+        canvas.onmousedown = (e) => {
+            drawing = true;
+            startX = e.offsetX; startY = e.offsetY;
+            ctx.beginPath();
+            if(currentMode === 'pen') draw(e);
+        };
+        canvas.onmousemove = draw;
+        canvas.onmouseup = (e) => {
+            if(currentMode === 'rect' && drawing) {
+                ctx.strokeStyle = document.getElementById('teachColor').value;
+                ctx.strokeRect(startX, startY, e.offsetX - startX, e.offsetY - startY);
+            }
+            drawing = false;
+        };
+
+        function draw(e) {
+            if(!drawing || (currentMode !== 'pen' && currentMode !== 'rect')) return;
+            if(currentMode === 'pen') {
+                ctx.strokeStyle = document.getElementById('teachColor').value;
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+            }
+        }
+
+        function styleSelectedText(command, value) {
+            teacherArea.focus();
+            document.execCommand(command, false, value);
+        }
+
+        function changeFontSize(dir) {
+            teacherArea.focus();
+            let currentSize = window.getComputedStyle(teacherArea).fontSize;
+            let newSize = parseInt(currentSize) + (dir * 2);
+            document.execCommand('fontSize', false, "7");
+            const spans = teacherArea.getElementsByTagName("font");
+            for (let i = 0; i < spans.length; i++) {
+                if(spans[i].size == "7") {
+                    spans[i].removeAttribute("size");
+                    spans[i].style.fontSize = newSize + "px";
+                }
+            }
+            if (!window.getSelection().toString()) teacherArea.style.fontSize = newSize + "px";
+        }
+
+        function addTeacherText(type) {
+            setMode('text');
+            const span = document.createElement("span");
+            span.style.color = (type === 'Q' ? 'red' : 'white');
+            span.style.fontWeight = 'bold';
+            span.innerText = `\n${type === 'Q' ? 'Question: ' : 'Answer: '}`;
+            teacherArea.focus();
+            const sel = window.getSelection();
+            if(sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                range.insertNode(span);
+                range.collapse(false);
+            }
+        }
+
+   
+        function startVoiceRecognition(targetId) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return alert("Speech not supported.");
+            const recognition = new SpeechRecognition();
+            const btn = document.getElementById('voiceStartBtn');
+            const editor = document.getElementById(targetId);
+            
+            recognition.onstart = () => {
+                btn.classList.add('voice-btn');
+                showToast("Listening...");
+            };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                editor.focus();
+              
+                document.execCommand('insertText', false, " " + transcript);
+                isSaved = false; 
+            };
+            
+            recognition.onend = () => btn.classList.remove('voice-btn');
+            recognition.onerror = () => btn.classList.remove('voice-btn');
+            recognition.start();
+        }
+
+        function setupImageUpload(inputId, container) {
+            document.getElementById(inputId).onchange = function(e) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.className = 'img-adjustable';
+                    img.style.width = '300px';
+                    img.style.left = '50px';
+                    img.style.top = (window.scrollY + 150) + 'px';
+                    img.onclick = function(ev) {
+                        ev.stopPropagation();
+                        activeImg = this;
+                        document.getElementById('image-adjuster').style.display = 'block';
+                    };
+                    container.appendChild(img);
+                    isSaved = false;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            };
+        }
+        setupImageUpload('teachImg', teacherWrap);
+        setupImageUpload('studentImgInp', studentArea);
+
+        function moveImage(dir) {
+            if(!activeImg) return;
+            let step = 30;
+            let top = parseInt(activeImg.style.top) || 0;
+            let left = parseInt(activeImg.style.left) || 0;
+            if(dir === 'up') activeImg.style.top = (top - step) + 'px';
+            if(dir === 'down') activeImg.style.top = (top + step) + 'px';
+            if(dir === 'left') activeImg.style.left = (left - step) + 'px';
+            if(dir === 'right') activeImg.style.left = (left + step) + 'px';
+        }
+        function resizeImage(v) { if(activeImg) activeImg.style.width = v + 'px'; }
+
+        function nav(mode) {
+            document.querySelectorAll('.view-div').forEach(v => v.classList.add('hidden'));
+            document.getElementById('section-' + mode).classList.remove('hidden');
+            document.querySelectorAll('.sidebar i').forEach(i => i.classList.remove('active'));
+            document.getElementById('nav-' + mode).classList.add('active');
+        }
+
+        function openAdmin() {
+            if(prompt("Admin Password:") === "admin58753244") { renderAdminLogs(); nav('admin'); }
+        }
+
+        function saveSession() {
+            const studentContent = studentArea.innerHTML;
+            let db = JSON.parse(localStorage.getItem('edu_master_db') || "[]");
+            db.push({ id: Date.now(), data: studentContent, date: new Date().toLocaleString() });
+            localStorage.setItem('edu_master_db', JSON.stringify(db));
+            isSaved = true; 
+            showToast("✅ Student notes saved!");
+            document.getElementById('saveBtn').style.background = "#059669";
+        }
+
+        function renderAdminLogs() {
+            const list = document.getElementById('admin-content-list');
+            const db = JSON.parse(localStorage.getItem('edu_master_db') || "[]");
+            document.getElementById('total-logs').innerText = `Total Logs: ${db.length}`;
+            list.innerHTML = db.map(item => `
+                <div class="data-card">
+                    <div style="display:flex; justify-content:space-between"><strong>ID: ${item.id}</strong><span>${item.date}</span></div>
+                    <div style="background:white; color:black; padding:20px; border-radius:8px; margin-top:15px;">${item.data}</div>
+                </div>
+            `).reverse().join('');
+        }
+
+        
+        async function downloadMasterPDF() {
+            
+            if(!isSaved) {
+                alert("⚠️ Please click 'Save Data' in the Student tab before downloading the PDF!");
+                nav('student');
+                return;
+            }
+
+            const name = prompt("Enter PDF Name:");
+            if(!name) return;
+            const targetView = document.querySelector('.view-div:not(.hidden)');
+            showToast("Generating Multi-page PDF...");
+
+            const toHide = document.querySelectorAll('.no-print');
+            toHide.forEach(el => el.style.visibility = 'hidden');
+
+            html2canvas(targetView, {
+                useCORS: true,
+                scale: 2,
+                backgroundColor: (targetView.id === 'section-student') ? "#ffffff" : "#1e1e1e",
+                windowWidth: targetView.scrollWidth,
+                windowHeight: targetView.scrollHeight
+            }).then(canvasShot => {
+                toHide.forEach(el => el.style.visibility = 'visible');
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgData = canvasShot.toDataURL('image/png');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfImgHeight = (imgProps.height * pageWidth) / imgProps.width;
+                
+                let heightLeft = pdfImgHeight;
+                let position = 0;
+
+                const drawBackground = () => {
+                    if(targetView.id !== 'section-student') {
+                        pdf.setFillColor(30, 30, 30);
+                        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+                        pdf.setDrawColor(60, 60, 60);
+                        pdf.setLineWidth(0.1);
+                        for (let y = 0; y < pageHeight; y += 10) pdf.line(0, y, pageWidth, y);
+                    }
+                };
+
+                drawBackground();
+                pdf.addImage(imgData, 'PNG', 0, position, pageWidth, pdfImgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - pdfImgHeight;
+                    pdf.addPage();
+                    drawBackground();
+                    pdf.addImage(imgData, 'PNG', 0, position, pageWidth, pdfImgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(name + ".pdf");
+                showToast("Download Complete!");
+            });
+        }
+
+        function addStyledText(type) {
+            const span = document.createElement("span");
+            span.className = (type === 'Q' ? 'q-text' : 'a-text');
+            span.style.color = (type === 'Q' ? 'red' : 'black');
+            span.innerText = `\n${type === 'Q' ? 'Question: ' : 'Answer: '}`;
+            studentArea.focus();
+            window.getSelection().getRangeAt(0).insertNode(span);
+            isSaved = false;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.right = "20px";
+            setTimeout(() => t.style.right = "-300px", 3000);
+        }
+
+        function exportBackup() {
+            const data = localStorage.getItem('edu_master_db');
+            const blob = new Blob([data], {type: "application/json"});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "Backup.json"; a.click();
+        }
+
+        function clearCanvas() { ctx.clearRect(0,0,canvas.width, canvas.height); teacherArea.innerHTML = ""; }
+    </script>
+</body>
+</html>
