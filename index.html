@@ -14,7 +14,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root {
@@ -380,6 +380,49 @@ body.focus-active .student-paper {
         background-size: 100% 35px;
     }
 }
+
+
+
+/* Force the shared view to the top */
+#section-single-view:not(.hidden) {
+    display: block !important;
+    visibility: visible !important;
+    z-index: 99999 !important;
+}
+
+/* Hide everything else when the shared view is active */
+body.sharing-active .sidebar, 
+body.sharing-active .mobile-header,
+body.sharing-active .toolbar-top {
+    display: none !important;
+}
+
+
+
+
+
+
+
+
+
+/* Helper button styles */
+.admin-btn {
+    color: white; 
+    border: none; 
+    padding: 6px 10px; 
+    border-radius: 4px; 
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Zoom class for mobile users who want to see text larger */
+.responsive-paper-wrapper.zoomed {
+    overflow-x: auto !important;
+    cursor: zoom-out !important;
+}
+.responsive-paper-wrapper.zoomed .scaler-engine {
+    transform: scale(1) !important;
+}
     </style>
 </head>
 <body>
@@ -427,6 +470,8 @@ body.focus-active .student-paper {
                 <label for="teachImg" style="cursor:pointer;"><i class="fas fa-image"></i></label>
                 <input type="file" id="teachImg" hidden accept="image/*">
                 <button onclick="clearCanvas()" style="color:#ef4444;"><i class="fas fa-trash"></i></button>
+
+                
     <button onclick="generateQR()" title="Share Board"><i class="fas fa-qrcode"></i></button>
 
               </div>
@@ -436,226 +481,11 @@ body.focus-active .student-paper {
             </div>
         </div>
 
-        <!-- <div id="section-student" class="view-div hidden">
-            <div class="no-print" style="background:#1e293b; padding:15px; position:sticky; top:0; z-index:100; display:flex; gap:15px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
-                <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Question</button>
-                <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Answer</button>
-                <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;"><i class="fas fa-microphone"></i> Voice Note</button>
-                <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px 20px; border-radius:6px; cursor:pointer;">Upload Image</label>
-                <input type="file" id="studentImgInp" hidden accept="image/*">
-                <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save Data</button>
-         <button onclick="generateQR()" title="Share Board"><i class="fas fa-qrcode"></i></button>
-      <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-    <div style="display: flex; align-items: center; justify-content: space-between;">
-        <h4 style="margin: 0; color: #1e293b;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
-        <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
-            Enable Collaborative Writing
-        </button>
-    </div>
-    
-    <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-        <p style="font-size: 13px; color: #64748b;">Share this Link with your partner (Delhi/Hyderabad/Anywhere):</p>
-        <div style="display: flex; gap: 8px;">
-            <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
-            <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">Copy</button>
-        </div>
-        <div id="partner-status" style="margin-top: 8px; font-size: 12px; color: #10b981; font-weight: bold;"></div>
-    </div>
-</div>
-         
-              </div>
-            <div id="studentEditor" class="student-paper" contenteditable="true">
-                Student: Write or use Voice Note...
-            </div>
-        </div> -->
-
-
-        <!-- <div id="section-student" class="view-div hidden">
-    <div class="no-print" style="background:#1e293b; padding:15px; position:sticky; top:0; z-index:100; display:flex; gap:15px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
-        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Question</button>
-        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Answer</button>
-        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;"><i class="fas fa-microphone"></i> Voice Note</button>
-        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px 20px; border-radius:6px; cursor:pointer;">Upload Image</label>
-        <input type="file" id="studentImgInp" hidden accept="image/*">
-        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save Data</button>
-        <button onclick="generateQR()" title="Share Board" style="padding:10px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
-    </div>
-
-    <div style="max-width: 800px; margin: 15px auto; padding: 0 15px;">
-        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px;">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <h4 style="margin: 0; color: #1e293b;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
-                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
-                    Enable Collaborative Writing
-                </button>
-            </div>
-            
-            <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-                <p style="font-size: 13px; color: #64748b;">Share this Link with your partner:</p>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; color: black;">
-                    <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">Copy</button>
-                </div>
-                <div id="partner-status" style="margin-top: 8px; font-size: 12px; color: #10b981; font-weight: bold;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="studentEditor" class="student-paper" contenteditable="true" style="margin-top:0;">
-        Student: Write or use Voice Note...
-    </div>
-</div> -->
+      
 
 
 
 
-<!-- <div id="section-student" class="view-div hidden">
-    <div class="no-print" style="background:#1e293b; padding:15px; position:sticky; top:0; z-index:100; display:flex; gap:15px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
-        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Question</button>
-        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Answer</button>
-        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;"><i class="fas fa-microphone"></i> Voice Note</button>
-        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px 20px; border-radius:6px; cursor:pointer;">Upload Image</label>
-        <input type="file" id="studentImgInp" hidden accept="image/*">
-        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save Data</button>
-        <button onclick="generateQR()" title="Share Board" style="padding:10px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
-    </div>
-
-    <div style="max-width: 800px; margin: 15px auto; padding: 0 15px;">
-        <div style="text-align: right; margin-bottom: 10px;">
-            <span id="active-timer-display" style="font-size: 12px; color: #1e293b; font-weight: bold; background: #fef3c7; padding: 6px 12px; border-radius: 20px; border: 1px solid #fcd34d;">
-                <i class="fas fa-stopwatch"></i> Active Work: 0m 0s
-            </span>
-        </div>
-
-        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <h4 style="margin: 0; color: #1e293b;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
-                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
-                    Enable Collaborative Writing
-                </button>
-            </div>
-            <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-                <p style="font-size: 13px; color: #64748b;">Share this Link with your partner:</p>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; color: black;">
-                    <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">Copy</button>
-                </div>
-                <div id="partner-status" style="margin-top: 8px; font-size: 12px; color: #10b981; font-weight: bold;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="studentEditor" class="student-paper" contenteditable="true" style="margin-top:0;">
-        Student: Write or use Voice Note...
-    </div>
-</div> -->
-
-
-<!-- 
-
-
-<div id="section-student" class="view-div hidden">
-    <div class="no-print" style="background:#1e293b; padding:10px; position:sticky; top:0; z-index:100; display:flex; gap:8px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
-        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Question</button>
-        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Answer</button>
-        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fas fa-microphone"></i> Voice</button>
-        
-        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px;">
-            <i class="fas fa-image"></i> Image
-        </label>
-        <input type="file" id="studentImgInp" hidden accept="image/*">
-        
-        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Save Data</button>
-        <button onclick="generateQR()" title="Share Board" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
-    </div>
-
-    <div style="max-width: 900px; margin: 10px auto; padding: 0 10px;">
-        
-        <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
-            <span id="active-timer-display" style="font-size: 11px; color: #1e293b; font-weight: bold; background: #fef3c7; padding: 6px 12px; border-radius: 20px; border: 1px solid #fcd34d; white-space: nowrap;">
-                <i class="fas fa-stopwatch"></i> Active Work: 0m 0s
-            </span>
-        </div>
-
-        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
-                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; max-width: 220px;">
-                    Enable Collab Writing
-                </button>
-            </div>
-            
-            <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
-                <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Share Link:</p>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; color: black; background: #fff;">
-                    <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 12px;">Copy</button>
-                </div>
-                <div id="partner-status" style="margin-top: 8px; font-size: 11px; color: #10b981; font-weight: bold;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true">
-        Student: Write or use Voice Note...
-    </div>
-</div> -->
-
-
-
-
-
-
-<!-- 
-<div id="section-student" class="view-div hidden">
-    <div id="student-toolbar" class="no-print" style="background:#1e293b; padding:10px; position:sticky; top:0; z-index:100; display:flex; gap:8px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap; transition: all 0.3s ease;">
-        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Question</button>
-        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Answer</button>
-        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fas fa-microphone"></i> Voice</button>
-        
-        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px;">
-            <i class="fas fa-image"></i> Image
-        </label>
-        <input type="file" id="studentImgInp" hidden accept="image/*">
-        
-        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Save Data</button>
-        
-        <button onclick="toggleFocusMode()" id="focusBtn" title="Focus Mode" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-expand"></i></button>
-        
-        <button onclick="generateQR()" title="Share Board" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
-    <div id="autosave-status" style="font-size: 11px; color: #94a3b8; margin-left: 10px; min-width: 100px;">
-    <i class="fas fa-cloud"></i> Ready
-</div>
-      </div>
-
-    <div id="student-workspace-ui" style="max-width: 900px; margin: 10px auto; padding: 0 10px; transition: opacity 0.3s ease;">
-        <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
-            <span id="active-timer-display" style="font-size: 11px; color: #1e293b; font-weight: bold; background: #fef3c7; padding: 6px 12px; border-radius: 20px; border: 1px solid #fcd34d; white-space: nowrap;">
-                <i class="fas fa-stopwatch"></i> Active Work: 0m 0s
-            </span>
-        </div>
-
-        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-                <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
-                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; max-width: 220px;">
-                    Enable Collab Writing
-                </button>
-            </div>
-            </div>
-    </div>
-
-    <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true">
-        Student: Write or use Voice Note...
-    </div>
-
-    <button id="exitFocusBtn" onclick="toggleFocusMode()" style="display:none; position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(30,41,59,0.8); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-        <i class="fas fa-compress"></i>
-    </button>
-
-
-    
-</div> -->
 
 <div id="section-student" class="view-div hidden">
     <div id="student-toolbar" class="no-print" style="background:#1e293b; padding:10px; position:sticky; top:0; z-index:1000; display:flex; gap:8px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap; transition: all 0.3s ease; align-items: center;">
@@ -681,6 +511,7 @@ body.focus-active .student-paper {
         
         <button onclick="toggleFocusMode()" id="focusBtn" title="Focus Mode" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-expand"></i></button>
         <button onclick="generateQR()" title="Share Board" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
+        
 <!-- 
         <div id="autosave-status" style="font-size: 11px; color: #94a3b8; margin-left: 10px; min-width: 90px; text-align: center;">
             <i class="fas fa-cloud"></i> Ready
@@ -711,7 +542,7 @@ body.focus-active .student-paper {
         </div>
     </div>
 
-    <div id="canvas-container" style="position: relative; max-width: 900px; margin: 0 auto;">
+    <!-- <div id="canvas-container" style="position: relative; max-width: 900px; margin: 0 auto;">
         <canvas id="studentShapeCanvas" style="position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; background: transparent;"></canvas>
         
         <div id="draw-timer" style="display:none; position:fixed; background:rgba(239, 68, 68, 0.9); color:white; padding:2px 8px; border-radius:4px; font-size:12px; pointer-events:none; z-index:10001; font-weight:bold;">0.0s</div>
@@ -719,7 +550,27 @@ body.focus-active .student-paper {
         <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true" style="position: relative; z-index: 1; min-height: 500px;">
             Student: Write or use Voice Note...
         </div>
+    </div> -->
+
+
+    <div id="canvas-container" style="position: relative; max-width: 900px; margin: 0 auto;">
+    <canvas id="studentShapeCanvas" style="position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; background: transparent;"></canvas>
+    
+    <div id="draw-timer" style="display:none; position:fixed; background:rgba(239, 68, 68, 0.9); color:white; padding:2px 8px; border-radius:4px; font-size:12px; pointer-events:none; z-index:10001; font-weight:bold;">0.0s</div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; background: #f1f5f9; border-radius: 8px 8px 0 0; border: 1px solid #e2e8f0; border-bottom: none;">
+        <label style="color: #64748b; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;">
+            <i class="fas fa-robot"></i> AI Observation
+        </label>
+        <span id="ai-mood-suggestion" style="font-size: 0.8rem; font-weight: bold; transition: all 0.3s; color: #94a3b8;">
+            Analyzing text...
+        </span>
     </div>
+
+    <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true" style="position: relative; z-index: 1; min-height: 500px; border-top-left-radius: 0; border-top-right-radius: 0;">
+        Student: Write or use Voice Note...
+    </div>
+</div>
 
     <button id="exitFocusBtn" onclick="toggleFocusMode()" style="display:none; position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(30,41,59,0.8); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
         <i class="fas fa-compress"></i>
@@ -754,6 +605,7 @@ body.focus-active .student-paper {
          <input type="text" id="studentNameInput" 
        oninput="localStorage.setItem('tempName', this.value)" 
        placeholder="Enter full name" ...>
+
 
         <div class="mood-selector" style="margin-bottom: 25px; text-align: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
             <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 12px; font-weight: 500;">How was the lesson today?</p>
@@ -1139,75 +991,48 @@ function saveSession() {
     }
 }
 
-// Helper to close modal
-function closeSaveModal() {
-    document.getElementById('saveModal').style.display = 'none';
-}
 
-// PART 2: Does the actual saving when "Save to Cloud" is clicked inside the modal
-// async function finalizeSave() {
-//     const studentName = document.getElementById('studentNameInput').value.trim();
-//     const studentContent = document.getElementById('studentEditor').innerHTML;
-    
-//     // Get the selected mood
-//     const moodElement = document.querySelector('input[name="mood"]:checked');
-//     const studentMood = moodElement ? moodElement.value : "😊";
 
-//     if (!studentName) {
-//         alert("Please enter a name before saving!");
+
+
+
+
+
+
+// async function saveSession() {
+//     const nameInput = document.getElementById('studentNameInput');
+//     const editor = document.getElementById('studentEditor');
+//     const canvas = document.getElementById('studentShapeCanvas');
+
+//     if (!nameInput.value) {
+//         showToast("❌ Please enter a student name");
 //         return;
 //     }
 
-//     showToast("Saving to Cloud...");
-    
+//     // 1. Capture the text content
+//     const boardContent = editor.innerHTML;
+
+//     // 2. Capture the Drawing (Convert canvas to image string)
+//     // This creates a small data string of your shapes
+//     const shapeData = canvas.toDataURL("image/png");
+
+//     const dataToSave = {
+//         studentName: nameInput.value,
+//         data: boardContent,
+//         shapes: shapeData, // <--- ADD THIS LINE
+//         timestamp: Date.now(),
+//         mood: document.getElementById('ai-mood-suggestion').innerText
+//     };
+
 //     try {
-//         const timestamp = Date.now();
-//         const dateString = new Date().toLocaleString();
-
-//         // New Entry Object
-//         const newEntry = {
-//             data: studentContent,
-//             mood: studentMood,
-//             timestamp: timestamp,
-//             dateString: dateString
-//         };
-
-//         // We use .doc(studentName) so that multiple saves by the same person 
-//         // group together for the "Time-Travel" feature
-//         const docRef = db.collection("edu_logs").doc(studentName);
-//         const doc = await docRef.get();
-
-//         if (doc.exists) {
-//             // IF STUDENT EXISTS: Update the main data and add to versions array
-//             await docRef.update({
-//                 data: studentContent,
-//                 mood: studentMood,
-//                 lastUpdated: timestamp,
-//                 versions: firebase.firestore.FieldValue.arrayUnion(newEntry)
-//             });
-//         } else {
-//             // IF NEW STUDENT: Create the record with the first version
-//             await docRef.set({
-//                 studentName: studentName,
-//                 data: studentContent,
-//                 mood: studentMood,
-//                 timestamp: timestamp,
-//                 dateString: dateString,
-//                 versions: [newEntry]
-//             });
-//         }
-
-//         isSaved = true; 
-//         showToast("✅ Saved to Global Database!");
-//         document.getElementById('saveBtn').style.background = "#059669";
+//         await db.collection("edu_logs").add(dataToSave);
+//         showToast("✅ Record & Shapes Saved!");
         
-//         // Clean up
-//         closeSaveModal();
-//         document.getElementById('studentNameInput').value = ""; // Clear input for next time
-        
-//     } catch (e) {
-//         console.error("Save Error:", e);
-//         showToast("❌ Save Failed!");
+//         // Clear canvas after successful save if desired
+//         clearAllShapes(); 
+//     } catch (error) {
+//         console.error("Save Error:", error);
+//         showToast("❌ Save Failed");
 //     }
 // }
 
@@ -1215,6 +1040,11 @@ function closeSaveModal() {
 
 
 
+// Helper to close modal
+function closeSaveModal() {
+    document.getElementById('saveModal').style.display = 'none';
+}
+
 
 
 // async function finalizeSave() {
@@ -1230,59 +1060,37 @@ function closeSaveModal() {
 //         return;
 //     }
 
-//     showToast("Saving to Cloud...");
+//     showToast("Saving unique record...");
     
 //     try {
 //         const timestamp = Date.now();
 //         const dateString = new Date().toLocaleString();
-        
-//         // Convert the activeSeconds into a readable string (e.g., "2m 15s")
 //         const finalActiveTime = formatTime(activeSeconds);
 
-//         // New Entry Object (This goes into the "versions" array)
-//         const newEntry = {
+//         // --- KEY CHANGE: Use .add() instead of .doc(studentName) ---
+//         // This generates a unique ID like "JkL928sk..." so it never overwrites!
+//         await db.collection("edu_logs").add({
+//             studentName: studentName,
 //             data: studentContent,
 //             mood: studentMood,
 //             timestamp: timestamp,
 //             dateString: dateString,
-//             activeTypingTime: finalActiveTime // Added time tracking to history
-//         };
-
-//         const docRef = db.collection("edu_logs").doc(studentName);
-//         const doc = await docRef.get();
-
-//         if (doc.exists) {
-//             // IF STUDENT EXISTS: Update main data and add to history
-//             await docRef.update({
-//                 data: studentContent,
-//                 mood: studentMood,
-//                 lastUpdated: timestamp,
-//                 totalActiveTime: finalActiveTime, // Update the main display time
-//                 versions: firebase.firestore.FieldValue.arrayUnion(newEntry)
-//             });
-//         } else {
-//             // IF NEW STUDENT: Create initial record
-//             await docRef.set({
-//                 studentName: studentName,
-//                 data: studentContent,
-//                 mood: studentMood,
-//                 timestamp: timestamp,
-//                 dateString: dateString,
-//                 totalActiveTime: finalActiveTime, // Set initial active time
-//                 versions: [newEntry]
-//             });
-//         }
+//             totalActiveTime: finalActiveTime,
+//             // We no longer need the "versions" array logic because 
+//             // every save is now its own version in the database.
+//             isVersion: true 
+//         });
 
 //         isSaved = true; 
-//         showToast("✅ Saved to Global Database!");
+//         showToast("✅ Saved as a new record!");
 //         document.getElementById('saveBtn').style.background = "#059669";
         
-//         // --- IMPORTANT: RESET TIMER AFTER SUCCESSFUL SAVE ---
+//         // --- RESET TIMER AND CLEAN UP ---
 //         activeSeconds = 0; 
 //         updateTimerUI(); 
         
-//         // Clean up
 //         closeSaveModal();
+//         // Clear name input so the next save requires a fresh check
 //         document.getElementById('studentNameInput').value = ""; 
         
 //     } catch (e) {
@@ -1292,10 +1100,20 @@ function closeSaveModal() {
 // }
 
 
+
+
+
+
+
+
 async function finalizeSave() {
     const studentName = document.getElementById('studentNameInput').value.trim();
     const studentContent = document.getElementById('studentEditor').innerHTML;
     
+    // 1. CAPTURE THE CANVAS DATA
+    const canvas = document.getElementById('studentShapeCanvas');
+    const shapeData = canvas ? canvas.toDataURL("image/png") : null;
+
     // Get the selected mood
     const moodElement = document.querySelector('input[name="mood"]:checked');
     const studentMood = moodElement ? moodElement.value : "😊";
@@ -1312,17 +1130,14 @@ async function finalizeSave() {
         const dateString = new Date().toLocaleString();
         const finalActiveTime = formatTime(activeSeconds);
 
-        // --- KEY CHANGE: Use .add() instead of .doc(studentName) ---
-        // This generates a unique ID like "JkL928sk..." so it never overwrites!
         await db.collection("edu_logs").add({
             studentName: studentName,
             data: studentContent,
+            shapes: shapeData, // 2. SAVE THE SHAPES TO FIREBASE
             mood: studentMood,
             timestamp: timestamp,
             dateString: dateString,
             totalActiveTime: finalActiveTime,
-            // We no longer need the "versions" array logic because 
-            // every save is now its own version in the database.
             isVersion: true 
         });
 
@@ -1330,12 +1145,15 @@ async function finalizeSave() {
         showToast("✅ Saved as a new record!");
         document.getElementById('saveBtn').style.background = "#059669";
         
-        // --- RESET TIMER AND CLEAN UP ---
+        // 3. CLEAR THE CANVAS FOR THE NEXT RECORD
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
         activeSeconds = 0; 
         updateTimerUI(); 
-        
         closeSaveModal();
-        // Clear name input so the next save requires a fresh check
         document.getElementById('studentNameInput').value = ""; 
         
     } catch (e) {
@@ -1343,8 +1161,6 @@ async function finalizeSave() {
         showToast("❌ Save Failed!");
     }
 }
-
-
     function renderAdminLogs() {
   
     db.collection("edu_logs").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
@@ -1361,6 +1177,140 @@ async function finalizeSave() {
         showToast("Error loading logs");
     });
 }
+
+
+
+// function displayLogs(logs, highlightTerm = "") {
+//     // 1. Update Stats Bar
+//     const happyCount = logs.filter(l => l.mood === '😊').length;
+//     const neutralCount = logs.filter(l => l.mood === '😐').length;
+//     const confusedCount = logs.filter(l => l.mood === '😕').length;
+
+//     if(document.getElementById('stat-happy')) document.getElementById('stat-happy').innerText = happyCount;
+//     if(document.getElementById('stat-neutral')) document.getElementById('stat-neutral').innerText = neutralCount;
+//     if(document.getElementById('stat-confused')) document.getElementById('stat-confused').innerText = confusedCount;
+
+//     const list = document.getElementById('admin-content-list');
+//     const totalCount = document.getElementById('total-logs');
+//     if(totalCount) totalCount.innerText = `Logs: ${logs.length}`;
+
+//     // 2. Handle Empty State
+//     if (logs.length === 0) {
+//         list.innerHTML = "<p style='text-align:center; padding:20px;'>No records found.</p>";
+//         return;
+//     }
+
+//     // 3. Handle Priority Alerts
+//     const priorityStudents = logs.filter(item => item.mood === '😕');
+//     const priorityDiv = document.getElementById('priority-alerts');
+    
+//     if (priorityDiv) {
+//         if (priorityStudents.length > 0) {
+//             priorityDiv.innerHTML = `
+//                 <div style="background:#fef2f2; border:2px solid #ef4444; padding:15px; border-radius:12px; margin-bottom:20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+//                     <h4 style="color:#991b1b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px;">
+//                         <i class="fas fa-exclamation-triangle"></i> Needs Immediate Help
+//                     </h4>
+//                     <div style="display:flex; flex-wrap:wrap; gap:8px;">
+//                         ${priorityStudents.map(s => `<span style="background:#ef4444; color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold;">${s.studentName}</span>`).join('')}
+//                     </div>
+//                 </div>`;
+//         } else {
+//             priorityDiv.innerHTML = "";
+//         }
+//     }
+
+//     // 4. Render Main List
+//     list.innerHTML = logs.map((item, index) => {
+//         let content = item.data;
+        
+//         // --- MOVED OUTSIDE: Detect subject based on content ---
+//         const textForTag = (item.data || "").toLowerCase();
+//         let tag = "";
+//         if (textForTag.includes("#math") || textForTag.includes("fraction") || textForTag.includes("=")) tag = "Math";
+//         else if (textForTag.includes("#science") || textForTag.includes("atom") || textForTag.includes("energy")) tag = "Science";
+//         else if (textForTag.includes("#english") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "English";
+//          else if (textForTag.includes("#java") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Java";
+//           else if (textForTag.includes("#Python") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Python";
+//            else if (textForTag.includes("#Oracle") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Oracle";
+//             else if (textForTag.includes("#AI") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "AI";
+
+//         const tagUI = tag ? `<span style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:10px; text-transform:uppercase;">${tag}</span>` : "";
+
+//         // Keyword Highlight
+//         if (highlightTerm && highlightTerm.length > 2) {
+//             const regex = new RegExp(`(${highlightTerm})`, 'gi');
+//             content = content.replace(regex, `<mark style="background:yellow; color:black; font-weight:bold;">$1</mark>`);
+//         }
+
+//         // Version History Slider Logic
+//         const hasHistory = item.versions && item.versions.length > 1;
+//         const versionUI = hasHistory ? `
+//             <div style="margin: 10px 0; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: flex; align-items:center; gap:10px;">
+//                 <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase;">History:</span>
+//                 <input type="range" min="0" max="${item.versions.length - 1}" value="${item.versions.length - 1}" 
+//                        oninput="updateCardContent('${index}', this.value)" 
+//                        style="flex-grow: 1; cursor: pointer;">
+//                 <span id="version-label-${index}" style="font-size: 11px; color: #6366f1;">Latest</span>
+//             </div>` : '';
+
+
+
+
+
+// return `
+//         <div class="data-card admin-log-item" id="log-card-${index}" style="border-left: 5px solid ${item.mood === '😕' ? '#ef4444' : '#6366f1'};">
+//             <div style="display:flex; justify-content:space-between; border-bottom: 1px solid #e2e8f0; padding-bottom:10px; margin-bottom:10px;">
+//                 <div style="display:flex; align-items:center; gap:10px;">
+//                     <input type="checkbox" class="log-checkbox" data-index="${index}" style="width:18px; height:18px;">
+//                     <strong>
+//                         <i class="fas fa-user"></i> ${item.studentName || 'Unknown'} 
+//                         <span style="font-size: 1.4rem; margin-left: 5px;" title="Student Mood">${item.mood || ''}</span>
+//                         ${tagUI} </strong>
+//                 </div>
+          
+//                 <p style="font-size:12px; color:#64748b;">
+//                     <i class="fas fa-keyboard"></i> Actual Effort: <b>${item.totalActiveTime || '0s'}</b>
+//                 </p>
+
+//                 <div style="display:flex; gap:6px; align-items:center;">
+//                     <span style="font-size:0.75em; color:#94a3b8; margin-right:5px;">${item.dateString || ''}</span>
+//                     <button onclick="shareRecordQR('${index}')" style="background:#8b5cf6; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Secure Share QR"><i class="fas fa-share-nodes"></i></button>
+//                     <button onclick="sendEmail('${index}')" style="background:#10b981; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Email"><i class="fas fa-envelope"></i></button>
+//                     <button onclick="copyToClipboard('${index}')" style="background:#475569; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Copy"><i class="fas fa-copy"></i></button>
+//                     <button onclick="downloadSingleRecord('${index}', '${item.studentName}')" style="background:var(--primary); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="PDF"><i class="fas fa-file-pdf"></i></button>
+//                 </div>
+//             </div>
+
+//             ${versionUI}
+
+          
+
+
+
+
+
+
+
+//  <div id="content-body-${index}" class="log-data-content" style="background:white; color:black; padding:20px; border-radius:8px; line-height:1.6; border: 1px solid #e2e8f0;">
+//                 ${content}
+//             </div>
+//         </div>`;
+//     }).join('');
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1384,7 +1334,7 @@ function displayLogs(logs, highlightTerm = "") {
         return;
     }
 
-    // 3. Handle Priority Alerts
+    // 3. Handle Priority Alerts (Responsive Flex)
     const priorityStudents = logs.filter(item => item.mood === '😕');
     const priorityDiv = document.getElementById('priority-alerts');
     
@@ -1392,7 +1342,7 @@ function displayLogs(logs, highlightTerm = "") {
         if (priorityStudents.length > 0) {
             priorityDiv.innerHTML = `
                 <div style="background:#fef2f2; border:2px solid #ef4444; padding:15px; border-radius:12px; margin-bottom:20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-                    <h4 style="color:#991b1b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px;">
+                    <h4 style="color:#991b1b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px; font-size:clamp(14px, 4vw, 18px);">
                         <i class="fas fa-exclamation-triangle"></i> Needs Immediate Help
                     </h4>
                     <div style="display:flex; flex-wrap:wrap; gap:8px;">
@@ -1408,16 +1358,16 @@ function displayLogs(logs, highlightTerm = "") {
     list.innerHTML = logs.map((item, index) => {
         let content = item.data;
         
-        // --- MOVED OUTSIDE: Detect subject based on content ---
+        // Subject Tag Detection (Kept all your tags)
         const textForTag = (item.data || "").toLowerCase();
         let tag = "";
         if (textForTag.includes("#math") || textForTag.includes("fraction") || textForTag.includes("=")) tag = "Math";
         else if (textForTag.includes("#science") || textForTag.includes("atom") || textForTag.includes("energy")) tag = "Science";
         else if (textForTag.includes("#english") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "English";
-         else if (textForTag.includes("#java") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Java";
-          else if (textForTag.includes("#Python") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Python";
-           else if (textForTag.includes("#Oracle") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Oracle";
-            else if (textForTag.includes("#AI") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "AI";
+        else if (textForTag.includes("#java")) tag = "Java";
+        else if (textForTag.includes("#python")) tag = "Python";
+        else if (textForTag.includes("#oracle")) tag = "Oracle";
+        else if (textForTag.includes("#ai")) tag = "AI";
 
         const tagUI = tag ? `<span style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:10px; text-transform:uppercase;">${tag}</span>` : "";
 
@@ -1427,61 +1377,106 @@ function displayLogs(logs, highlightTerm = "") {
             content = content.replace(regex, `<mark style="background:yellow; color:black; font-weight:bold;">$1</mark>`);
         }
 
-        // Version History Slider Logic
+        // Version History UI
         const hasHistory = item.versions && item.versions.length > 1;
         const versionUI = hasHistory ? `
-            <div style="margin: 10px 0; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: flex; align-items:center; gap:10px;">
+            <div style="margin: 10px 0; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase;">History:</span>
                 <input type="range" min="0" max="${item.versions.length - 1}" value="${item.versions.length - 1}" 
                        oninput="updateCardContent('${index}', this.value)" 
-                       style="flex-grow: 1; cursor: pointer;">
+                       style="flex-grow: 1; cursor: pointer; min-width:100px;">
                 <span id="version-label-${index}" style="font-size: 11px; color: #6366f1;">Latest</span>
             </div>` : '';
 
         return `
-        <div class="data-card admin-log-item" id="log-card-${index}" style="border-left: 5px solid ${item.mood === '😕' ? '#ef4444' : '#6366f1'};">
-            <div style="display:flex; justify-content:space-between; border-bottom: 1px solid #e2e8f0; padding-bottom:10px; margin-bottom:10px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" class="log-checkbox" data-index="${index}" style="width:18px; height:18px;">
-                    <strong>
-                        <i class="fas fa-user"></i> ${item.studentName || 'Unknown'} 
-                        <span style="font-size: 1.4rem; margin-left: 5px;" title="Student Mood">${item.mood || ''}</span>
-                        ${tagUI} </strong>
+        <div class="data-card admin-log-item" id="log-card-${index}" 
+             style="border-left: 5px solid ${item.mood === '😕' ? '#ef4444' : '#6366f1'}; background:white; margin-bottom:20px; border-radius:12px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+            
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; border-bottom: 1px solid #e2e8f0; padding-bottom:10px; margin-bottom:10px;">
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" class="log-checkbox" data-index="${index}" style="width:18px; height:18px;">
+                        <strong style="font-size: clamp(14px, 4vw, 16px);">
+                            <i class="fas fa-user"></i> ${item.studentName || 'Unknown'} 
+                            <span style="font-size: 1.2rem; margin-left: 5px;">${item.mood || ''}</span>
+                            ${tagUI} 
+                        </strong>
+                    </div>
+                    <span style="font-size:11px; color:#94a3b8; margin-left:28px;">${item.dateString || ''}</span>
                 </div>
-          
-<p style="font-size:12px; color:#64748b;">
-    <i class="fas fa-keyboard"></i> Actual Effort: <b>${item.totalActiveTime || '0s'}</b>
-</p>
 
-                <div style="display:flex; gap:6px; align-items:center;">
-                    <span style="font-size:0.75em; color:#94a3b8; margin-right:5px;">${item.dateString || ''}</span>
-                    <button onclick="shareRecordQR('${index}')" style="background:#8b5cf6; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Secure Share QR"><i class="fas fa-share-nodes"></i></button>
-                    <button onclick="sendEmail('${index}')" style="background:#10b981; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Email"><i class="fas fa-envelope"></i></button>
-                    <button onclick="copyToClipboard('${index}')" style="background:#475569; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Copy"><i class="fas fa-copy"></i></button>
-                    <button onclick="downloadSingleRecord('${index}', '${item.studentName}')" style="background:var(--primary); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                    <p style="font-size:11px; color:#64748b; margin:0;">
+                        <i class="fas fa-keyboard"></i> Effort: <b>${item.totalActiveTime || '0s'}</b>
+                    </p>
+                    <div style="display:flex; gap:4px;">
+                        <button onclick="shareRecordQR('${index}')" class="admin-btn" title="QR Share" style="background:#8b5cf6;"><i class="fas fa-share-nodes"></i></button>
+                        <button onclick="sendEmail('${index}')" class="admin-btn" title="Email" style="background:#10b981;"><i class="fas fa-envelope"></i></button>
+                        <button onclick="copyToClipboard('${index}')" class="admin-btn" title="Copy" style="background:#475569;"><i class="fas fa-copy"></i></button>
+                        <button onclick="downloadSingleRecord('${index}', '${item.studentName}')" class="admin-btn" title="PDF" style="background:#6366f1;"><i class="fas fa-file-pdf"></i></button>
+                    </div>
                 </div>
             </div>
 
             ${versionUI}
 
-            <div id="content-body-${index}" class="log-data-content" style="background:white; color:black; padding:20px; border-radius:8px; line-height:1.6; border: 1px solid #e2e8f0;">
-                ${content}
+            <div class="responsive-paper-wrapper" 
+                 onclick="this.classList.toggle('zoomed')"
+                 style="width: 100%; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor:zoom-in; transition: 0.3s;">
+                
+                <div id="content-body-${index}" class="scaler-engine" 
+                     style="width: 900px; transform-origin: top left; position: relative;">
+                    
+                    <div id="text-layer-${index}" style="padding: 20px; font-size: 16px; line-height: 1.6; color: black; width: 900px; box-sizing: border-box; word-wrap: break-word; min-height: 50px;">
+                        ${content}
+                    </div>
+
+                    <div id="shape-layer-${index}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                        ${item.shapes ? `<img src="${item.shapes}" style="width: 100%; height: 100%; object-fit: fill;">` : ''}
+                    </div>
+                </div>
             </div>
         </div>`;
     }).join('');
+
+    // Trigger calculation
+    handleResponsiveScaling();
 }
-// Global helper to switch versions visually
-function updateCardContent(logIndex, versionIndex) {
-    const log = allCloudLogs[logIndex];
-    const contentDiv = document.getElementById(`content-body-${logIndex}`);
-    const labelDiv = document.getElementById(`version-label-${logIndex}`);
-    
-    const selectedVersion = log.versions[versionIndex];
-    contentDiv.innerHTML = selectedVersion.data;
-    
-    labelDiv.innerText = versionIndex == log.versions.length - 1 ? "Latest" : `v.${parseInt(versionIndex) + 1}`;
-}
+
+
+
+
+
+
+
+
  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     function filterLogs(term) {
     const filtered = allCloudLogs.filter(log => 
@@ -1716,28 +1711,22 @@ function toggleSelectAll() {
 
 
 function generateRecordQR(docId) {
-    // 1. Get the base URL correctly
     const currentUrl = window.location.origin + window.location.pathname;
+    // Ensure this matches your URL structure
+const shareUrl = `${window.location.origin}${window.location.pathname}?portfolio=${docId}`;
     
-    // 2. Ensure we use 'id' so the Auto-Loader recognizes it
-    const shareUrl = `${currentUrl}?id=${docId}`;
-    
-    const qrContainer = document.getElementById('qr-result');
+    // Change 'qr-result' to 'qrcode' to match your HTML
+    const qrContainer = document.getElementById('qrcode'); 
     qrContainer.innerHTML = ""; 
     
-    // 3. Generate the QR
     new QRCode(qrContainer, {
         text: shareUrl,
-        width: 150,
-        height: 150,
-        colorDark : "#0f172a",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
+        width: 180,
+        height: 180
     });
     
     // Show the modal
     document.getElementById('qrModal').style.display = 'flex';
-    console.log("QR Link Generated:", shareUrl);
 }
 
 
@@ -1801,7 +1790,9 @@ function shareRecordQR(index) {
 
     const expiryTime = Date.now() + (parseFloat(hours) * 60 * 60 * 1000);
     // Change this line in shareRecordQR:
-    const shareUrl = `${window.location.origin}${window.location.pathname}?portfolio=${encodeURIComponent(logEntry.studentName)}`;
+    // Change this line to use 'view' so it matches the logic above
+const shareUrl = `${window.location.origin}${window.location.pathname}?view=${logEntry.id}`;
+    // const shareUrl = `${window.location.origin}${window.location.pathname}?portfolio=${encodeURIComponent(logEntry.studentName)}`;
     // const shareUrl = `${window.location.origin}${window.location.pathname}?view=${recordId}&exp=${expiryTime}`;
 
     console.log("Generated Share URL:", shareUrl);
@@ -1834,156 +1825,295 @@ function shareRecordQR(index) {
 
 
 
+
+
+
 // window.onload = function() {
+//     // --- 1. HANDLE EXTERNAL VIEWS (URL PARAMS) ---
 //     const urlParams = new URLSearchParams(window.location.search);
 //     const viewId = urlParams.get('view');
-//     const portfolioName = urlParams.get('portfolio'); // NEW: Get portfolio name
+//     const portfolioName = urlParams.get('portfolio');
 
-//     // 1. Check if we are viewing a SINGLE record
 //     if (viewId) {
-//         setupGuestViewContainer(); // Creates the empty UI shell
+//         setupGuestViewContainer(); 
 //         loadSingleSharedRecord(viewId);
-//     } 
-//     // 2. Check if we are viewing a STUDENT PORTFOLIO
-//     else if (portfolioName) {
-//         setupGuestViewContainer(); // Creates the empty UI shell
+//         return; // Stop here if in view mode
+//     } else if (portfolioName) {
+//         setupGuestViewContainer(); 
 //         loadStudentPortfolio(portfolioName);
+//         return; // Stop here if in portfolio mode
+//     }
+
+//     // --- 2. HANDLE LOCAL STORAGE (FOR AUTO-SAVE) ---
+//     const savedName = localStorage.getItem('tempName');
+//     const nameInput = document.getElementById('studentNameInput');
+    
+//     if (savedName && nameInput) {
+//         nameInput.value = savedName;
+//         // If name exists, we can start the Auto-Save listener
+//         initAutoSaveListener();
 //     }
 // };
 
-// // Helper to create the UI shell for guests (Portfolio or Single View)
-// function setupGuestViewContainer() {
-//     document.body.innerHTML = `
-//         <div style="background: #0f172a; min-height: 100vh; padding: 40px 20px; font-family: sans-serif;">
-//             <div id="single-view-container" style="max-width: 800px; margin: 0 auto; color: white;">
-//                 <p>Loading records...</p>
-//             </div>
-//         </div>`;
-// }
-
-
 
 window.onload = function() {
-    // --- 1. HANDLE EXTERNAL VIEWS (URL PARAMS) ---
     const urlParams = new URLSearchParams(window.location.search);
-    const viewId = urlParams.get('view');
     const portfolioName = urlParams.get('portfolio');
+    const viewId = urlParams.get('view');
 
+    // --- 1. HANDLE PORTFOLIO VIEW ---
+    if (portfolioName) {
+        console.log("Loading Portfolio for:", portfolioName);
+        setupGuestViewContainer(); 
+        loadStudentPortfolio(portfolioName); // Make sure this function exists
+        return; 
+    } 
+
+    // --- 2. HANDLE SINGLE RECORD VIEW ---
     if (viewId) {
+        console.log("Loading Single Record:", viewId);
         setupGuestViewContainer(); 
         loadSingleSharedRecord(viewId);
-        return; // Stop here if in view mode
-    } else if (portfolioName) {
-        setupGuestViewContainer(); 
-        loadStudentPortfolio(portfolioName);
-        return; // Stop here if in portfolio mode
+        return;
     }
 
-    // --- 2. HANDLE LOCAL STORAGE (FOR AUTO-SAVE) ---
+    // --- 3. NORMAL APP MODE (If no URL params) ---
     const savedName = localStorage.getItem('tempName');
     const nameInput = document.getElementById('studentNameInput');
     
     if (savedName && nameInput) {
         nameInput.value = savedName;
-        // If name exists, we can start the Auto-Save listener
-        initAutoSaveListener();
+        if (typeof initAutoSaveListener === "function") {
+            initAutoSaveListener();
+        }
     }
 };
 
+function setupGuestViewContainer() {
+    document.body.innerHTML = `
+        <div style="background: #0f172a; min-height: 100vh; padding: 40px 20px; font-family: sans-serif;">
+            <div id="single-view-container" style="max-width: 800px; margin: 0 auto; color: white;">
+                <p>Loading records for you...</p>
+            </div>
+        </div>`;
+}
+
 // --- 3. AUTO-SAVE INITIALIZER ---
+// function initAutoSaveListener() {
+//     const editor = document.getElementById('studentEditor');
+//     if (!editor) return;
+
+//     editor.addEventListener('input', () => {
+//         const status = document.getElementById('autosave-status');
+//         if (status) status.innerHTML = '<i class="fas fa-pencil-alt"></i> Typing...';
+
+//         clearTimeout(autoSaveTimeout);
+//         autoSaveTimeout = setTimeout(autoSaveSync, 3000); 
+//     });
+//     console.log("Auto-Save system initialized.");
+// }
+
+
+
+
+
+
 function initAutoSaveListener() {
     const editor = document.getElementById('studentEditor');
+    const moodDisplay = document.getElementById('ai-mood-suggestion'); // Create this element in HTML
+
     if (!editor) return;
 
     editor.addEventListener('input', () => {
-        const status = document.getElementById('autosave-status');
-        if (status) status.innerHTML = '<i class="fas fa-pencil-alt"></i> Typing...';
+        const text = editor.innerText || editor.value;
+        const suggestion = analyzeSentiment(text);
 
-        clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(autoSaveSync, 3000); 
+        // UI Feedback: Show the teacher what the AI thinks
+        if (text.length > 5) {
+            moodDisplay.innerHTML = `AI Suggestion: ${suggestion.emoji}`;
+            moodDisplay.style.color = suggestion.color;
+            
+            // Auto-select the radio button if you have them
+            const radioToSelect = document.querySelector(`input[value="${suggestion.emoji}"]`);
+            if (radioToSelect) radioToSelect.checked = true;
+        }
+
+        // ... existing autosave code ...
     });
-    console.log("Auto-Save system initialized.");
 }
 
 
 
 // THE NEW PORTFOLIO FUNCTION
-async function loadSingleSharedRecord(id) { // Changed 'du_logs' to 'id' to match your QR generator
+// async function loadSingleSharedRecord(id) { // Changed 'du_logs' to 'id' to match your QR generator
+//     const container = document.getElementById('single-view-container');
+//     if (!container) return;
+
+//     try {
+//         // Use the correct collection name: edu_logs
+//         const docRef = db.collection("edu_logs").doc(id); 
+//         const doc = await docRef.get();
+
+//         if (doc.exists) {
+//             const data = doc.data();
+            
+//             container.innerHTML = `
+//                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+//                     <div>
+//                         <h1 style="margin:0; font-size:1.5rem; color:#f8fafc;">EduFlow Digital Record</h1>
+//                         <span style="background:#10b98122; color:#10b981; padding:4px 10px; border-radius:20px; font-size:0.75rem; border:1px solid #10b98144;">
+//                             <i class="fas fa-shield-check"></i> Verified Record
+//                         </span>
+//                     </div>
+//                     <button onclick="window.print()" style="background:#334155; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">
+//                         <i class="fas fa-print"></i>
+//                     </button>
+//                 </div>
+
+//                 <div style="background:white; color:#1e293b; padding:50px; border-radius:15px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position:relative; overflow:hidden;">
+//                     <div style="position:absolute; left:0; top:0; height:100%; width:5px; background:#6366f1;"></div>
+                    
+//                     <div style="display:flex; justify-content:space-between; border-bottom:2px solid #f1f5f9; padding-bottom:20px; margin-bottom:30px;">
+//                         <div>
+//                             <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Student Name</small>
+//                             <h2 style="margin:5px 0 0 0; color:#0f172a;">${data.studentName}</h2>
+//                         </div>
+//                         <div style="text-align:right;">
+//                             <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Date Recorded</small>
+//                             <p style="margin:5px 0 0 0; font-weight:600;">${data.dateString || 'N/A'}</p>
+//                         </div>
+//                     </div>
+
+//                     <div style="line-height:1.8; font-size:1.1rem; color:#334155; min-height:300px;">
+//                         ${data.data}
+//                     </div>
+
+//                     <div style="margin-top:50px; border-top:1px dashed #cbd5e1; padding-top:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">
+//                         This is an official digital record generated via EduFlow. <br> Reference ID: ${id}
+//                     </div>
+//                 </div>
+
+//                 <div style="text-align:center; margin-top:30px;">
+//                     <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none; font-size:0.9rem;">
+//                         <i class="fas fa-arrow-left"></i> Return to Main Platform
+//                     </a>
+//                 </div>
+//             `;
+//             container.style.opacity = "1";
+//         } else {
+//             container.innerHTML = `<div style="text-align:center; color:white; padding:50px;"><h2>Record Expired</h2><p>This record was not found.</p></div>`;
+//         }
+//     } catch (error) {
+//         console.error("Load Error:", error);
+//         container.innerHTML = `<h3 style="color:white;">Connection Error.</h3>`;
+//     }
+// }
+
+
+// async function loadSingleSharedRecord(id) {
+//     const container = document.getElementById('single-view-container');
+//     if (!container || !id) return;
+
+//     try {
+//         // Fetch from Firebase
+//         const doc = await db.collection("edu_logs").doc(id).get();
+
+//         if (doc.exists) {
+//             const data = doc.data();
+//             container.innerHTML = `
+//                 <div style="background:white; color:#1e293b; padding:40px; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+//                     <h1 style="margin-top:0; color:#0f172a;">${data.studentName}'s Record</h1>
+//                     <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+//                     <div style="font-size:1.1rem; line-height:1.6;">${data.data}</div>
+//                     <p style="margin-top:30px; color:#64748b; font-size:0.8rem;">Reference: ${id}</p>
+//                 </div>
+//                 <p style="text-align:center; margin-top:20px;">
+//                     <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none;">← Return Home</a>
+//                 </p>
+//             `;
+//         } else {
+//             container.innerHTML = "<h2>Record not found.</h2>";
+//         }
+//     } catch (error) {
+//         console.error("Firebase Error:", error);
+//         container.innerHTML = "<h2>Connection Error.</h2>";
+//     }
+// }
+
+
+
+
+
+
+
+
+
+async function loadSingleSharedRecord(id) {
     const container = document.getElementById('single-view-container');
-    if (!container) return;
+    if (!container || !id) return;
 
     try {
-        // Use the correct collection name: edu_logs
-        const docRef = db.collection("edu_logs").doc(id); 
-        const doc = await docRef.get();
+        // Fetch from Firebase
+        const doc = await db.collection("edu_logs").doc(id).get();
 
         if (doc.exists) {
             const data = doc.data();
             
             container.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <div>
-                        <h1 style="margin:0; font-size:1.5rem; color:#f8fafc;">EduFlow Digital Record</h1>
-                        <span style="background:#10b98122; color:#10b981; padding:4px 10px; border-radius:20px; font-size:0.75rem; border:1px solid #10b98144;">
-                            <i class="fas fa-shield-check"></i> Verified Record
-                        </span>
-                    </div>
-                    <button onclick="window.print()" style="background:#334155; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">
-                        <i class="fas fa-print"></i>
-                    </button>
-                </div>
-
-                <div style="background:white; color:#1e293b; padding:50px; border-radius:15px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position:relative; overflow:hidden;">
-                    <div style="position:absolute; left:0; top:0; height:100%; width:5px; background:#6366f1;"></div>
+                <div style="background:white; color:#1e293b; padding:40px; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;">
                     
-                    <div style="display:flex; justify-content:space-between; border-bottom:2px solid #f1f5f9; padding-bottom:20px; margin-bottom:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
                         <div>
-                            <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Student Name</small>
-                            <h2 style="margin:5px 0 0 0; color:#0f172a;">${data.studentName}</h2>
+                            <h1 style="margin:0; color:#0f172a; font-size:1.8rem;">${data.studentName}'s Record</h1>
+                            <small style="color:#64748b;">Recorded on: ${data.dateString || 'N/A'}</small>
                         </div>
-                        <div style="text-align:right;">
-                            <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Date Recorded</small>
-                            <p style="margin:5px 0 0 0; font-weight:600;">${data.dateString || 'N/A'}</p>
-                        </div>
+                        <div style="font-size:1.5rem;">${data.mood || '😊'}</div>
                     </div>
 
-                    <div style="line-height:1.8; font-size:1.1rem; color:#334155; min-height:300px;">
-                        ${data.data}
+                    <hr style="border:0; border-top:1px solid #f1f5f9; margin:20px 0;">
+
+                    <div id="content-canvas-wrapper" style="position: relative; min-height: 400px; line-height: 1.6;">
+                        
+                        <div style="position: relative; z-index: 1; font-size: 1.1rem;">
+                            ${data.data}
+                        </div>
+
+                        ${data.shapes ? `
+                            <img src="${data.shapes}" 
+                                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; object-fit: contain;">
+                        ` : ''}
                     </div>
 
-                    <div style="margin-top:50px; border-top:1px dashed #cbd5e1; padding-top:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">
-                        This is an official digital record generated via EduFlow. <br> Reference ID: ${id}
+                    <div style="margin-top:30px; padding-top:20px; border-top:1px dashed #e2e8f0; color:#94a3b8; font-size:0.8rem; display:flex; justify-content:space-between;">
+                        <span>Reference: ${id}</span>
+                        <span>Time Spent: ${data.totalActiveTime || 'N/A'}</span>
                     </div>
                 </div>
 
-                <div style="text-align:center; margin-top:30px;">
-                    <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none; font-size:0.9rem;">
-                        <i class="fas fa-arrow-left"></i> Return to Main Platform
+                <p style="text-align:center; margin-top:20px;">
+                    <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none; font-weight:bold;">
+                        <i class="fas fa-arrow-left"></i> Return to Platform
                     </a>
-                </div>
+                </p>
             `;
-            container.style.opacity = "1";
+            
+            // Fade in effect
+            container.style.opacity = "0";
+            setTimeout(() => { container.style.transition = "opacity 0.5s"; container.style.opacity = "1"; }, 100);
+
         } else {
-            container.innerHTML = `<div style="text-align:center; color:white; padding:50px;"><h2>Record Expired</h2><p>This record was not found.</p></div>`;
+            container.innerHTML = `
+                <div style="text-align:center; color:white; padding:50px;">
+                    <i class="fas fa-exclamation-triangle fa-3x" style="color:#f59e0b;"></i>
+                    <h2>Record Not Found</h2>
+                    <p>This link may have expired or the record was deleted.</p>
+                </div>`;
         }
     } catch (error) {
-        console.error("Load Error:", error);
-        container.innerHTML = `<h3 style="color:white;">Connection Error.</h3>`;
+        console.error("Firebase Error:", error);
+        container.innerHTML = "<h2 style='color:white; text-align:center;'>Connection Error. Please check your internet.</h2>";
     }
 }
-
-// Get the selected emoji
-const selectedMood = document.querySelector('input[name="mood"]:checked')?.value || "😊";
-
-// Add this 'selectedMood' to the object you send to Firebase!
-const dataToSave = {
-    studentName: nameInput.value,
-    data: boardContent,
-    mood: selectedMood, // <--- Add this
-    timestamp: Date.now()
-};
-
-
 
 // FEATURE: Filter by Mood
 function filterByMood(moodEmoji) {
@@ -2403,35 +2533,215 @@ async function uploadStudentPdf() {
 
 
 
-window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const sharedId = params.get('id');
+
+
+
+
+
+
+
+
+
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // CHANGE THIS LINE: Look for 'portfolio' instead of 'id'
+    const sharedId = urlParams.get('portfolio'); 
 
     if (sharedId) {
-        // Hide all other UI sections
-        document.querySelectorAll('.view-div').forEach(el => el.classList.add('hidden'));
+        console.log("Found Shared Portfolio ID:", sharedId);
         
-        // Show your single view section
-        const singleSection = document.getElementById('section-single-view');
-        if(singleSection) {
-            singleSection.classList.remove('hidden');
+        // Hide other sections
+        document.querySelectorAll('.view-div').forEach(div => {
+            div.style.setProperty("display", "none", "important");
+            div.classList.add('hidden');
+        });
+
+        const singleView = document.getElementById('section-single-view');
+        if (singleView) {
+            singleView.classList.remove('hidden');
+            singleView.style.setProperty("display", "block", "important");
+            
+            // Call your function with the 'Rules' ID
             loadSingleSharedRecord(sharedId);
         }
     }
 });
+
+
+
+
+
+
+
+// function analyzeSentiment(text) {
+//     const input = text.toLowerCase();
+    
+//     // Define keyword maps
+//     const sentiments = {
+//         positive: {
+//             words: ['excellent', 'great', 'improved', 'happy', 'focused', 'success', 'amazing', 'brilliant', 'proud'],
+//             emoji: '🌟',
+//             color: '#10b981'
+//         },
+//         negative: {
+//             words: ['struggled', 'difficult', 'upset', 'tired', 'distracted', 'unhappy', 'refused', 'hard', 'slow'],
+//             emoji: '😟',
+//             color: '#ef4444'
+//         },
+//         neutral: {
+//             words: ['steady', 'consistent', 'ok', 'normal', 'completed', 'usual'],
+//             emoji: '😐',
+//             color: '#6366f1'
+//         }
+//     };
+
+//     // Score the text
+//     let score = 0;
+//     sentiments.positive.words.forEach(word => { if(input.includes(word)) score++; });
+//     sentiments.negative.words.forEach(word => { if(input.includes(word)) score--; });
+
+//     if (score > 0) return sentiments.positive;
+//     if (score < 0) return sentiments.negative;
+//     return sentiments.neutral;
+// }
+
+
+
+
+
+
+
+const EDU_DICTIONARY = {
+    positive: [
+        'excellent', 'great', 'improved', 'happy', 'focused', 'success', 'amazing', 'brilliant', 'proud', 'achieved', 'perfect', 'creative', 'participated', 'confident', 'solved', 'correct', 'leadership', 'fast', 'smoothly', 'interested', 'engaged', 'mastered', 'progressing', 'wonderful', 'kind', 'polite', 'sharing', 'helpful', 'determined', 'focused', 'bright', 'cheerful', 'diligent', 'eager', 'energetic', 'friendly', 'generous', 'honest', 'imaginative', 'intelligent', 'joyful', 'knowledgeable', 'loyal', 'motivated', 'noble', 'observant', 'patient', 'quick', 'reliable', 'sincere', 'thoughtful', 'understanding', 'vibrant', 'wise', 'zealous', 'ambitious', 'brave', 'calm', 'delightful', 'enthusiastic', 'flexible', 'graceful', 'harmonious', 'inventive', 'keen', 'lively', 'modest', 'nice', 'optimistic', 'passionate', 'resourceful', 'strong', 'trustworthy', 'unique', 'valuable', 'warm', 'skilled', 'talented', 'organized', 'efficient', 'proactive', 'resilient', 'adaptable', 'articulate', 'balanced', 'capable', 'cooperative', 'curious', 'dedicated', 'empathetic', 'fearless', 'genuine', 'humble', 'independent', 'logical', 'mature', 'nurturing', 'objective', 'persistent', 'rational', 'sensible', 'tolerant', 'upbeat', 'versatile', 'witty', 'admirable', 'bold', 'charitable', 'dynamic', 'earnest', 'fearless', 'gifted', 'honorable', 'insightful', 'judicious', 'kindhearted', 'lucid', 'methodical', 'neat', 'orderly', 'precise', 'refined', 'steadfast', 'thorough', 'unselfish', 'vigilant', 'wholesome', 'astute', 'bountiful', 'cordial', 'discerning', 'exemplary', 'fruitful', 'gracious', 'hearty', 'industrious', 'jovial', 'laudable', 'mighty', 'noteworthy', 'outstanding', 'praiseworthy', 'remarkable', 'superb', 'terrific', 'unwavering', 'vivid', 'worthy', 'adept', 'blessed', 'clever', 'dashing', 'elated', 'fine', 'grand', 'handy', 'ideal', 'just', 'keen', 'lovely', 'merry', 'noble', 'open', 'pleasant', 'quiet', 'rich', 'smart', 'tidy', 'useful', 'vocal', 'worthy', 'youthful', 'zestful', 'academic', 'advanced', 'analytical', 'attentive', 'collaborative', 'comprehensive', 'decisive', 'effective', 'fluent', 'goal-oriented', 'high-achieving', 'inquisitive', 'literate', 'mathematical', 'original', 'perceptive', 'proficient', 'reflective', 'scholarly', 'strategic', 'tenacious', 'visionary'
+    ],
+    negative: [
+        'struggled', 'difficult', 'upset', 'tired', 'distracted', 'hard', 'slow', 'confused', 'refused', 'forgot', 'unfinished', 'sad', 'angry', 'noisy', 'messy', 'frustrated', 'crying', 'failed', 'mistake', 'poor', 'bored', 'unfocused', 'off-task', 'ignored', 'slowly', 'late', 'incomplete', 'aggressive', 'anxious', 'clumsy', 'defiant', 'disobedient', 'fidgety', 'gloomy', 'hostile', 'impatient', 'irritable', 'lazy', 'mean', 'nervous', 'obstructive', 'passive', 'quarrelsome', 'rude', 'selfish', 'stubborn', 'uncooperative', 'vague', 'weak', 'worried', 'argumentative', 'bitter', 'careless', 'disorganized', 'envious', 'forgetful', 'greedy', 'harsh', 'impulsive', 'jealous', 'lonely', 'malicious', 'neglectful', 'overwhelmed', 'pessimistic', 'resentful', 'sloppy', 'tense', 'unreliable', 'vengeful', 'weary', 'withdrawn', 'apathetic', 'belligerent', 'cynical', 'disrespectful', 'erratic', 'frail', 'grumpy', 'hasty', 'insecure', 'judgmental', 'lethargic', 'moody', 'negative', 'opinionated', 'prejudiced', 'reckless', 'spiteful', 'unstable', 'vulnerable', 'wicked', 'anxiety', 'bullying', 'conflict', 'depression', 'disruption', 'exclusion', 'failure', 'guilt', 'hatred', 'isolation', 'jealousy', 'misbehavior', 'neglect', 'outburst', 'pain', 'rejection', 'shame', 'stress', 'trauma', 'unrest', 'violence', 'absent', 'awkward', 'broken', 'damaged', 'empty', 'faulty', 'gross', 'harmful', 'injured', 'junk', 'lost', 'nasty', 'odd', 'painful', 'rotten', 'scary', 'terrible', 'ugly', 'vile', 'waste', 'zero', 'bad', 'cheap', 'dirty', 'evil', 'foul', 'grim', 'hard', 'ill', 'jaded', 'killer', 'low', 'mad', 'numb', 'off', 'pest', 'quit', 'rank', 'sour', 'tart', 'under', 'vice', 'wild', 'yell', 'abrupt', 'avoidant', 'cluttered', 'disconnected', 'exhausted', 'fretful', 'guarded', 'hesitant', 'inhibited', 'lackluster', 'muddled', 'non-compliant', 'over-sensitive', 'provocative', 'resistant', 'stagnant', 'unresponsive', 'vacant', 'wearisome'
+    ],
+    natural: [
+        'steady', 'completed', 'normal', 'working', 'okay', 'standard', 'average', 'typical', 'continued', 'expected', 'routine', 'finished', 'followed', 'observed', 'noted', 'plain', 'regular', 'satisfactory', 'usual', 'common', 'customary', 'daily', 'general', 'moderate', 'natural', 'ordinary', 'stable', 'uniform', 'basic', 'central', 'constant', 'direct', 'even', 'fixed', 'generic', 'habitual', 'internal', 'level', 'neutral', 'objective', 'passive', 'quiet', 'simple', 'traditional', 'universal', 'valid', 'weekly', 'yearly', 'actual', 'brief', 'current', 'defined', 'existing', 'formal', 'global', 'historical', 'initial', 'joint', 'known', 'local', 'main', 'nominal', 'overall', 'prior', 'quick', 'recent', 'specific', 'total', 'underlying', 'virtual', 'whole', 'base', 'core', 'data', 'element', 'fact', 'grid', 'item', 'key', 'list', 'mark', 'node', 'part', 'range', 'site', 'task', 'unit', 'view', 'word', 'area', 'block', 'case', 'desk', 'entry', 'file', 'group', 'hall', 'index', 'job', 'kit', 'link', 'mode', 'name', 'output', 'page', 'query', 'row', 'step', 'term', 'user', 'value', 'zone', 'attendance', 'background', 'calendar', 'document', 'environment', 'form', 'grade', 'history', 'information', 'journal', 'level', 'manual', 'notice', 'observation', 'profile', 'report', 'schedule', 'table', 'update', 'version', 'waiting', 'account', 'balance', 'category', 'detail', 'example', 'folder', 'guide', 'header', 'input', 'label', 'method', 'number', 'object', 'process', 'result', 'status', 'topic', 'utility', 'volume', 'weight', 'abstract', 'binary', 'code', 'default', 'engine', 'format', 'graph', 'host', 'image', 'layout', 'module', 'network', 'option', 'path', 'resource', 'source', 'type', 'unique', 'vector', 'window', 'array', 'buffer', 'client', 'device', 'event', 'field', 'handle', 'interface', 'library', 'memory', 'object', 'parameter', 'record', 'server', 'template', 'upload'
+    ]
+};
+
+
+
+
+
+
+// 1. The Analysis Engine
+// Pre-convert arrays to Sets for speed (Run this once)
+const posSet = new Set(EDU_DICTIONARY.positive);
+const negSet = new Set(EDU_DICTIONARY.negative);
+const neuSet = new Set(EDU_DICTIONARY.natural);
+
+function analyzeSentiment(text) {
+    if (!text) return { emoji: '😐', color: '#94a3b8' };
+    
+    // Clean text: remove punctuation and split into lowercase words
+    const words = text.toLowerCase().replace(/[.,!?;:()]/g, "").split(/\s+/);
+    
+    let posScore = 0;
+    let negScore = 0;
+    let neuScore = 0;
+
+    words.forEach(word => {
+        if (posSet.has(word)) posScore++;
+        else if (negSet.has(word)) negScore++;
+        else if (neuSet.has(word)) neuScore++;
+    });
+
+    // Weighted decision
+    if (posScore > negScore) {
+        return { emoji: '🌟', color: '#10b981' }; // Positive
+    } else if (negScore > posScore) {
+        return { emoji: '😟', color: '#ef4444' }; // Negative
+    } else {
+        return { emoji: '😐', color: '#6366f1' }; // Neutral
+    }
+}
+
+
+function downloadAsPDF(studentName) {
+    // The element we want to turn into a PDF
+    const element = document.querySelector('[style*="background:white"]'); 
+    
+    // Optional: Hide the "Return Home" and "Download" buttons temporarily in the PDF
+    const options = {
+        margin:       10,
+        filename:     `${studentName}_Record.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true, // Important for loading the shapes from Firebase
+            letterRendering: true 
+        },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    showToast("Generating PDF...");
+
+    // Run the conversion
+    html2pdf().set(options).from(element).save().then(() => {
+        showToast("✅ PDF Downloaded!");
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 
 
 
-<div id="qrModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
-    <div style="background:white; padding:20px; border-radius:12px; text-align:center; min-width: 250px;">
-        <div id="qrcode" style="margin-bottom: 15px; display: flex; justify-content: center;"></div>
-        
-        <button onclick="document.getElementById('qrModal').style.display='none'" 
-                style="padding:10px 20px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer;">
-            Close
-        </button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="section-single-view" class="view-div hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; overflow-y: auto; padding: 20px;">
+        <div style="max-width: 800px; margin: 0 auto; display: flex; justify-content: flex-end;">
+            <button onclick="location.href=window.location.pathname" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+        <div id="single-view-container" style="max-width: 800px; margin: 20px auto; opacity: 0; transition: opacity 0.5s;">
+        </div>
     </div>
-</div>
+
+    <div id="qrModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:25px; border-radius:15px; text-align:center; min-width: 280px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <h3 style="color:#1e293b; margin-bottom:15px; font-family:sans-serif;">Share Record</h3>
+            <div id="qrcode" style="margin-bottom: 20px; display: flex; justify-content: center;"></div>
+            <button onclick="document.getElementById('qrModal').style.display='none'" 
+                    style="padding:10px 25px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">
+                Close
+            </button>
+        </div>
+    </div>
+
+    </body>
+</html>
 </body>
 </html>
