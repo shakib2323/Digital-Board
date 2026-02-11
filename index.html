@@ -8,7 +8,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    
     <style>
         :root {
             --primary: #6366f1;
@@ -158,11 +165,11 @@ html, body {
    ========================= */
 @media (max-width: 768px) {
     .mobile-header {
-        display: flex; /* Show only on mobile */
+        display: flex; 
     }
 
     .toolbar-top {
-        display: none; /* Hide original desktop toolbar on mobile */
+        display: none;
     }
 
     .sidebar {
@@ -180,7 +187,7 @@ html, body {
     .main-container {
         margin-left: 0;
         margin-bottom: 60px;
-        margin-top: 60px; /* Push content down for header */
+        margin-top: 60px; 
     }
 
     .board-container {
@@ -200,7 +207,177 @@ html, body {
 
 @media (min-width: 769px) {
     .mobile-header {
-        display: none !important; /* Force hide on desktop */
+        display: none !important; 
+    }
+}
+
+
+.student-paper {
+    background: white; 
+    color: black; 
+    padding: 60px; 
+    width: 90%; 
+    max-width: 900px;
+    margin: 40px auto; 
+    min-height: 100vh; /* Starts at full screen */
+    height: auto;      /* Grows with content */
+    overflow: visible; /* Ensures html2canvas sees everything */
+    position: relative;
+    background-image: repeating-linear-gradient(white 0px, white 34px, #e5e7eb 35px);
+    line-height: 35px; 
+    font-size: 18px; 
+    outline: none; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    word-wrap: break-word; /* Prevents long text from going off-side */
+}
+
+
+
+/* Animated Mood Icons */
+.mood-selector label {
+    transition: all 0.3s ease;
+    padding: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    filter: grayscale(100%); /* Start greyed out */
+    opacity: 0.6;
+}
+
+.mood-selector label:hover {
+    transform: scale(1.2);
+    opacity: 1;
+}
+
+.mood-selector input[type="radio"]:checked + span,
+.mood-selector input[type="radio"]:checked ~ i, /* if using icons */
+.mood-selector label:has(input:checked) {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1.4);
+    background: rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+
+
+/* ADMIN PANEL RESPONSIVENESS */
+@media (max-width: 768px) {
+    .admin-view {
+        padding: 15px; /* Less padding on small screens */
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .admin-header h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Stack stats vertically on mobile */
+    .stats-bar {
+        flex-direction: column;
+        gap: 10px !important;
+    }
+
+    /* Make buttons full width on small mobile */
+    .admin-header button, #adminSearch {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    /* Adjust the individual student data cards */
+    .data-card {
+        padding: 15px;
+    }
+
+    /* Action buttons in the footer of the admin view */
+    .stats-bar + div {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .stats-bar + div button {
+        width: 100%;
+    }
+}
+
+
+
+
+
+/* RESPONSIVE EDITOR PAD */
+.responsive-editor {
+    width: 95% !important;
+    margin: 10px auto !important;
+    padding: 30px !important; /* Smaller padding for mobile */
+    font-size: 16px !important;
+    line-height: 32px !important;
+    background-size: 100% 32px !important; /* Lines match text */
+}
+
+/* TABLET & DESKTOP ADJUSTMENT */
+@media (min-width: 768px) {
+    .responsive-editor {
+        width: 90% !important;
+        max-width: 900px !important;
+        padding: 60px !important;
+        font-size: 18px !important;
+        line-height: 35px !important;
+        background-size: 100% 35px !important;
+    }
+}
+
+/* Ensure images inside the editor don't break the layout */
+#studentEditor img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+
+
+/* FOCUS MODE OVERRIDES */
+body.focus-active .sidebar, 
+body.focus-active #student-toolbar, 
+body.focus-active #student-workspace-ui {
+    display: none !important;
+}
+
+body.focus-active .main-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.focus-active .student-paper {
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 1000px !important;
+    box-shadow: none !important;
+    min-height: 100vh !important;
+}
+
+/* RESPONSIVE EDITOR PAD (From previous step) */
+.responsive-editor {
+    width: 95% !important;
+    margin: 10px auto;
+    padding: 30px !important;
+    font-size: 16px;
+    line-height: 32px;
+    background-size: 100% 32px;
+    transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .responsive-editor {
+        width: 90% !important;
+        max-width: 900px;
+        padding: 60px !important;
+        font-size: 18px;
+        line-height: 35px;
+        background-size: 100% 35px;
     }
 }
     </style>
@@ -250,14 +427,16 @@ html, body {
                 <label for="teachImg" style="cursor:pointer;"><i class="fas fa-image"></i></label>
                 <input type="file" id="teachImg" hidden accept="image/*">
                 <button onclick="clearCanvas()" style="color:#ef4444;"><i class="fas fa-trash"></i></button>
-            </div>
+    <button onclick="generateQR()" title="Share Board"><i class="fas fa-qrcode"></i></button>
+
+              </div>
             <div class="board-container" id="teacher-wrap">
                 <canvas id="teachingBoard"></canvas>
                 <div id="teacherEditor" contenteditable="true">Teacher: Click to type, or use Pen...created by Shakib Ali</div>
             </div>
         </div>
 
-        <div id="section-student" class="view-div hidden">
+        <!-- <div id="section-student" class="view-div hidden">
             <div class="no-print" style="background:#1e293b; padding:15px; position:sticky; top:0; z-index:100; display:flex; gap:15px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
                 <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Question</button>
                 <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Answer</button>
@@ -265,28 +444,410 @@ html, body {
                 <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px 20px; border-radius:6px; cursor:pointer;">Upload Image</label>
                 <input type="file" id="studentImgInp" hidden accept="image/*">
                 <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save Data</button>
-            </div>
+         <button onclick="generateQR()" title="Share Board"><i class="fas fa-qrcode"></i></button>
+      <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h4 style="margin: 0; color: #1e293b;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
+        <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+            Enable Collaborative Writing
+        </button>
+    </div>
+    
+    <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+        <p style="font-size: 13px; color: #64748b;">Share this Link with your partner (Delhi/Hyderabad/Anywhere):</p>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+            <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">Copy</button>
+        </div>
+        <div id="partner-status" style="margin-top: 8px; font-size: 12px; color: #10b981; font-weight: bold;"></div>
+    </div>
+</div>
+         
+              </div>
             <div id="studentEditor" class="student-paper" contenteditable="true">
                 Student: Write or use Voice Note...
             </div>
-        </div>
+        </div> -->
 
-        <div id="section-admin" class="view-div hidden admin-view">
-            <div class="admin-header no-print">
-                <h1>Master Admin Panel</h1>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="exportBackup()" style="background:orange; color:black; border:none; padding:10px; border-radius:5px; cursor:pointer;">Backup JSON</button>
-                    <p id="total-logs" style="align-self:center;">Logs: 0</p>
+
+        <!-- <div id="section-student" class="view-div hidden">
+    <div class="no-print" style="background:#1e293b; padding:15px; position:sticky; top:0; z-index:100; display:flex; gap:15px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
+        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Question</button>
+        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Answer</button>
+        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;"><i class="fas fa-microphone"></i> Voice Note</button>
+        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px 20px; border-radius:6px; cursor:pointer;">Upload Image</label>
+        <input type="file" id="studentImgInp" hidden accept="image/*">
+        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save Data</button>
+        <button onclick="generateQR()" title="Share Board" style="padding:10px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
+    </div>
+
+    <div style="max-width: 800px; margin: 15px auto; padding: 0 15px;">
+        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <h4 style="margin: 0; color: #1e293b;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
+                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    Enable Collaborative Writing
+                </button>
+            </div>
+            
+            <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+                <p style="font-size: 13px; color: #64748b;">Share this Link with your partner:</p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; color: black;">
+                    <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">Copy</button>
                 </div>
+                <div id="partner-status" style="margin-top: 8px; font-size: 12px; color: #10b981; font-weight: bold;"></div>
             </div>
-            <div class="stats-bar no-print">
-                <div class="stat-box"><h4>Active Users</h4><p>Live</p></div>
-                <div class="stat-box"><h4>Storage</h4><p>Local</p></div>
-                <div class="stat-box"><h4>System</h4><p>Online</p></div>
-            </div>
-            <div id="admin-content-list"></div>
         </div>
     </div>
+
+    <div id="studentEditor" class="student-paper" contenteditable="true" style="margin-top:0;">
+        Student: Write or use Voice Note...
+    </div>
+</div> -->
+
+
+
+
+<!-- <div id="section-student" class="view-div hidden">
+    <div class="no-print" style="background:#1e293b; padding:15px; position:sticky; top:0; z-index:100; display:flex; gap:15px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
+        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Question</button>
+        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Answer</button>
+        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;"><i class="fas fa-microphone"></i> Voice Note</button>
+        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px 20px; border-radius:6px; cursor:pointer;">Upload Image</label>
+        <input type="file" id="studentImgInp" hidden accept="image/*">
+        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Save Data</button>
+        <button onclick="generateQR()" title="Share Board" style="padding:10px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
+    </div>
+
+    <div style="max-width: 800px; margin: 15px auto; padding: 0 15px;">
+        <div style="text-align: right; margin-bottom: 10px;">
+            <span id="active-timer-display" style="font-size: 12px; color: #1e293b; font-weight: bold; background: #fef3c7; padding: 6px 12px; border-radius: 20px; border: 1px solid #fcd34d;">
+                <i class="fas fa-stopwatch"></i> Active Work: 0m 0s
+            </span>
+        </div>
+
+        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <h4 style="margin: 0; color: #1e293b;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
+                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    Enable Collaborative Writing
+                </button>
+            </div>
+            <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+                <p style="font-size: 13px; color: #64748b;">Share this Link with your partner:</p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; color: black;">
+                    <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer;">Copy</button>
+                </div>
+                <div id="partner-status" style="margin-top: 8px; font-size: 12px; color: #10b981; font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="studentEditor" class="student-paper" contenteditable="true" style="margin-top:0;">
+        Student: Write or use Voice Note...
+    </div>
+</div> -->
+
+
+<!-- 
+
+
+<div id="section-student" class="view-div hidden">
+    <div class="no-print" style="background:#1e293b; padding:10px; position:sticky; top:0; z-index:100; display:flex; gap:8px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap;">
+        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Question</button>
+        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Answer</button>
+        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fas fa-microphone"></i> Voice</button>
+        
+        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px;">
+            <i class="fas fa-image"></i> Image
+        </label>
+        <input type="file" id="studentImgInp" hidden accept="image/*">
+        
+        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Save Data</button>
+        <button onclick="generateQR()" title="Share Board" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
+    </div>
+
+    <div style="max-width: 900px; margin: 10px auto; padding: 0 10px;">
+        
+        <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
+            <span id="active-timer-display" style="font-size: 11px; color: #1e293b; font-weight: bold; background: #fef3c7; padding: 6px 12px; border-radius: 20px; border: 1px solid #fcd34d; white-space: nowrap;">
+                <i class="fas fa-stopwatch"></i> Active Work: 0m 0s
+            </span>
+        </div>
+
+        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
+                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; max-width: 220px;">
+                    Enable Collab Writing
+                </button>
+            </div>
+            
+            <div id="share-area" style="display: none; margin-top: 15px; border-top: 1px solid #cbd5e1; padding-top: 10px;">
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Share Link:</p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="collabUrl" readonly style="flex-grow: 1; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px; color: black; background: #fff;">
+                    <button onclick="copyCollabLink()" style="background: #10b981; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 12px;">Copy</button>
+                </div>
+                <div id="partner-status" style="margin-top: 8px; font-size: 11px; color: #10b981; font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true">
+        Student: Write or use Voice Note...
+    </div>
+</div> -->
+
+
+
+
+
+
+<!-- 
+<div id="section-student" class="view-div hidden">
+    <div id="student-toolbar" class="no-print" style="background:#1e293b; padding:10px; position:sticky; top:0; z-index:100; display:flex; gap:8px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap; transition: all 0.3s ease;">
+        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Question</button>
+        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px; min-width:80px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Answer</button>
+        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fas fa-microphone"></i> Voice</button>
+        
+        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px;">
+            <i class="fas fa-image"></i> Image
+        </label>
+        <input type="file" id="studentImgInp" hidden accept="image/*">
+        
+        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Save Data</button>
+        
+        <button onclick="toggleFocusMode()" id="focusBtn" title="Focus Mode" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-expand"></i></button>
+        
+        <button onclick="generateQR()" title="Share Board" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
+    <div id="autosave-status" style="font-size: 11px; color: #94a3b8; margin-left: 10px; min-width: 100px;">
+    <i class="fas fa-cloud"></i> Ready
+</div>
+      </div>
+
+    <div id="student-workspace-ui" style="max-width: 900px; margin: 10px auto; padding: 0 10px; transition: opacity 0.3s ease;">
+        <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
+            <span id="active-timer-display" style="font-size: 11px; color: #1e293b; font-weight: bold; background: #fef3c7; padding: 6px 12px; border-radius: 20px; border: 1px solid #fcd34d; white-space: nowrap;">
+                <i class="fas fa-stopwatch"></i> Active Work: 0m 0s
+            </span>
+        </div>
+
+        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
+                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; max-width: 220px;">
+                    Enable Collab Writing
+                </button>
+            </div>
+            </div>
+    </div>
+
+    <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true">
+        Student: Write or use Voice Note...
+    </div>
+
+    <button id="exitFocusBtn" onclick="toggleFocusMode()" style="display:none; position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(30,41,59,0.8); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+        <i class="fas fa-compress"></i>
+    </button>
+
+
+    
+</div> -->
+
+<div id="section-student" class="view-div hidden">
+    <div id="student-toolbar" class="no-print" style="background:#1e293b; padding:10px; position:sticky; top:0; z-index:1000; display:flex; gap:8px; justify-content:center; border-bottom:1px solid #334155; flex-wrap: wrap; transition: all 0.3s ease; align-items: center;">
+        <button onclick="addStyledText('Q')" style="background:red; color:white; border:none; padding:10px; min-width:60px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Q</button>
+        <button onclick="addStyledText('A')" style="background:black; color:white; border:none; padding:10px; min-width:60px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">A</button>
+        
+        <button id="studentShapeBtn" onclick="toggleStudentDrawMode()" style="background:#f87171; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px;">
+            <i class="fas fa-draw-polygon"></i> Draw Shape
+        </button>
+
+        <button onclick="clearAllShapes()" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;" title="Clear Drawing">
+            <i class="fas fa-eraser"></i>
+        </button>
+
+        <button id="voiceStartBtn" onclick="startVoiceRecognition('studentEditor')" style="background:#6366f1; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fas fa-microphone"></i> Voice</button>
+        
+        <label for="studentImgInp" style="background:var(--primary); color:white; padding:10px; min-width:100px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px;">
+            <i class="fas fa-image"></i> Image
+        </label>
+        <input type="file" id="studentImgInp" hidden accept="image/*">
+        
+        <button id="saveBtn" onclick="saveSession()" style="background:#10b981; color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold;">Save Data</button>
+        
+        <button onclick="toggleFocusMode()" id="focusBtn" title="Focus Mode" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-expand"></i></button>
+        <button onclick="generateQR()" title="Share Board" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
+<!-- 
+        <div id="autosave-status" style="font-size: 11px; color: #94a3b8; margin-left: 10px; min-width: 90px; text-align: center;">
+            <i class="fas fa-cloud"></i> Ready
+        </div> -->
+
+        <label for="studentPdfInp" style="background:#f59e0b; color:white; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px; font-weight:bold;">
+    <i class="fas fa-file-pdf"></i> Upload PDF
+</label>
+<input type="file" id="studentPdfInp" hidden accept="application/pdf" onchange="uploadStudentPdf()">
+    </div>
+
+    <div id="student-workspace-ui" style="max-width: 900px; margin: 10px auto; padding: 0 10px; transition: opacity 0.3s ease;">
+        <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
+            <span id="active-timer-display" style="font-size: 11px; color: #1e293b; font-weight: bold; background: #fef3c7; padding: 6px 12px; border-radius: 20px; border: 1px solid #fcd34d; white-space: nowrap;">
+                <i class="fas fa-stopwatch"></i> Active Work: 0m 0s
+            </span>
+        </div>
+
+        <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
+                <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; max-width: 220px;">
+                    Enable Collab Writing
+                </button>
+
+                
+            </div>
+        </div>
+    </div>
+
+    <div id="canvas-container" style="position: relative; max-width: 900px; margin: 0 auto;">
+        <canvas id="studentShapeCanvas" style="position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; background: transparent;"></canvas>
+        
+        <div id="draw-timer" style="display:none; position:fixed; background:rgba(239, 68, 68, 0.9); color:white; padding:2px 8px; border-radius:4px; font-size:12px; pointer-events:none; z-index:10001; font-weight:bold;">0.0s</div>
+
+        <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true" style="position: relative; z-index: 1; min-height: 500px;">
+            Student: Write or use Voice Note...
+        </div>
+    </div>
+
+    <button id="exitFocusBtn" onclick="toggleFocusMode()" style="display:none; position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(30,41,59,0.8); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+        <i class="fas fa-compress"></i>
+    </button>
+</div>
+
+    <!-- <div style="position: relative; max-width: 900px; margin: 0 auto;">
+        <canvas id="studentShapeCanvas" style="position: absolute; top: 0; left: 0; z-index: 5; pointer-events: none; touch-action: none;"></canvas>
+        
+        <div id="draw-timer" style="display:none; position:fixed; background:rgba(239, 68, 68, 0.9); color:white; padding:2px 8px; border-radius:4px; font-size:12px; pointer-events:none; z-index:10001; font-weight:bold;">0.0s</div>
+
+        <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true" style="z-index: 1;">
+            Student: Write or use Voice Note...
+        </div>
+    </div>
+
+    <button id="exitFocusBtn" onclick="toggleFocusMode()" style="display:none; position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(30,41,59,0.8); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+        <i class="fas fa-compress"></i>
+    </button>
+</div> -->
+
+
+
+
+
+        <div id="saveModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.9); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:white; padding:30px; border-radius:15px; width:90%; max-width:400px; color:#1e293b; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+        <h3 style="margin-top:0; color:#0f172a;">Complete Your Save</h3>
+        
+        <label style="display:block; margin-bottom:8px; font-weight:600; font-size:0.9rem;">Your Name</label>
+        <!-- <input type="text" id="studentNameInput" placeholder="Enter full name" style="width:100%; padding:12px; border:2px solid #e2e8f0; border-radius:8px; margin-bottom:20px; outline:none;"> -->
+         <input type="text" id="studentNameInput" 
+       oninput="localStorage.setItem('tempName', this.value)" 
+       placeholder="Enter full name" ...>
+
+        <div class="mood-selector" style="margin-bottom: 25px; text-align: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <p style="color: #64748b; font-size: 0.85rem; margin-bottom: 12px; font-weight: 500;">How was the lesson today?</p>
+            <div style="display: flex; justify-content: center; gap: 25px;">
+                <label style="cursor:pointer; transition: transform 0.2s;"><input type="radio" name="mood" value="😊" style="display:none;" checked> <span style="font-size:30px;">😊</span></label>
+                <label style="cursor:pointer; transition: transform 0.2s;"><input type="radio" name="mood" value="😐" style="display:none;"> <span style="font-size:30px;">😐</span></label>
+                <label style="cursor:pointer; transition: transform 0.2s;"><input type="radio" name="mood" value="😕" style="display:none;"> <span style="font-size:30px;">😕</span></label>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button onclick="closeSaveModal()" style="flex:1; padding:12px; border-radius:8px; border:none; background:#e2e8f0; cursor:pointer;">Cancel</button>
+            <button onclick="finalizeSave()" style="flex:2; padding:12px; border-radius:8px; border:none; background:#10b981; color:white; font-weight:600; cursor:pointer;">Save to Cloud</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<div id="section-admin" class="view-div hidden admin-view">
+    <div class="admin-header no-print">
+        <h1>Master Admin Panel</h1>
+        
+        <div style="display:flex; gap:10px; flex-wrap: wrap; align-items: center; width: 100%;">
+            <input type="text" id="adminSearch" placeholder="🔍 Search student name..." 
+                   oninput="filterLogs(this.value)" 
+                   style="padding:10px; border-radius:8px; border:1px solid var(--primary); background:#1e293b; color:white; flex-grow: 1; min-width:200px;">
+            
+            <button onclick="toggleSelectAll()" style="background:#475569; color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer;">
+                <i class="fas fa-check-double"></i> Select All
+            </button>
+            
+            <button onclick="downloadFilteredHistory()" style="background:#10b981; color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer;">
+                <i class="fas fa-file-download"></i> Download Filtered
+            </button>
+            
+            <button onclick="downloadSelectedRecords()" style="background:#6366f1; color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer;">
+                <i class="fas fa-tasks"></i> Download Selected
+            </button>
+            
+            <button onclick="exportBackup()" style="background:orange; color:black; border:none; padding:10px; border-radius:8px; cursor:pointer;">Backup JSON</button>
+            
+            <p id="total-logs" style="align-self:center; font-weight: bold; margin-left: auto;">Logs: 0</p>
+        </div>
+    </div>
+
+    <div class="stats-bar no-print" style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <div class="stat-box" style="flex:1; text-align:center; background:#dcfce7; color:#166534; border-radius:10px; padding:15px; border: 1px solid #bbf7d0;">
+            <h4 style="margin:0;">Great Understanding</h4>
+            <p id="stat-happy" style="font-size:1.5rem; font-weight:bold; margin:5px 0;">0</p>
+        </div>
+        <div class="stat-box" style="flex:1; text-align:center; background:#fef9c3; color:#854d0e; border-radius:10px; padding:15px; border: 1px solid #fef08a;">
+            <h4 style="margin:0;">Needs Review</h4>
+            <p id="stat-neutral" style="font-size:1.5rem; font-weight:bold; margin:5px 0;">0</p>
+        </div>
+        <div class="stat-box" style="flex:1; text-align:center; background:#fecaca; color:#991b1b; border-radius:10px; padding:15px; border: 1px solid #fca5a5;">
+            <h4 style="margin:0;">Confused</h4>
+            <p id="stat-confused" style="font-size:1.5rem; font-weight:bold; margin:5px 0;">0</p>
+        </div>
+        <div id="admin-video-upload" style="background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; color: white;">
+    <h3><i class="fas fa-video"></i> Upload Lesson Video</h3>
+    <input type="file" id="videoFile" accept="video/*" style="margin-bottom: 10px;">
+    
+    <div id="upload-progress-container" style="display:none; width: 100%; background: #334155; border-radius: 10px; height: 10px; margin: 10px 0;">
+        <div id="upload-progress-bar" style="width: 0%; background: #10b981; height: 100%; border-radius: 10px; transition: width 0.3s;"></div>
+    </div>
+    
+    <button onclick="uploadVideo()" id="uploadBtn" style="background: #6366f1; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+        Start Upload
+    </button>
+</div>
+    </div>
+
+    <div class="no-print" style="display:flex; gap:10px; margin-bottom:20px; flex-wrap: wrap; align-items: center;">
+        <button onclick="displayLogs(allCloudLogs)" style="background:#475569; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">
+            <i class="fas fa-list"></i> Show All
+        </button>
+        <button onclick="filterByMood('😕')" style="background:#ef4444; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">
+            <i class="fas fa-exclamation-circle"></i> Show Confused Only
+        </button>
+        
+        <button onclick="resetDailyDashboard()" style="background:#dc2626; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; margin-left:auto;">
+            <i class="fas fa-trash-alt"></i> Reset Daily Dashboard
+        </button>
+    </div>
+
+    <div id="priority-alerts" style="margin-bottom: 20px;"></div>
+
+    <div id="admin-content-list" style="min-height: 200px;">
+        </div>
+</div>
 
     <div id="image-adjuster" class="image-controls-panel no-print">
         <h4 style="margin-bottom:15px; color:var(--primary);">Adjust Image Position</h4>
@@ -301,325 +862,1570 @@ html, body {
         <input type="range" min="50" max="1500" style="width:100%;" oninput="resizeImage(this.value)">
     </div>
 
-    <script>
-        const canvas = document.getElementById('teachingBoard');
-        const ctx = canvas.getContext('2d');
-        const teacherWrap = document.getElementById('teacher-wrap');
-        const studentArea = document.getElementById('studentEditor');
-        const teacherArea = document.getElementById('teacherEditor');
-        let drawing = false, activeImg = null, currentMode = 'text';
-        let startX, startY;
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script>
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyD4NZ7BhlCVmRRiRqdXRs5TluNBgCtxBOU",
+        authDomain: "eduflow-storage.firebaseapp.com",
+        projectId: "eduflow-storage",
+        storageBucket: "eduflow-storage.firebasestorage.app",
+        messagingSenderId: "1031861595930",
+        appId: "1:1031861595930:web:a516008c231e31bb0b06a3"
+    };
+ firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    let allCloudLogs = []; 
+
+// Define the tools
+
+
+
+//new featurs started
+
+
+// ... Firebase init code (firebase.initializeApp, etc.) ...
+
+// --- ADD THE TIME TRACKING CODE HERE ---
+let activeSeconds = 0;
+let typingTimer;
+let clockInterval;
+
+function trackActiveTime() {
+    if (!clockInterval) {
+        clockInterval = setInterval(() => {
+            activeSeconds++;
+            updateTimerUI();
+        }, 1000);
+    }
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => {
+        clearInterval(clockInterval);
+        clockInterval = null;
+    }, 3000); 
+}
+
+function formatTime(s) {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return `${mins}m ${secs}s`;
+}
+
+function updateTimerUI() {
+    const display = document.getElementById('active-timer-display');
+    if(display) display.innerText = `Active Work: ${formatTime(activeSeconds)}`;
+}
+
+// IMPORTANT: This listener must go after the studentEditor element exists in the DOM
+// Or place it inside your 'window.onload' function
+document.addEventListener('DOMContentLoaded', () => {
+    const editor = document.getElementById('studentEditor');
+    if(editor) {
+        editor.addEventListener('input', trackActiveTime);
+    }
+});
+
+
+
+
+
+
+
+
+
+    // --- YOUR EXISTING VARIABLES ---
+    const canvas = document.getElementById('teachingBoard');
+    const ctx = canvas.getContext('2d');
+    const teacherWrap = document.getElementById('teacher-wrap');
+    const studentArea = document.getElementById('studentEditor');
+    const teacherArea = document.getElementById('teacherEditor');
+    let drawing = false, activeImg = null, currentMode = 'text';
+    let startX, startY;
+    let isSaved = false;
+
+    studentArea.addEventListener('input', () => { isSaved = false; }); 
+
+    window.onload = () => {
+        resizeCanvas();
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 3;
+        renderAdminLogs(); // Updated to fetch from cloud
+    };
+
+    window.onresize = resizeCanvas;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth - (window.innerWidth > 768 ? 75 : 0);
+        canvas.height = 3000;
+    }
+
+    // --- PRESERVED DRAWING LOGIC ---
+    function setMode(m) {
+        currentMode = m;
+        showToast("Mode: " + m);
+        teacherArea.style.pointerEvents = (m === 'pen' || m === 'rect') ? 'none' : 'auto';
         
-        let isSaved = false;
-        studentArea.addEventListener('input', () => { isSaved = false; }); 
+    }
 
-        window.onload = () => {
-            resizeCanvas();
-            ctx.lineCap = 'round';
-            ctx.lineWidth = 3;
-            renderAdminLogs();
-        };
+    function getActiveColor() {
+        return window.innerWidth <= 768 ? document.getElementById('teachColorMob').value : document.getElementById('teachColor').value;
+    }
 
-        window.onresize = resizeCanvas;
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth - (window.innerWidth > 768 ? 75 : 0);
-            canvas.height = 3000;
+    function startDraw(e) {
+        if (currentMode === 'text') return;
+        drawing = true;
+        const coords = getCoords(e);
+        startX = coords.x; startY = coords.y;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.strokeStyle = getActiveColor();
+    }
+
+    function doDraw(e) {
+        if (!drawing || currentMode === 'text') return;
+        const coords = getCoords(e);
+        if(currentMode === 'pen') {
+            ctx.lineTo(coords.x, coords.y);
+            ctx.stroke();
         }
+    }
 
-        function setMode(m) {
-            currentMode = m;
-            showToast("Mode: " + m);
-            // Crucial: Pointer events must be 'none' to draw on the canvas below the editor
-            teacherArea.style.pointerEvents = (m === 'pen' || m === 'rect') ? 'none' : 'auto';
-        }
-
-        function getActiveColor() {
-            return window.innerWidth <= 768 ? document.getElementById('teachColorMob').value : document.getElementById('teachColor').value;
-        }
-
-        function getCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
-        }
-
-        function startDraw(e) {
-            if (currentMode === 'text') return;
-            drawing = true;
-            const coords = getCoords(e);
-            startX = coords.x;
-            startY = coords.y;
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
+    function stopDraw(e) {
+        if (!drawing) return;
+        if(currentMode === 'rect') {
+            const coords = getCoords(e.changedTouches ? e.changedTouches[0] : e);
             ctx.strokeStyle = getActiveColor();
+            ctx.strokeRect(startX, startY, coords.x - startX, coords.y - startY);
         }
+        drawing = false;
+        ctx.closePath();
+    }
 
-        function doDraw(e) {
-            if (!drawing || currentMode === 'text') return;
-            const coords = getCoords(e);
-            
-            if(currentMode === 'pen') {
-                ctx.lineTo(coords.x, coords.y);
-                ctx.stroke();
-            }
-            // Rect preview isn't handled here to keep it simple, 
-            // but we could use a second canvas for that.
-        }
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', doDraw);
+    window.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); doDraw(e); }, {passive: false});
+    canvas.addEventListener('touchend', (e) => { stopDraw(e); });
 
-        function stopDraw(e) {
-            if (!drawing) return;
-            if(currentMode === 'rect') {
-                const coords = getCoords(e.changedTouches ? e.changedTouches[0] : e);
-                ctx.strokeStyle = getActiveColor();
-                ctx.strokeRect(startX, startY, coords.x - startX, coords.y - startY);
-            }
-            drawing = false;
-            ctx.closePath();
-        }
+    // --- PRESERVED TEXT & UTILITY LOGIC ---
+    function styleSelectedText(command, value) {
+        teacherArea.focus();
+        document.execCommand(command, false, value);
+    }
 
-        // Mouse Events
-        canvas.addEventListener('mousedown', startDraw);
-        canvas.addEventListener('mousemove', doDraw);
-        window.addEventListener('mouseup', stopDraw);
-
-        // Touch Events
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); doDraw(e); }, {passive: false});
-        canvas.addEventListener('touchend', (e) => { stopDraw(e); });
-
-        function styleSelectedText(command, value) {
-            teacherArea.focus();
-            document.execCommand(command, false, value);
-        }
-
-        function changeFontSize(dir) {
-            teacherArea.focus();
-            let currentSize = window.getComputedStyle(teacherArea).fontSize;
-            let newSize = parseInt(currentSize) + (dir * 2);
-            document.execCommand('fontSize', false, "7");
-            const spans = teacherArea.getElementsByTagName("font");
-            for (let i = 0; i < spans.length; i++) {
-                if(spans[i].size == "7") {
-                    spans[i].removeAttribute("size");
-                    spans[i].style.fontSize = newSize + "px";
-                }
-            }
-            if (!window.getSelection().toString()) teacherArea.style.fontSize = newSize + "px";
-        }
-
-        function addTeacherText(type) {
-            setMode('text');
-            const span = document.createElement("span");
-            span.style.color = (type === 'Q' ? 'red' : 'white');
-            span.style.fontWeight = 'bold';
-            span.innerText = `\n${type === 'Q' ? 'Question: ' : 'Answer: '}`;
-            teacherArea.focus();
-            const sel = window.getSelection();
-            if(sel.rangeCount > 0) {
-                const range = sel.getRangeAt(0);
-                range.insertNode(span);
-                range.collapse(false);
+    function changeFontSize(dir) {
+        teacherArea.focus();
+        let currentSize = window.getComputedStyle(teacherArea).fontSize;
+        let newSize = parseInt(currentSize) + (dir * 2);
+        document.execCommand('fontSize', false, "7");
+        const spans = teacherArea.getElementsByTagName("font");
+        for (let i = 0; i < spans.length; i++) {
+            if(spans[i].size == "7") {
+                spans[i].removeAttribute("size");
+                spans[i].style.fontSize = newSize + "px";
             }
         }
+        if (!window.getSelection().toString()) teacherArea.style.fontSize = newSize + "px";
+    }
 
-        function startVoiceRecognition(targetId) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return alert("Speech not supported.");
-            const recognition = new SpeechRecognition();
-            const btn = document.getElementById('voiceStartBtn');
-            const editor = document.getElementById(targetId);
-            
-            recognition.onstart = () => {
-                btn.classList.add('voice-btn');
-                showToast("Listening...");
+    function addTeacherText(type) {
+        setMode('text');
+        const span = document.createElement("span");
+        span.style.color = (type === 'Q' ? 'red' : 'white');
+        span.style.fontWeight = 'bold';
+        span.innerText = `\n${type === 'Q' ? 'Question: ' : 'Answer: '}`;
+        teacherArea.focus();
+        const sel = window.getSelection();
+        if(sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            range.insertNode(span);
+            range.collapse(false);
+        }
+    }
+
+    function startVoiceRecognition(targetId) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return alert("Speech not supported.");
+        const recognition = new SpeechRecognition();
+        const btn = document.getElementById('voiceStartBtn');
+        const editor = document.getElementById(targetId);
+        recognition.onstart = () => { btn.classList.add('voice-btn'); showToast("Listening..."); };
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            editor.focus();
+            document.execCommand('insertText', false, " " + transcript);
+            isSaved = false; 
+        };
+        recognition.onend = () => btn.classList.remove('voice-btn');
+        recognition.onerror = () => btn.classList.remove('voice-btn');
+        recognition.start();
+    }
+
+    // --- PRESERVED IMAGE LOGIC ---
+    function handleImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                img.className = 'img-adjustable';
+                img.style.width = '300px';
+                img.style.left = '50px';
+                img.style.top = (window.scrollY + 150) + 'px';
+                img.onclick = function(ev) {
+                    ev.stopPropagation();
+                    activeImg = this;
+                    document.getElementById('image-adjuster').style.display = 'block';
+                };
+                teacherWrap.appendChild(img);
+                isSaved = false;
             };
-            
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                editor.focus();
-                document.execCommand('insertText', false, " " + transcript);
-                isSaved = false; 
-            };
-            
-            recognition.onend = () => btn.classList.remove('voice-btn');
-            recognition.onerror = () => btn.classList.remove('voice-btn');
-            recognition.start();
+            reader.readAsDataURL(input.files[0]);
         }
+    }
 
+    function setupImageUpload(inputId, container) {
+        document.getElementById(inputId).onchange = function(e) { handleImage(this); };
+    }
+    setupImageUpload('teachImg', teacherWrap);
+    setupImageUpload('studentImgInp', studentArea);
 
+    function moveImage(dir) {
+        if(!activeImg) return;
+        let step = 30;
+        let top = parseInt(activeImg.style.top) || 0;
+        let left = parseInt(activeImg.style.left) || 0;
+        if(dir === 'up') activeImg.style.top = (top - step) + 'px';
+        if(dir === 'down') activeImg.style.top = (top + step) + 'px';
+        if(dir === 'left') activeImg.style.left = (left - step) + 'px';
+        if(dir === 'right') activeImg.style.left = (left + step) + 'px';
+    }
+    function resizeImage(v) { if(activeImg) activeImg.style.width = v + 'px'; }
+
+    // --- UPDATED: CLOUD SAVE & ADMIN LOGIC ---
+    function nav(mode) {
+        document.querySelectorAll('.view-div').forEach(v => v.classList.add('hidden'));
+        document.getElementById('section-' + mode).classList.remove('hidden');
+        document.querySelectorAll('.sidebar i').forEach(i => i.classList.remove('active'));
+        document.getElementById('nav-' + mode).classList.add('active');
+    }
+
+    function openAdmin() {
+    let pass = prompt("Admin Password:");
+    if(pass === "admin") { 
+        nav('admin'); // Navigate first
+        renderAdminLogs(); // Then fetch/render
+    } else {
+        alert("Wrong Password");
+    }
+}
+
+    // PART 1: Just opens the modal
+function saveSession() {
+    const modal = document.getElementById('saveModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        alert("Modal Error: Make sure the saveModal HTML is present.");
+    }
+}
+
+// Helper to close modal
+function closeSaveModal() {
+    document.getElementById('saveModal').style.display = 'none';
+}
+
+// PART 2: Does the actual saving when "Save to Cloud" is clicked inside the modal
+// async function finalizeSave() {
+//     const studentName = document.getElementById('studentNameInput').value.trim();
+//     const studentContent = document.getElementById('studentEditor').innerHTML;
+    
+//     // Get the selected mood
+//     const moodElement = document.querySelector('input[name="mood"]:checked');
+//     const studentMood = moodElement ? moodElement.value : "😊";
+
+//     if (!studentName) {
+//         alert("Please enter a name before saving!");
+//         return;
+//     }
+
+//     showToast("Saving to Cloud...");
+    
+//     try {
+//         const timestamp = Date.now();
+//         const dateString = new Date().toLocaleString();
+
+//         // New Entry Object
+//         const newEntry = {
+//             data: studentContent,
+//             mood: studentMood,
+//             timestamp: timestamp,
+//             dateString: dateString
+//         };
+
+//         // We use .doc(studentName) so that multiple saves by the same person 
+//         // group together for the "Time-Travel" feature
+//         const docRef = db.collection("edu_logs").doc(studentName);
+//         const doc = await docRef.get();
+
+//         if (doc.exists) {
+//             // IF STUDENT EXISTS: Update the main data and add to versions array
+//             await docRef.update({
+//                 data: studentContent,
+//                 mood: studentMood,
+//                 lastUpdated: timestamp,
+//                 versions: firebase.firestore.FieldValue.arrayUnion(newEntry)
+//             });
+//         } else {
+//             // IF NEW STUDENT: Create the record with the first version
+//             await docRef.set({
+//                 studentName: studentName,
+//                 data: studentContent,
+//                 mood: studentMood,
+//                 timestamp: timestamp,
+//                 dateString: dateString,
+//                 versions: [newEntry]
+//             });
+//         }
+
+//         isSaved = true; 
+//         showToast("✅ Saved to Global Database!");
+//         document.getElementById('saveBtn').style.background = "#059669";
         
-        function handleImage(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    img.className = 'img-adjustable';
-                    img.style.width = '300px';
-                    img.style.left = '50px';
-                    img.style.top = (window.scrollY + 150) + 'px';
-                    img.onclick = function(ev) {
-                        ev.stopPropagation();
-                        activeImg = this;
-                        document.getElementById('image-adjuster').style.display = 'block';
-                    };
-                    teacherWrap.appendChild(img);
-                    isSaved = false;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
+//         // Clean up
+//         closeSaveModal();
+//         document.getElementById('studentNameInput').value = ""; // Clear input for next time
+        
+//     } catch (e) {
+//         console.error("Save Error:", e);
+//         showToast("❌ Save Failed!");
+//     }
+// }
+
+
+
+
+
+
+
+// async function finalizeSave() {
+//     const studentName = document.getElementById('studentNameInput').value.trim();
+//     const studentContent = document.getElementById('studentEditor').innerHTML;
+    
+//     // Get the selected mood
+//     const moodElement = document.querySelector('input[name="mood"]:checked');
+//     const studentMood = moodElement ? moodElement.value : "😊";
+
+//     if (!studentName) {
+//         alert("Please enter a name before saving!");
+//         return;
+//     }
+
+//     showToast("Saving to Cloud...");
+    
+//     try {
+//         const timestamp = Date.now();
+//         const dateString = new Date().toLocaleString();
+        
+//         // Convert the activeSeconds into a readable string (e.g., "2m 15s")
+//         const finalActiveTime = formatTime(activeSeconds);
+
+//         // New Entry Object (This goes into the "versions" array)
+//         const newEntry = {
+//             data: studentContent,
+//             mood: studentMood,
+//             timestamp: timestamp,
+//             dateString: dateString,
+//             activeTypingTime: finalActiveTime // Added time tracking to history
+//         };
+
+//         const docRef = db.collection("edu_logs").doc(studentName);
+//         const doc = await docRef.get();
+
+//         if (doc.exists) {
+//             // IF STUDENT EXISTS: Update main data and add to history
+//             await docRef.update({
+//                 data: studentContent,
+//                 mood: studentMood,
+//                 lastUpdated: timestamp,
+//                 totalActiveTime: finalActiveTime, // Update the main display time
+//                 versions: firebase.firestore.FieldValue.arrayUnion(newEntry)
+//             });
+//         } else {
+//             // IF NEW STUDENT: Create initial record
+//             await docRef.set({
+//                 studentName: studentName,
+//                 data: studentContent,
+//                 mood: studentMood,
+//                 timestamp: timestamp,
+//                 dateString: dateString,
+//                 totalActiveTime: finalActiveTime, // Set initial active time
+//                 versions: [newEntry]
+//             });
+//         }
+
+//         isSaved = true; 
+//         showToast("✅ Saved to Global Database!");
+//         document.getElementById('saveBtn').style.background = "#059669";
+        
+//         // --- IMPORTANT: RESET TIMER AFTER SUCCESSFUL SAVE ---
+//         activeSeconds = 0; 
+//         updateTimerUI(); 
+        
+//         // Clean up
+//         closeSaveModal();
+//         document.getElementById('studentNameInput').value = ""; 
+        
+//     } catch (e) {
+//         console.error("Save Error:", e);
+//         showToast("❌ Save Failed!");
+//     }
+// }
+
+
+async function finalizeSave() {
+    const studentName = document.getElementById('studentNameInput').value.trim();
+    const studentContent = document.getElementById('studentEditor').innerHTML;
+    
+    // Get the selected mood
+    const moodElement = document.querySelector('input[name="mood"]:checked');
+    const studentMood = moodElement ? moodElement.value : "😊";
+
+    if (!studentName) {
+        alert("Please enter a name before saving!");
+        return;
+    }
+
+    showToast("Saving unique record...");
+    
+    try {
+        const timestamp = Date.now();
+        const dateString = new Date().toLocaleString();
+        const finalActiveTime = formatTime(activeSeconds);
+
+        // --- KEY CHANGE: Use .add() instead of .doc(studentName) ---
+        // This generates a unique ID like "JkL928sk..." so it never overwrites!
+        await db.collection("edu_logs").add({
+            studentName: studentName,
+            data: studentContent,
+            mood: studentMood,
+            timestamp: timestamp,
+            dateString: dateString,
+            totalActiveTime: finalActiveTime,
+            // We no longer need the "versions" array logic because 
+            // every save is now its own version in the database.
+            isVersion: true 
+        });
+
+        isSaved = true; 
+        showToast("✅ Saved as a new record!");
+        document.getElementById('saveBtn').style.background = "#059669";
+        
+        // --- RESET TIMER AND CLEAN UP ---
+        activeSeconds = 0; 
+        updateTimerUI(); 
+        
+        closeSaveModal();
+        // Clear name input so the next save requires a fresh check
+        document.getElementById('studentNameInput').value = ""; 
+        
+    } catch (e) {
+        console.error("Save Error:", e);
+        showToast("❌ Save Failed!");
+    }
+}
+
+
+    function renderAdminLogs() {
+  
+    db.collection("edu_logs").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+        allCloudLogs = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+        
+        const term = document.getElementById('adminSearch').value;
+        if(term) {
+            filterLogs(term);
+        } else {
+            displayLogs(allCloudLogs);
+        }
+    }, (error) => {
+        console.error("Error fetching logs: ", error);
+        showToast("Error loading logs");
+    });
+}
+
+
+
+function displayLogs(logs, highlightTerm = "") {
+    // 1. Update Stats Bar
+    const happyCount = logs.filter(l => l.mood === '😊').length;
+    const neutralCount = logs.filter(l => l.mood === '😐').length;
+    const confusedCount = logs.filter(l => l.mood === '😕').length;
+
+    if(document.getElementById('stat-happy')) document.getElementById('stat-happy').innerText = happyCount;
+    if(document.getElementById('stat-neutral')) document.getElementById('stat-neutral').innerText = neutralCount;
+    if(document.getElementById('stat-confused')) document.getElementById('stat-confused').innerText = confusedCount;
+
+    const list = document.getElementById('admin-content-list');
+    const totalCount = document.getElementById('total-logs');
+    if(totalCount) totalCount.innerText = `Logs: ${logs.length}`;
+
+    // 2. Handle Empty State
+    if (logs.length === 0) {
+        list.innerHTML = "<p style='text-align:center; padding:20px;'>No records found.</p>";
+        return;
+    }
+
+    // 3. Handle Priority Alerts
+    const priorityStudents = logs.filter(item => item.mood === '😕');
+    const priorityDiv = document.getElementById('priority-alerts');
+    
+    if (priorityDiv) {
+        if (priorityStudents.length > 0) {
+            priorityDiv.innerHTML = `
+                <div style="background:#fef2f2; border:2px solid #ef4444; padding:15px; border-radius:12px; margin-bottom:20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                    <h4 style="color:#991b1b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px;">
+                        <i class="fas fa-exclamation-triangle"></i> Needs Immediate Help
+                    </h4>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                        ${priorityStudents.map(s => `<span style="background:#ef4444; color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold;">${s.studentName}</span>`).join('')}
+                    </div>
+                </div>`;
+        } else {
+            priorityDiv.innerHTML = "";
+        }
+    }
+
+    // 4. Render Main List
+    list.innerHTML = logs.map((item, index) => {
+        let content = item.data;
+        
+        // --- MOVED OUTSIDE: Detect subject based on content ---
+        const textForTag = (item.data || "").toLowerCase();
+        let tag = "";
+        if (textForTag.includes("#math") || textForTag.includes("fraction") || textForTag.includes("=")) tag = "Math";
+        else if (textForTag.includes("#science") || textForTag.includes("atom") || textForTag.includes("energy")) tag = "Science";
+        else if (textForTag.includes("#english") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "English";
+         else if (textForTag.includes("#java") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Java";
+          else if (textForTag.includes("#Python") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Python";
+           else if (textForTag.includes("#Oracle") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Oracle";
+            else if (textForTag.includes("#AI") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "AI";
+
+        const tagUI = tag ? `<span style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:10px; text-transform:uppercase;">${tag}</span>` : "";
+
+        // Keyword Highlight
+        if (highlightTerm && highlightTerm.length > 2) {
+            const regex = new RegExp(`(${highlightTerm})`, 'gi');
+            content = content.replace(regex, `<mark style="background:yellow; color:black; font-weight:bold;">$1</mark>`);
         }
 
-        function setupImageUpload(inputId, container) {
-            document.getElementById(inputId).onchange = function(e) {
-                handleImage(this);
-            };
-        }
-        setupImageUpload('teachImg', teacherWrap);
-        setupImageUpload('studentImgInp', studentArea);
+        // Version History Slider Logic
+        const hasHistory = item.versions && item.versions.length > 1;
+        const versionUI = hasHistory ? `
+            <div style="margin: 10px 0; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: flex; align-items:center; gap:10px;">
+                <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase;">History:</span>
+                <input type="range" min="0" max="${item.versions.length - 1}" value="${item.versions.length - 1}" 
+                       oninput="updateCardContent('${index}', this.value)" 
+                       style="flex-grow: 1; cursor: pointer;">
+                <span id="version-label-${index}" style="font-size: 11px; color: #6366f1;">Latest</span>
+            </div>` : '';
 
-        function moveImage(dir) {
-            if(!activeImg) return;
-            let step = 30;
-            let top = parseInt(activeImg.style.top) || 0;
-            let left = parseInt(activeImg.style.left) || 0;
-            if(dir === 'up') activeImg.style.top = (top - step) + 'px';
-            if(dir === 'down') activeImg.style.top = (top + step) + 'px';
-            if(dir === 'left') activeImg.style.left = (left - step) + 'px';
-            if(dir === 'right') activeImg.style.left = (left + step) + 'px';
-        }
-        function resizeImage(v) { if(activeImg) activeImg.style.width = v + 'px'; }
-
-        function nav(mode) {
-            document.querySelectorAll('.view-div').forEach(v => v.classList.add('hidden'));
-            document.getElementById('section-' + mode).classList.remove('hidden');
-            document.querySelectorAll('.sidebar i').forEach(i => i.classList.remove('active'));
-            document.getElementById('nav-' + mode).classList.add('active');
-        }
-
-        function openAdmin() {
-            if(prompt("Admin Password:") === "admin🤣🤣🤣") { renderAdminLogs(); nav('admin'); }
-        }
-
-        function saveSession() {
-            const studentContent = studentArea.innerHTML;
-            let db = JSON.parse(localStorage.getItem('edu_master_db') || "[]");
-            db.push({ id: Date.now(), data: studentContent, date: new Date().toLocaleString() });
-            localStorage.setItem('edu_master_db', JSON.stringify(db));
-            isSaved = true; 
-            showToast("✅ Student notes saved!");
-            document.getElementById('saveBtn').style.background = "#059669";
-        }
-
-        function renderAdminLogs() {
-            const list = document.getElementById('admin-content-list');
-            const db = JSON.parse(localStorage.getItem('edu_master_db') || "[]");
-            document.getElementById('total-logs').innerText = `Total Logs: ${db.length}`;
-            list.innerHTML = db.map(item => `
-                <div class="data-card">
-                    <div style="display:flex; justify-content:space-between"><strong>ID: ${item.id}</strong><span>${item.date}</span></div>
-                    <div style="background:white; color:black; padding:20px; border-radius:8px; margin-top:15px;">${item.data}</div>
+        return `
+        <div class="data-card admin-log-item" id="log-card-${index}" style="border-left: 5px solid ${item.mood === '😕' ? '#ef4444' : '#6366f1'};">
+            <div style="display:flex; justify-content:space-between; border-bottom: 1px solid #e2e8f0; padding-bottom:10px; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" class="log-checkbox" data-index="${index}" style="width:18px; height:18px;">
+                    <strong>
+                        <i class="fas fa-user"></i> ${item.studentName || 'Unknown'} 
+                        <span style="font-size: 1.4rem; margin-left: 5px;" title="Student Mood">${item.mood || ''}</span>
+                        ${tagUI} </strong>
                 </div>
-            `).reverse().join('');
+          
+<p style="font-size:12px; color:#64748b;">
+    <i class="fas fa-keyboard"></i> Actual Effort: <b>${item.totalActiveTime || '0s'}</b>
+</p>
+
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <span style="font-size:0.75em; color:#94a3b8; margin-right:5px;">${item.dateString || ''}</span>
+                    <button onclick="shareRecordQR('${index}')" style="background:#8b5cf6; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Secure Share QR"><i class="fas fa-share-nodes"></i></button>
+                    <button onclick="sendEmail('${index}')" style="background:#10b981; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Email"><i class="fas fa-envelope"></i></button>
+                    <button onclick="copyToClipboard('${index}')" style="background:#475569; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Copy"><i class="fas fa-copy"></i></button>
+                    <button onclick="downloadSingleRecord('${index}', '${item.studentName}')" style="background:var(--primary); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="PDF"><i class="fas fa-file-pdf"></i></button>
+                </div>
+            </div>
+
+            ${versionUI}
+
+            <div id="content-body-${index}" class="log-data-content" style="background:white; color:black; padding:20px; border-radius:8px; line-height:1.6; border: 1px solid #e2e8f0;">
+                ${content}
+            </div>
+        </div>`;
+    }).join('');
+}
+// Global helper to switch versions visually
+function updateCardContent(logIndex, versionIndex) {
+    const log = allCloudLogs[logIndex];
+    const contentDiv = document.getElementById(`content-body-${logIndex}`);
+    const labelDiv = document.getElementById(`version-label-${logIndex}`);
+    
+    const selectedVersion = log.versions[versionIndex];
+    contentDiv.innerHTML = selectedVersion.data;
+    
+    labelDiv.innerText = versionIndex == log.versions.length - 1 ? "Latest" : `v.${parseInt(versionIndex) + 1}`;
+}
+ 
+
+    function filterLogs(term) {
+    const filtered = allCloudLogs.filter(log => 
+        log.studentName?.toLowerCase().includes(term.toLowerCase()) ||
+        log.data?.toLowerCase().includes(term.toLowerCase())
+    );
+    displayLogs(filtered, term); // Pass the search term to displayLogs
+}
+
+
+    async function downloadFilteredHistory() {
+        const listArea = document.getElementById('admin-content-list');
+        if (listArea.children.length === 0) {
+            alert("Nothing to download!");
+            return;
         }
 
-       async function downloadMasterPDF() {
-            const targetView = document.querySelector('.view-div:not(.hidden)');
+        const fileName = prompt("Enter filename for history:", "Student_History_Export");
+        if(!fileName) return;
+
+        showToast("Generating History PDF...");
+        
+        // Temporarily change background for better PDF readability
+        const originalBg = listArea.style.background;
+        listArea.style.background = "#f3f4f6"; 
+
+        html2canvas(listArea, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: "#f3f4f6"
+        }).then(canvasShot => {
+            listArea.style.background = originalBg;
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvasShot.toDataURL('image/png');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfImgHeight = (imgProps.height * pageWidth) / imgProps.width;
             
-            if(targetView.id === 'section-student' && !isSaved) {
-                alert("⚠️ Please click 'Save Data' in the Student tab before downloading the PDF!");
-                return;
-            }
+            let heightLeft = pdfImgHeight;
+            let position = 0;
 
-            const name = prompt("Enter PDF Name:");
-            if(!name) return;
+            pdf.addImage(imgData, 'PNG', 0, position, pageWidth, pdfImgHeight);
+            heightLeft -= pageHeight;
 
-            showToast("Generating Multi-page PDF...");
-            
-            const toHide = document.querySelectorAll('.no-print');
-            toHide.forEach(el => el.style.visibility = 'hidden');
-
-            html2canvas(targetView, {
-                useCORS: true,
-                scale: 2,
-                backgroundColor: (targetView.id === 'section-student') ? "#ffffff" : "#1e1e1e",
-                windowWidth: targetView.scrollWidth,
-                windowHeight: targetView.scrollHeight
-            }).then(canvasShot => {
-                toHide.forEach(el => el.style.visibility = 'visible');
-
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgData = canvasShot.toDataURL('image/png');
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const imgProps = pdf.getImageProperties(imgData);
-                const pdfImgHeight = (imgProps.height * pageWidth) / imgProps.width;
-                
-                let heightLeft = pdfImgHeight;
-                let position = 0;
-
-                const drawBackground = () => {
-                    if(targetView.id !== 'section-student') {
-                        pdf.setFillColor(30, 30, 30);
-                        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-                        pdf.setDrawColor(60, 60, 60);
-                        pdf.setLineWidth(0.1);
-                        for (let y = 0; y < pageHeight; y += 10) pdf.line(0, y, pageWidth, y);
-                    }
-                };
-
-                drawBackground();
+            while (heightLeft >= 0) {
+                position = heightLeft - pdfImgHeight;
+                pdf.addPage();
                 pdf.addImage(imgData, 'PNG', 0, position, pageWidth, pdfImgHeight);
                 heightLeft -= pageHeight;
+            }
 
-                while (heightLeft >= 0) {
-                    position = heightLeft - pdfImgHeight;
-                    pdf.addPage();
-                    drawBackground();
-                    pdf.addImage(imgData, 'PNG', 0, position, pageWidth, pdfImgHeight);
-                    heightLeft -= pageHeight;
-                }
+            pdf.save(fileName + ".pdf");
+            showToast("History Downloaded!");
+        });
+    }
 
-                pdf.save(name + ".pdf");
-                showToast("Download Complete!");
+    async function downloadSingleRecord(index, studentName) {
+    const card = document.getElementById(`log-card-${index}`);
+    const downloadBtn = card.querySelector('button');
+    
+    // Hide the download button momentarily so it doesn't appear in the PDF
+    downloadBtn.style.display = 'none';
+    
+    showToast(`Preparing PDF for ${studentName}...`);
+
+    html2canvas(card, {
+        useCORS: true,
+        scale: 2,
+        backgroundColor: "#ffffff"
+    }).then(canvasShot => {
+        downloadBtn.style.display = 'block'; // Show button again
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvasShot.toDataURL('image/png');
+        
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfImgHeight = (imgProps.height * pageWidth) / imgProps.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 5, pageWidth, pdfImgHeight);
+        pdf.save(`${studentName}_Record.pdf`);
+        
+        showToast("Single Record Downloaded!");
+    });
+}
+
+
+
+async function downloadSelectedRecords() {
+    const checkboxes = document.querySelectorAll('.log-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert("Please select at least one record.");
+        return;
+    }
+
+    const fileName = prompt("Enter filename:", "EduFlow_Export");
+    if(!fileName) return;
+
+    showToast(`Generating PDF...`);
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    
+    // We increase the top margin to 20mm to leave room for the page number
+    const topMargin = 20; 
+    const sideMargin = 10;
+    const bottomMargin = 15;
+    const contentWidth = pageWidth - (sideMargin * 2);
+    let currentY = topMargin;
+
+    for (let i = 0; i < checkboxes.length; i++) {
+        const index = checkboxes[i].getAttribute('data-index');
+        const card = document.getElementById(`log-card-${index}`);
+        
+        const cb = card.querySelector('.log-checkbox');
+        const btn = card.querySelector('button');
+        cb.style.opacity = '0';
+        btn.style.opacity = '0';
+
+        const canvasShot = await html2canvas(card, { 
+            useCORS: true, 
+            scale: 2, 
+            backgroundColor: "#ffffff",
+            height: card.scrollHeight 
+        });
+        
+        cb.style.opacity = '1';
+        btn.style.opacity = '1';
+
+        const imgProps = pdf.getImageProperties(canvasShot.toDataURL('image/png'));
+        const totalImgHeightInPdf = (imgProps.height * contentWidth) / imgProps.width;
+
+        let remainingHeight = totalImgHeightInPdf;
+        let sourceYmm = 0; 
+
+        while (remainingHeight > 0) {
+            // Space available calculation now respects the top and bottom margins
+            const spaceAvailable = pageHeight - currentY - bottomMargin;
+            const hToDraw = Math.min(remainingHeight, spaceAvailable);
+
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = canvasShot.width;
+            sliceCanvas.height = (hToDraw * canvasShot.width) / contentWidth;
+            const sliceCtx = sliceCanvas.getContext('2d');
+
+            sliceCtx.drawImage(
+                canvasShot, 
+                0, (sourceYmm * canvasShot.width) / contentWidth, 
+                canvasShot.width, (hToDraw * canvasShot.width) / contentWidth, 
+                0, 0, 
+                sliceCanvas.width, sliceCanvas.height
+            );
+
+            const slicedImgData = sliceCanvas.toDataURL('image/png');
+            pdf.addImage(slicedImgData, 'PNG', sideMargin, currentY, contentWidth, hToDraw);
+
+            remainingHeight -= hToDraw;
+            sourceYmm += hToDraw;
+
+            if (remainingHeight > 0) {
+                pdf.addPage();
+                currentY = topMargin; // Reset to the top margin on new page
+            } else {
+                currentY += hToDraw + 10; 
+            }
+        }
+    }
+
+    // --- ADD PAGE NUMBERS IN TOP RIGHT CORNER ---
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let j = 1; j <= totalPages; j++) {
+        pdf.setPage(j);
+        pdf.setFontSize(10);
+        pdf.setTextColor(100); // Subtle grey color
+        
+        const pageText = `Page ${j} of ${totalPages}`;
+        // x = pageWidth - 15 (15mm from right edge), y = 12 (12mm from top edge)
+        pdf.text(pageText, pageWidth - 15, 12, { align: 'right' });
+        
+        // Optional: Add a subtle thin line under the page number
+        pdf.setDrawColor(200);
+        pdf.line(sideMargin, 15, pageWidth - sideMargin, 15);
+    }
+
+    pdf.save(fileName + ".pdf");
+    showToast("✅ PDF with Top Corner Numbers Downloaded!");
+}
+    function addStyledText(type) {
+        const span = document.createElement("span");
+        span.className = (type === 'Q' ? 'q-text' : 'a-text');
+        span.style.color = (type === 'Q' ? 'red' : 'black');
+        span.innerText = `\n${type === 'Q' ? 'Question: ' : 'Answer: '}`;
+        studentArea.focus();
+        window.getSelection().getRangeAt(0).insertNode(span);
+        isSaved = false;
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.right = "20px";
+        setTimeout(() => t.style.right = "-300px", 3000);
+    }
+
+    function clearCanvas() { 
+        ctx.clearRect(0,0,canvas.width, canvas.height); 
+        teacherArea.innerHTML = "Teacher: Click to type, or use Pen..."; 
+    }
+
+    let allSelected = false;
+function toggleSelectAll() {
+    allSelected = !allSelected;
+    const checkboxes = document.querySelectorAll('.log-checkbox');
+    checkboxes.forEach(cb => cb.checked = allSelected);
+    showToast(allSelected ? "All selected" : "Selection cleared");
+}
+
+function generateQR() {
+    const qrDiv = document.getElementById("qrcode");
+    qrDiv.innerHTML = ""; // Clear old QR
+    new QRCode(qrDiv, {
+        text: window.location.href,
+        width: 256,
+        height: 256
+    });
+    document.getElementById('qrModal').style.display = 'flex';
+}
+
+
+function copyToClipboard(index) {
+    // We get the data from our original logs array
+    // This ensures we copy the CLEAN text, not the version with <mark> tags
+    const logEntry = allCloudLogs[index]; 
+    if (!logEntry) return;
+
+    // Remove any HTML tags just in case
+    const cleanText = logEntry.data.replace(/<\/?[^>]+(>|$)/g, "");
+
+    navigator.clipboard.writeText(cleanText).then(() => {
+        showToast("📋 Copied to clipboard!");
+    }).catch(() => {
+        showToast("❌ Failed to copy");
+    });
+}
+
+function sendEmail(index) {
+    const logEntry = allCloudLogs[index];
+    if (!logEntry) return;
+
+    // Clean the text of any HTML tags
+    const cleanBody = logEntry.data.replace(/<\/?[^>]+(>|$)/g, "");
+    const subject = encodeURIComponent(`Education Record: ${logEntry.studentName}`);
+    
+    // Construct the mailto link
+    const mailtoLink = `mailto:?subject=${subject}&body=${encodeURIComponent(cleanBody)}`;
+
+    // Open the user's default email app
+    window.location.href = mailtoLink;
+    showToast("Opening Email Client...");
+}
+
+
+
+
+function shareRecordQR(index) {
+    console.log("Attempting to share index:", index);
+    
+    // Check if the logs exist
+    if (!allCloudLogs || !allCloudLogs[index]) {
+        console.error("Log entry not found at index", index);
+        alert("Error: Record data missing.");
+        return;
+    }
+
+    const logEntry = allCloudLogs[index];
+    const recordId = logEntry.id; 
+
+    if (!recordId) {
+        console.error("This record is missing a Firebase Document ID!");
+        alert("Cannot share: Record has no ID.");
+        return;
+    }
+
+    // Ask for expiry
+    const hours = prompt("Link expires in how many hours?", "24");
+    if (hours === null) return; // User cancelled
+
+    const expiryTime = Date.now() + (parseFloat(hours) * 60 * 60 * 1000);
+    // Change this line in shareRecordQR:
+    const shareUrl = `${window.location.origin}${window.location.pathname}?portfolio=${encodeURIComponent(logEntry.studentName)}`;
+    // const shareUrl = `${window.location.origin}${window.location.pathname}?view=${recordId}&exp=${expiryTime}`;
+
+    console.log("Generated Share URL:", shareUrl);
+
+    // Show the Modal
+    const qrModal = document.getElementById('qrModal');
+    const qrContainer = document.getElementById("qrcode");
+    
+    if (!qrModal || !qrContainer) {
+        alert("HTML Error: qrModal or qrcode div is missing from your page!");
+        return;
+    }
+
+    qrContainer.innerHTML = `<p style="color:black; margin-bottom:10px;"><b>Scan to view ${logEntry.studentName}'s record</b></p>`;
+    qrModal.style.display = 'flex';
+
+    // Generate the QR
+    try {
+        new QRCode(qrContainer, {
+            text: shareUrl,
+            width: 200,
+            height: 200
+        });
+    } catch (e) {
+        console.error("QR Library Error:", e);
+        alert("QR Library (qrcode.js) is not loaded!");
+    }
+}
+
+
+
+
+// window.onload = function() {
+//     const urlParams = new URLSearchParams(window.location.search);
+//     const viewId = urlParams.get('view');
+//     const portfolioName = urlParams.get('portfolio'); // NEW: Get portfolio name
+
+//     // 1. Check if we are viewing a SINGLE record
+//     if (viewId) {
+//         setupGuestViewContainer(); // Creates the empty UI shell
+//         loadSingleSharedRecord(viewId);
+//     } 
+//     // 2. Check if we are viewing a STUDENT PORTFOLIO
+//     else if (portfolioName) {
+//         setupGuestViewContainer(); // Creates the empty UI shell
+//         loadStudentPortfolio(portfolioName);
+//     }
+// };
+
+// // Helper to create the UI shell for guests (Portfolio or Single View)
+// function setupGuestViewContainer() {
+//     document.body.innerHTML = `
+//         <div style="background: #0f172a; min-height: 100vh; padding: 40px 20px; font-family: sans-serif;">
+//             <div id="single-view-container" style="max-width: 800px; margin: 0 auto; color: white;">
+//                 <p>Loading records...</p>
+//             </div>
+//         </div>`;
+// }
+
+
+
+window.onload = function() {
+    // --- 1. HANDLE EXTERNAL VIEWS (URL PARAMS) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewId = urlParams.get('view');
+    const portfolioName = urlParams.get('portfolio');
+
+    if (viewId) {
+        setupGuestViewContainer(); 
+        loadSingleSharedRecord(viewId);
+        return; // Stop here if in view mode
+    } else if (portfolioName) {
+        setupGuestViewContainer(); 
+        loadStudentPortfolio(portfolioName);
+        return; // Stop here if in portfolio mode
+    }
+
+    // --- 2. HANDLE LOCAL STORAGE (FOR AUTO-SAVE) ---
+    const savedName = localStorage.getItem('tempName');
+    const nameInput = document.getElementById('studentNameInput');
+    
+    if (savedName && nameInput) {
+        nameInput.value = savedName;
+        // If name exists, we can start the Auto-Save listener
+        initAutoSaveListener();
+    }
+};
+
+// --- 3. AUTO-SAVE INITIALIZER ---
+function initAutoSaveListener() {
+    const editor = document.getElementById('studentEditor');
+    if (!editor) return;
+
+    editor.addEventListener('input', () => {
+        const status = document.getElementById('autosave-status');
+        if (status) status.innerHTML = '<i class="fas fa-pencil-alt"></i> Typing...';
+
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(autoSaveSync, 3000); 
+    });
+    console.log("Auto-Save system initialized.");
+}
+
+
+
+// THE NEW PORTFOLIO FUNCTION
+async function loadStudentPortfolio(name) {
+    const container = document.getElementById('single-view-container');
+    try {
+        const snapshot = await db.collection("edu_logs")
+                           .where("studentName", "==", name)
+                           .orderBy("timestamp", "desc").get();
+
+        if (snapshot.empty) {
+            container.innerHTML = "<h1>No records found for " + name + "</h1>";
+            return;
+        }
+
+        let html = `<h1 style="color:white; margin-bottom:30px; border-bottom: 2px solid #6366f1; padding-bottom:10px;">Progress Timeline: ${name}</h1>`;
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            html += `
+                <div style="border-left:4px solid #6366f1; margin:20px 0; background:white; color:#1e293b; padding:25px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                        <small style="color:#64748b; font-weight:bold;">${data.dateString}</small>
+                        <span style="font-size:1.2rem;">${data.mood || '😊'}</span>
+                    </div>
+                    <div style="line-height:1.6;">${data.data}</div>
+                </div>`;
+        });
+        container.innerHTML = html;
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = "<h1>Error loading portfolio.</h1>";
+    }
+}
+
+async function loadSingleSharedRecord(id) {
+    const container = document.getElementById('single-view-container');
+    try {
+        // Fetch from Firebase (Ensure 'db' and collection name 'logs' are correct)
+        const docRef = db.collection("logs").doc(id); 
+        const doc = await docRef.get();
+
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // Build the beautiful document view
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div>
+                        <h1 style="margin:0; font-size:1.5rem; color:#f8fafc;">EduFlow Digital Record</h1>
+                        <span style="background:#10b98122; color:#10b981; padding:4px 10px; border-radius:20px; font-size:0.75rem; border:1px solid #10b98144;">
+                            <i class="fas fa-shield-check"></i> Verified Record
+                        </span>
+                    </div>
+                    <button onclick="window.print()" style="background:#334155; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+
+                <div style="background:white; color:#1e293b; padding:50px; border-radius:15px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position:relative; overflow:hidden;">
+                    <div style="position:absolute; left:0; top:0; height:100%; width:5px; background:#6366f1;"></div>
+                    
+                    <div style="display:flex; justify-content:space-between; border-bottom:2px solid #f1f5f9; padding-bottom:20px; margin-bottom:30px;">
+                        <div>
+                            <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Student Name</small>
+                            <h2 style="margin:5px 0 0 0; color:#0f172a;">${data.studentName}</h2>
+                        </div>
+                        <div style="text-align:right;">
+                            <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Date Recorded</small>
+                            <p style="margin:5px 0 0 0; font-weight:600;">${data.dateString || 'N/A'}</p>
+                        </div>
+                    </div>
+
+                    <div style="line-height:1.8; font-size:1.1rem; color:#334155; min-height:300px;">
+                        ${data.data}
+                    </div>
+
+                    <div style="margin-top:50px; pt-30px; border-top:1px dashed #cbd5e1; padding-top:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">
+                        This is an official digital record generated via EduFlow. 
+                        <br> Reference ID: ${id}
+                    </div>
+                </div>
+
+                <div style="text-align:center; margin-top:30px;">
+                    <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none; font-size:0.9rem;">
+                        <i class="fas fa-arrow-left"></i> Return to Main Platform
+                    </a>
+                </div>
+            `;
+            container.style.opacity = "1"; // Fade in effect
+        } else {
+            container.innerHTML = `<div style="text-align:center; padding:50px; background:#ef444411; border:1px solid #ef444444; border-radius:12px;">
+                <i class="fas fa-exclamation-triangle fa-3x" style="color:#ef4444;"></i>
+                <h2 style="color:white;">Record Expired</h2>
+                <p style="color:#94a3b8;">This record has been deleted by the administrator or the link is incorrect.</p>
+            </div>`;
+            container.style.opacity = "1";
+        }
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = `<h3 style="color:white;">Connection Error. Please check your internet.</h3>`;
+        container.style.opacity = "1";
+    }
+}
+
+
+// Get the selected emoji
+const selectedMood = document.querySelector('input[name="mood"]:checked')?.value || "😊";
+
+// Add this 'selectedMood' to the object you send to Firebase!
+const dataToSave = {
+    studentName: nameInput.value,
+    data: boardContent,
+    mood: selectedMood, // <--- Add this
+    timestamp: Date.now()
+};
+
+
+
+// FEATURE: Filter by Mood
+function filterByMood(moodEmoji) {
+    const filtered = allCloudLogs.filter(log => log.mood === moodEmoji);
+    displayLogs(filtered);
+    showToast(`Showing ${filtered.length} students with ${moodEmoji}`);
+}
+
+// FEATURE: Reset Dashboard (Delete all current logs)
+async function resetDailyDashboard() {
+    const confirmation = confirm("Are you sure? This will delete ALL records from the database for the new day. This cannot be undone.");
+    
+    if (confirmation) {
+        showToast("Cleaning database...");
+        try {
+            const snapshot = await db.collection("edu_logs").get();
+            const batch = db.batch();
+            
+            snapshot.docs.forEach((doc) => {
+                batch.delete(doc.ref);
             });
+            
+            await batch.commit();
+            showToast("✅ Dashboard Reset Successfully!");
+        } catch (error) {
+            console.error("Error resetting:", error);
+            showToast("❌ Reset Failed!");
+        }
+    }
+}
+
+
+
+
+
+let currentUser = null;
+let isCollaborating = false;
+
+// 1. Google Auth Logic
+// 1. The main button logic
+async function handleCollabMode() {
+    try {
+        // 1. Check if already logged in, if not, sign in with Google
+        let user = firebase.auth().currentUser;
+        
+        if (!user) {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await firebase.auth().signInWithPopup(provider);
+            user = result.user;
+            showToast(`Signed in as ${user.displayName}`);
         }
 
-        function addStyledText(type) {
-            const span = document.createElement("span");
-            span.className = (type === 'Q' ? 'q-text' : 'a-text');
-            span.style.color = (type === 'Q' ? 'red' : 'black');
-            span.innerText = `\n${type === 'Q' ? 'Question: ' : 'Answer: '}`;
-            studentArea.focus();
-            window.getSelection().getRangeAt(0).insertNode(span);
-            isSaved = false;
+        // 2. Generate or get the Room ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        let roomId = urlParams.get('room');
+
+        if (!roomId) {
+            // Create a unique ID for this session
+            roomId = "collab-" + Math.random().toString(36).substring(2, 10);
+            const newUrl = window.location.origin + window.location.pathname + "?room=" + roomId;
+            
+            // Show the link to the user
+            document.getElementById('collabUrl').value = newUrl;
+            window.history.pushState({}, '', newUrl);
+        } else {
+            document.getElementById('collabUrl').value = window.location.href;
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.style.right = "20px";
-            setTimeout(() => t.style.right = "-300px", 3000);
-        }
+        // 3. UI Changes
+        document.getElementById('share-area').style.display = 'block';
+        document.getElementById('collabToggleBtn').innerText = "Live Session Active";
+        document.getElementById('collabToggleBtn').style.background = "#10b981";
 
-        function exportBackup() {
-            const data = localStorage.getItem('edu_master_db');
-            const blob = new Blob([data], {type: "application/json"});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = "Backup.json"; a.click();
-        }
+        // 4. Start the Syncing Engine
+        startLiveSync(roomId, user);
 
-        function clearCanvas() { 
-            ctx.clearRect(0,0,canvas.width, canvas.height); 
-            teacherArea.innerHTML = "Teacher: Click to type, or use Pen..."; 
+    } catch (error) {
+        console.error("Auth Error:", error);
+        alert("Login failed! Make sure Google Sign-in is enabled in Firebase Console.");
+    }
+}
+
+// Function to copy the link for the partner
+function copyCollabLink() {
+    const copyText = document.getElementById("collabUrl");
+    copyText.select();
+    navigator.clipboard.writeText(copyText.value);
+    showToast("Link Copied! Send this to your partner.");
+}
+
+// 3. The Live Syncing (The "2-in-1" magic)
+function startLiveSync(roomId) {
+    isCollaborating = true;
+    const editor = document.getElementById('studentEditor');
+
+    // LISTEN for changes from the partner
+    db.collection("collab_notes").doc(roomId)
+    .onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            // Don't overwrite if YOU are the one typing
+            if (data.lastEditedBy !== currentUser.uid) {
+                editor.innerHTML = data.content;
+                document.getElementById('partner-status').innerText = "Partner is editing...";
+                setTimeout(() => document.getElementById('partner-status').innerText = "Connected", 2000);
+            }
         }
-    </script>
+    });
+    
+    // SEND your changes to the partner
+    editor.addEventListener('input', () => {
+        if (!isCollaborating) return;
+        
+        // Debounce: Wait 300ms so we don't lag the database
+        clearTimeout(window.syncTimeout);
+        window.syncTimeout = setTimeout(() => {
+            db.collection("collab_notes").doc(roomId).set({
+                content: editor.innerHTML,
+                lastEditedBy: currentUser.uid,
+                lastEditedName: currentUser.displayName,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        }, 300);
+    });
+}
+
+
+
+function toggleFocusMode() {
+    const body = document.body;
+    const isFocusing = body.classList.toggle('focus-active');
+    const exitBtn = document.getElementById('exitFocusBtn');
+    
+    if (isFocusing) {
+        showToast("Focus Mode Enabled ✍️");
+        exitBtn.style.display = 'block';
+    } else {
+        exitBtn.style.display = 'none';
+        showToast("Focus Mode Disabled");
+    }
+}
+
+
+let autoSaveTimeout;
+let lastSavedContent = "";
+
+// Monitor the editor for typing
+document.getElementById('studentEditor').addEventListener('input', () => {
+    // 1. Show "Typing" status
+    const status = document.getElementById('autosave-status');
+    if (status) status.innerHTML = '<i class="fas fa-pencil-alt"></i> Typing...';
+
+    // 2. Clear previous timer and set a new one (Debounce)
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(autoSaveSync, 1000); // Try to save 3 seconds after typing stops
+});
+
+async function autoSaveSync() {
+    const nameInput = document.getElementById('studentNameInput');
+    const editor = document.getElementById('studentEditor');
+    const status = document.getElementById('autosave-status');
+
+    if (!nameInput || !editor) return;
+
+    const studentName = nameInput.value.trim();
+    const studentContent = editor.innerHTML;
+
+    // 1. Don't save if name is empty
+    if (!studentName) {
+        if (status) status.innerHTML = '<i class="fas fa-user-slash"></i> Enter Name to Sync';
+        return;
+    }
+
+    // 2. Don't save if nothing changed
+    if (studentContent === lastSavedContent) {
+        if (status) status.innerHTML = '<i class="fas fa-cloud"></i> Synced';
+        return;
+    }
+
+    try {
+        if (status) status.innerHTML = '<i class="fas fa-sync fa-spin"></i> Saving...';
+
+        // Use .set with {merge: true} to handle both new and existing docs
+        await db.collection("edu_logs").doc(studentName).set({
+            studentName: studentName,
+            data: studentContent,
+            lastUpdated: Date.now(),
+            totalActiveTime: formatTime(activeSeconds) // From our previous timer logic
+        }, { merge: true });
+
+        lastSavedContent = studentContent;
+        if (status) status.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i> Auto-saved';
+        
+        // Return to "Synced" after 2 seconds
+        setTimeout(() => {
+            if (status) status.innerHTML = '<i class="fas fa-cloud"></i> Synced';
+        }, 2000);
+
+    } catch (error) {
+        console.error("Autosave Error:", error);
+        if (status) status.innerHTML = '<i class="fas fa-wifi"></i> Sync Pending...';
+    }
+}
+
+
+
+
+// --- SHAPE DRAWING ENGINE ---
+let isStudentDrawing = false;
+let studentDrawActive = false;
+let drawStartTime = 0;
+let drawInterval;
+
+const sCanvas = document.getElementById('studentShapeCanvas');
+const dTimer = document.getElementById('draw-timer');
+const sEditor = document.getElementById('studentEditor');
+
+function toggleStudentDrawMode() {
+    studentDrawActive = !studentDrawActive;
+    const btn = document.getElementById('studentShapeBtn');
+    
+    if (studentDrawActive) {
+        btn.style.background = "#dc2626";
+        btn.innerHTML = '<i class="fas fa-check"></i> Finish Shape';
+        
+        // Sync Canvas size to Paper size
+        sCanvas.width = sEditor.offsetWidth;
+        sCanvas.height = sEditor.scrollHeight;
+        
+        sCanvas.style.pointerEvents = "auto";
+        sEditor.setAttribute('contenteditable', 'false');
+    } else {
+        btn.style.background = "#f87171";
+        btn.innerHTML = '<i class="fas fa-draw-polygon"></i> Draw Shape';
+        sCanvas.style.pointerEvents = "none";
+        sEditor.setAttribute('contenteditable', 'true');
+    }
+}
+
+function clearAllShapes() {
+    const ctx = sCanvas.getContext('2d');
+    ctx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+}
+
+// Coordinate detection
+function getCoords(e) {
+    const rect = sCanvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top,
+        rawX: clientX,
+        rawY: clientY
+    };
+}
+
+sCanvas.addEventListener('mousedown', startDrawing);
+sCanvas.addEventListener('touchstart', startDrawing, {passive: false});
+
+function startDrawing(e) {
+    if(!studentDrawActive) return;
+    isStudentDrawing = true;
+    drawStartTime = Date.now();
+    
+    const pos = getCoords(e);
+    const ctx = sCanvas.getContext('2d');
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.strokeStyle = "red"; // Only Red
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+
+    dTimer.style.display = 'block';
+    updateTimer(pos.rawX, pos.rawY);
+    drawInterval = setInterval(() => {
+        dTimer.innerText = ((Date.now() - drawStartTime)/1000).toFixed(1) + "s";
+    }, 100);
+}
+
+sCanvas.addEventListener('mousemove', moveDrawing);
+sCanvas.addEventListener('touchmove', moveDrawing, {passive: false});
+
+function moveDrawing(e) {
+    if(!isStudentDrawing) return;
+    if(e.cancelable) e.preventDefault();
+    
+    const pos = getCoords(e);
+    const ctx = sCanvas.getContext('2d');
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    updateTimer(pos.rawX, pos.rawY);
+}
+
+window.addEventListener('mouseup', stopDrawing);
+window.addEventListener('touchend', stopDrawing);
+
+function stopDrawing() {
+    if(isStudentDrawing) {
+        isStudentDrawing = false;
+        clearInterval(drawInterval);
+        dTimer.style.display = 'none';
+        if(typeof autoSaveSync === "function") autoSaveSync();
+    }
+}
+
+function updateTimer(x, y) {
+    dTimer.style.left = (x + 15) + "px";
+    dTimer.style.top = (y + 15) + "px";
+}
+
+
+
+async function uploadVideo() {
+    const file = document.getElementById('videoFile').files[0];
+    const uploadBtn = document.getElementById('uploadBtn');
+    const progressContainer = document.getElementById('upload-progress-container');
+    const progressBar = document.getElementById('upload-progress-bar');
+
+    if (!file) {
+        alert("Please select a video file first!");
+        return;
+    }
+
+    // 1. Create a reference in Firebase Storage
+    const storageRef = firebase.storage().ref('lesson_videos/' + file.name);
+    const uploadTask = storageRef.put(file);
+
+    uploadBtn.disabled = true;
+    progressContainer.style.display = 'block';
+
+    // 2. Monitor Progress
+    uploadTask.on('state_changed', 
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            progressBar.style.width = progress + '%';
+        }, 
+        (error) => {
+            console.error("Upload failed:", error);
+            alert("Upload failed. Make sure Firebase Storage is enabled.");
+        }, 
+        async () => {
+            // 3. Upload Complete - Get Download URL
+            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+            
+            // 4. Save the Video Link to Firestore for students to see
+            await db.collection("lesson_resources").add({
+                type: "video",
+                url: downloadURL,
+                fileName: file.name,
+                uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            alert("Video Uploaded Successfully! ✅");
+            uploadBtn.disabled = false;
+            progressContainer.style.display = 'none';
+            progressBar.style.width = '0%';
+        }
+    );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function uploadStudentPdf() {
+    const file = document.getElementById('studentPdfInp').files[0];
+    const nameInput = document.getElementById('studentNameInput').value.trim();
+
+    if (!nameInput) {
+        alert("Please enter your name first!");
+        // Clear the file input so they can try again after entering name
+        document.getElementById('studentPdfInp').value = '';
+        return;
+    }
+
+    if (!file) return;
+
+    showToast("Uploading PDF...");
+
+    try {
+        // 1. Create unique path in Storage
+        const storageRef = firebase.storage().ref(`student_pdfs/${Date.now()}_${file.name}`);
+        
+        // 2. Upload the file
+        const uploadTask = await storageRef.put(file);
+        const downloadURL = await uploadTask.ref.getDownloadURL();
+
+        // 3. Create a record in Firestore (just like a normal save)
+        await db.collection("edu_logs").add({
+            studentName: nameInput,
+            data: `<div style="background:#fee2e2; border:2px solid #ef4444; padding:15px; border-radius:10px; text-align:center;">
+                    <i class="fas fa-file-pdf" style="font-size:24px; color:#ef4444;"></i><br>
+                    <strong>PDF Document Attached</strong><br>
+                    <a href="${downloadURL}" target="_blank" style="color:#2563eb; text-decoration:underline;">Click here to open PDF</a>
+                   </div>`,
+            type: "pdf_upload",
+            fileUrl: downloadURL,
+            timestamp: Date.now(),
+            dateString: new Date().toLocaleString()
+        });
+
+        showToast("PDF Saved to Admin Panel! ✅");
+    } catch (error) {
+        console.error("PDF Upload Error:", error);
+        showToast("Failed to upload PDF.");
+    }
+}
+</script>
+
+
+
+<div id="qrModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:12px; text-align:center; min-width: 250px;">
+        <div id="qrcode" style="margin-bottom: 15px; display: flex; justify-content: center;"></div>
+        
+        <button onclick="document.getElementById('qrModal').style.display='none'" 
+                style="padding:10px 20px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer;">
+            Close
+        </button>
+    </div>
+</div>
 </body>
 </html>
-
