@@ -1703,15 +1703,41 @@ function toggleSelectAll() {
     showToast(allSelected ? "All selected" : "Selection cleared");
 }
 
-function generateQR() {
-    const qrDiv = document.getElementById("qrcode");
-    qrDiv.innerHTML = ""; // Clear old QR
-    new QRCode(qrDiv, {
-        text: window.location.href,
-        width: 256,
-        height: 256
+// function generateQR() {
+//     const qrDiv = document.getElementById("qrcode");
+//     qrDiv.innerHTML = ""; // Clear old QR
+//     new QRCode(qrDiv, {
+//         text: window.location.href,
+//         width: 256,
+//         height: 256
+//     });
+//     document.getElementById('qrModal').style.display = 'flex';
+// }
+
+
+function generateRecordQR(docId) {
+    // 1. Get the base URL correctly
+    const currentUrl = window.location.origin + window.location.pathname;
+    
+    // 2. Ensure we use 'id' so the Auto-Loader recognizes it
+    const shareUrl = `${currentUrl}?id=${docId}`;
+    
+    const qrContainer = document.getElementById('qr-result');
+    qrContainer.innerHTML = ""; 
+    
+    // 3. Generate the QR
+    new QRCode(qrContainer, {
+        text: shareUrl,
+        width: 150,
+        height: 150,
+        colorDark : "#0f172a",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
     });
+    
+    // Show the modal
     document.getElementById('qrModal').style.display = 'flex';
+    console.log("QR Link Generated:", shareUrl);
 }
 
 
@@ -1882,49 +1908,18 @@ function initAutoSaveListener() {
 
 
 // THE NEW PORTFOLIO FUNCTION
-async function loadStudentPortfolio(name) {
+async function loadSingleSharedRecord(id) { // Changed 'du_logs' to 'id' to match your QR generator
     const container = document.getElementById('single-view-container');
+    if (!container) return;
+
     try {
-        const snapshot = await db.collection("edu_logs")
-                           .where("studentName", "==", name)
-                           .orderBy("timestamp", "desc").get();
-
-        if (snapshot.empty) {
-            container.innerHTML = "<h1>No records found for " + name + "</h1>";
-            return;
-        }
-
-        let html = `<h1 style="color:white; margin-bottom:30px; border-bottom: 2px solid #6366f1; padding-bottom:10px;">Progress Timeline: ${name}</h1>`;
-        
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            html += `
-                <div style="border-left:4px solid #6366f1; margin:20px 0; background:white; color:#1e293b; padding:25px; border-radius:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-                        <small style="color:#64748b; font-weight:bold;">${data.dateString}</small>
-                        <span style="font-size:1.2rem;">${data.mood || '😊'}</span>
-                    </div>
-                    <div style="line-height:1.6;">${data.data}</div>
-                </div>`;
-        });
-        container.innerHTML = html;
-    } catch (err) {
-        console.error(err);
-        container.innerHTML = "<h1>Error loading portfolio.</h1>";
-    }
-}
-
-async function loadSingleSharedRecord(id) {
-    const container = document.getElementById('single-view-container');
-    try {
-        // Fetch from Firebase (Ensure 'db' and collection name 'logs' are correct)
-        const docRef = db.collection("logs").doc(id); 
+        // Use the correct collection name: edu_logs
+        const docRef = db.collection("edu_logs").doc(id); 
         const doc = await docRef.get();
 
         if (doc.exists) {
             const data = doc.data();
             
-            // Build the beautiful document view
             container.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <div>
@@ -1956,9 +1951,8 @@ async function loadSingleSharedRecord(id) {
                         ${data.data}
                     </div>
 
-                    <div style="margin-top:50px; pt-30px; border-top:1px dashed #cbd5e1; padding-top:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">
-                        This is an official digital record generated via EduFlow. 
-                        <br> Reference ID: ${id}
+                    <div style="margin-top:50px; border-top:1px dashed #cbd5e1; padding-top:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">
+                        This is an official digital record generated via EduFlow. <br> Reference ID: ${id}
                     </div>
                 </div>
 
@@ -1968,22 +1962,15 @@ async function loadSingleSharedRecord(id) {
                     </a>
                 </div>
             `;
-            container.style.opacity = "1"; // Fade in effect
-        } else {
-            container.innerHTML = `<div style="text-align:center; padding:50px; background:#ef444411; border:1px solid #ef444444; border-radius:12px;">
-                <i class="fas fa-exclamation-triangle fa-3x" style="color:#ef4444;"></i>
-                <h2 style="color:white;">Record Expired</h2>
-                <p style="color:#94a3b8;">This record has been deleted by the administrator or the link is incorrect.</p>
-            </div>`;
             container.style.opacity = "1";
+        } else {
+            container.innerHTML = `<div style="text-align:center; color:white; padding:50px;"><h2>Record Expired</h2><p>This record was not found.</p></div>`;
         }
     } catch (error) {
-        console.error(error);
-        container.innerHTML = `<h3 style="color:white;">Connection Error. Please check your internet.</h3>`;
-        container.style.opacity = "1";
+        console.error("Load Error:", error);
+        container.innerHTML = `<h3 style="color:white;">Connection Error.</h3>`;
     }
 }
-
 
 // Get the selected emoji
 const selectedMood = document.querySelector('input[name="mood"]:checked')?.value || "😊";
@@ -2413,6 +2400,25 @@ async function uploadStudentPdf() {
         showToast("Failed to upload PDF.");
     }
 }
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const sharedId = params.get('id');
+
+    if (sharedId) {
+        // Hide all other UI sections
+        document.querySelectorAll('.view-div').forEach(el => el.classList.add('hidden'));
+        
+        // Show your single view section
+        const singleSection = document.getElementById('section-single-view');
+        if(singleSection) {
+            singleSection.classList.remove('hidden');
+            loadSingleSharedRecord(sharedId);
+        }
+    }
+});
 </script>
 
 
