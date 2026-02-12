@@ -433,26 +433,31 @@ body.sharing-active .toolbar-top {
         <input type="file" id="teachImgMob" hidden accept="image/*" onchange="handleImage(this)">
         <button onclick="changeFontSize(-1)"><i class="fas fa-minus"></i></button>
         <button onclick="changeFontSize(1)"><i class="fas fa-plus"></i></button>
+        
         <div style="display:flex; align-items:center; gap:5px; background:#475569; padding:5px; border-radius:5px;">
             <span>H</span><input type="color" value="#ffff00" onchange="styleSelectedText('hiliteColor', this.value)" style="width:20px;">
             <span>T</span><input type="color" value="#ffffff" onchange="styleSelectedText('foreColor', this.value)" style="width:20px;">
         </div>
+        
         <button onclick="addTeacherText('A')" style="font-weight:bold;">A</button>
         <button onclick="addTeacherText('Q')" style="color:red; font-weight:bold;">Q</button>
         <button onclick="setMode('pen')"><i class="fas fa-pen"></i></button>
         <button onclick="setMode('rect')"><i class="fas fa-draw-polygon"></i></button>
         <input type="color" id="teachColorMob" value="#ffffff" style="width:30px; height:30px; border-radius:50%; border:none;">
+      
     </header>
 
     <div id="toast">New Update!</div>
-
+    
     <nav class="sidebar no-print">
         <i class="fas fa-chalkboard-teacher active" id="nav-teacher" onclick="nav('teacher')" title="Teacher Board"></i>
         <i class="fas fa-edit" id="nav-student" onclick="nav('student')" title="Student Notes"></i>
         <i class="fas fa-user-shield" id="nav-admin" onclick="openAdmin()" title="Admin Control"></i>
         <i class="fas fa-file-pdf" onclick="downloadMasterPDF()" title="Download as PDF"></i>
+        <a href="index12.html" style="text-decoration: none; color: white;"><h6>TakeTest</h6></a>
+         
     </nav>
-
+    
     <div class="main-container">
         <div id="section-teacher" class="view-div">
             <div class="toolbar-top no-print">
@@ -2745,7 +2750,6 @@ function downloadAsPDF(studentName) {
 </html>
 </body>
 </html>
-
 
 
 

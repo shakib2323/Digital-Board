@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduFlow Pro | Ultimate Assessment System</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #6366f1; --danger: #ef4444; --success: #10b981; --dark: #0f172a; --slate: #1e293b; --warn: #f59e0b; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--dark); color: white; line-height: 1.6; }
+        
+        .view-section { display: none; padding: 15px; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
+        .active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--slate); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; font-size: 16px; }
+        .btn { cursor: pointer; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; color: white; transition: 0.3s; display: inline-block; text-align: center; text-decoration: none; }
+        .btn-primary { background: var(--primary); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-warn { background: var(--warn); color: #000; }
+        .btn-sm { padding: 8px 12px; font-size: 13px; margin: 2px; }
+        .full-w { width: 100%; }
+
+        .table-container { overflow-x: auto; border-radius: 8px; }
+        .table-res { width: 100%; border-collapse: collapse; min-width: 600px; }
+        .table-res th, .table-res td { padding: 12px; border: 1px solid #334155; text-align: left; }
+        .table-res th { background: #111827; position: sticky; top: 0; }
+        
+        .history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .q-box { background: white; color: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 6px solid var(--primary); }
+
+        #timer-banner { background: var(--danger); text-align: center; padding: 12px; font-weight: bold; position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid rgba(0,0,0,0.2); }
+        .badge-count { background: white; color: var(--danger); padding: 2px 8px; border-radius: 20px; margin-left: 10px; font-size: 0.8rem; }
+
+        /* Modal Styling */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content { background: var(--slate); margin: 5% auto; padding: 25px; border-radius: 15px; width: 90%; max-width: 700px; border: 1px solid var(--primary); }
+
+        @media (max-width: 600px) {
+            .btn { width: 100%; margin-bottom: 5px; }
+            .history-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="gradeModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-st-name">Grade Submission</h2>
+            <div id="modal-body" style="max-height: 60vh; overflow-y: auto; margin-bottom: 20px;"></div>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="manual-marks" placeholder="Enter Total Marks for Descriptive Part" style="flex: 1;">
+                <button onclick="submitManualGrade()" class="btn btn-success">Update Final Score</button>
+                <button onclick="closeModal()" class="btn btn-danger">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: #000; padding: 10px 20px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;">
+        <span id="db-status"><i class="fas fa-circle"></i> Connecting...</span>
+        <span id="user-display">EduFlow Hybrid Mode</span>
+    </div>
+
+    <div id="app">
+        <section id="view-start" class="view-section active">
+            <div style="text-align: center; margin-top: 10vh;">
+                <h1><i class="fas fa-graduation-cap"></i> EDUFLOW PRO</h1>
+                <p style="color:#94a3b8">Hybrid MCQ & Long-Answer Assessment System</p>
+                <div style="margin-top: 30px; display: grid; gap: 15px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <button onclick="switchView('view-teacher-login')" class="btn btn-primary">TEACHER PORTAL</button>
+                    <button onclick="switchView('view-join')" class="btn btn-success">STUDENT JOIN</button>
+                    <button onclick="switchView('view-public-results')" class="btn btn-warn">VIEW RESULTS (QR)</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-teacher-login" class="view-section">
+            <div class="card" style="max-width: 400px; margin: auto;">
+                <h3><i class="fas fa-lock"></i> Teacher Authentication</h3>
+                <input type="text" id="t-user" placeholder="Teacher Username">
+                <input type="password" id="t-pass" placeholder="Password">
+                <button onclick="authTeacher()" class="btn btn-primary full-w">Login / Sign Up</button>
+                <button onclick="switchView('view-start')" class="btn btn-sm full-w" style="margin-top:10px; background:none">Cancel</button>
+            </div>
+        </section>
+
+        <section id="view-setup" class="view-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
+                <h2>Teacher Dashboard</h2>
+                <button onclick="location.reload()" class="btn btn-sm btn-danger">Logout</button>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-plus"></i> Configure New Test</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+                    <input type="text" id="ex-id" placeholder="Exam Code (e.g., TEST-01)">
+                    <input type="number" id="ex-duration" placeholder="Total Time (Mins)">
+                    <input type="number" id="ex-pass" placeholder="Passing Score %">
+                    <input type="date" id="ex-expiry" title="Expiry Date">
+                </div>
+                
+                <div style="margin: 15px 0; display: flex; gap: 20px; flex-wrap: wrap; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
+                    <label><input type="checkbox" id="ex-neg"> Enable Negative Marking (-1)</label>
+                    <label><input type="checkbox" id="ex-hold" checked> Hold Results for Review</label>
+                    <label style="color: var(--warn)"><input type="checkbox" id="ex-email"> 📧 Enable Email Automation</label>
+                </div>
+
+                <div id="setup-qs"></div>
+                
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button onclick="addQField('mcq')" class="btn btn-sm btn-primary">+ MCQ</button>
+                    <button onclick="addQField('long')" class="btn btn-sm btn-warn">+ Long Answer</button>
+                </div>
+                <button onclick="launchExam()" class="btn btn-success full-w" style="margin-top:20px; padding: 15px;">ACTIVATE TEST</button>
+            </div>
+
+            <div class="card">
+                <h3><i class="fas fa-folder-open"></i> Manage Your Tests (History)</h3>
+                <div id="history-list" class="history-grid"></div>
+            </div>
+        </section>
+
+        <section id="view-monitor" class="view-section">
+            <div id="timer-banner">
+                MONITORING: <span id="mon-id"></span>
+                <span class="badge-count">Live Students: <span id="live-count">0</span></span>
+            </div>
+            
+            <div class="card" style="margin-top: 10px;">
+                <div style="display:flex; gap:5px; margin-bottom:15px; flex-wrap: wrap; justify-content: space-between;">
+                   <div>
+                        <button class="btn btn-sm btn-primary" onclick="toggleFilter('all')">All</button>
+                        <button class="btn btn-sm btn-success" onclick="toggleFilter('pass')">Passed</button>
+                        <button class="btn btn-sm btn-danger" onclick="toggleFilter('fail')">Failed</button>
+                        <button class="btn btn-sm btn-warn" onclick="toggleFilter('grading')">Need Review</button>
+                   </div>
+                   <div>
+                        <button class="btn btn-sm btn-warn" onclick="bulkEmailResults()"><i class="fas fa-envelope"></i> Email All</button>
+                        <button class="btn btn-sm btn-success" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                   </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="table-res">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Score</th>
+                                <th>Result</th>
+                                <th>Integrity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monitor-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- <div class="card" style="text-align: center;">
+                <h4>Exam Result QR Code</h4>
+                <div id="qrcode-mon" style="background:white; padding:15px; display:inline-block; border-radius:10px;"></div>
+             
+                <p><small>Students can scan this to check the result list for this specific test.</small></p>
+            </div> -->
+
+            <div class="card" style="text-align: center;">
+    <h4>Exam Result QR Code</h4>
+    <div id="qrcode-mon" style="background:white; padding:15px; display:inline-block; border-radius:10px;"></div>
+    
+    <div style="margin-top: 10px;">
+        <button onclick="downloadQR()" class="btn btn-sm" style="background: var(--primary); color: white; cursor: pointer;">
+            <i class="fas fa-download"></i> Download QR
+        </button>
+        <button onclick="printQRCode()" class="btn btn-sm" style="background: #6c757d; color: white; cursor: pointer;">
+    <i class="fas fa-print"></i> Print for Classroom
+</button>
+    </div>
+
+    <p><small>Students can scan this to check the result list for this specific test.</small></p>
+</div>
+
+
+            <button onclick="switchView('view-setup')" class="btn btn-primary">Return to Dashboard</button>
+        </section>
+
+        <section id="view-join" class="view-section">
+            <div class="card" style="max-width: 400px; margin: auto;">
+                <h3>Join Examination</h3>
+                <input type="text" id="st-teacher-id" placeholder="Teacher Username">
+                <input type="text" id="st-code" placeholder="Test Code">
+                <hr style="border-color: #334155">
+                <input type="text" id="st-name" placeholder="Your Full Name">
+                <input type="email" id="st-email" placeholder="Email Address">
+                <button onclick="studentJoin()" class="btn btn-primary full-w">Start Examination</button>
+            </div>
+        </section>
+
+         <section id="view-paper" class="view-section">
+            <div id="timer-banner">TIME REMAINING: <span id="timer-clock">00:00</span></div>
+            <div id="paper-content" style="margin-top:20px;"></div>
+            <button onclick="finishTest()" class="btn btn-success full-w" style="padding: 20px; font-size: 1.2rem; margin-top: 20px;">SUBMIT TEST</button>
+        </section> 
+
+
+
+
+        <section id="view-result" class="view-section">
+            <div class="card" style="text-align:center; margin-top:10vh;">
+                <div id="res-status-ui">
+                    <i class="fas fa-check-circle" style="font-size:70px; color:var(--success)"></i>
+                    <h2>Submission Successful</h2>
+                    <div id="student-score-box"></div>
+                    <div id="student-status-box" style="margin-top:10px; font-weight:bold; font-size:1.2rem;"></div>
+                </div>
+                <button onclick="genSubmissionPDF()" class="btn btn-primary" style="margin-top:20px;">Download Receipt (PDF)</button>
+                <button onclick="location.reload()" class="btn btn-sm" style="display:block; margin: 20px auto; color:#94a3b8">Back to Home</button>
+            </div>
+        </section>
+
+        <section id="view-public-results" class="view-section">
+            <div class="card">
+                <h2>Public Result Portal</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="res-t-id" placeholder="Teacher ID">
+                    <input type="text" id="res-e-id" placeholder="Test Code">
+                    <button onclick="loadPublicBoard()" class="btn btn-primary">Search</button>
+                </div>
+                <div class="table-container">
+                    <table class="table-res">
+                        <thead><tr><th>Rank</th><th>Name</th><th>Total</th><th>Status</th></tr></thead>
+                        <tbody id="public-board-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <button onclick="switchView('view-start')" class="btn btn-sm btn-primary">Back Home</button>
+        </section>
+    </div>
+
+<script>
+// --- CORE CONFIG ---
+const firebaseConfig = {
+    apiKey: "AIzaSyAQtBdy0vsMJo6vEga452Elu5P3iTwUnhs",
+    authDomain: "eduflow-pro-assess.firebaseapp.com",
+    databaseURL: "https://eduflow-pro-assess-default-rtdb.firebaseio.com",
+    projectId: "eduflow-pro-assess",
+    storageBucket: "eduflow-pro-assess.firebasestorage.app",
+    messagingSenderId: "62529929501",
+    appId: "1:62529929501:web:21053e00008982a9ca61f4"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let currentTeacher = "";
+let currentExam = null;
+let gradingStudent = null;
+let stState = { name: "", email: "", id: "", teacher: "", answers: {}, pastes: 0 };
+let currentFilter = 'all';
+
+db.ref('.info/connected').on('value', s => {
+    document.getElementById('db-status').innerHTML = s.val() ? '<i class="fas fa-circle" style="color:var(--success)"></i> Live' : '<i class="fas fa-circle" style="color:var(--danger)"></i> Offline';
+});
+
+function switchView(id) {
+    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+}
+
+
+
+const PUBLIC_KEY = "aDv7N0Ry8Yq1VsNlw"; 
+const SERVICE_ID = "service_ruuzmdf";
+const TEMPLATE_ID = "template_xxcgwad";
+
+(function() {
+    emailjs.init(PUBLIC_KEY);
+})();
+
+function sendEmailResult(name, email, score, total, status) {
+    if(!email) return;
+
+    // UNIQUE FEATURE: Dynamic Encouragement Logic
+    let encouragement = "";
+    const percentage = (score / total) * 100;
+
+    if (percentage >= 90) {
+        encouragement = "Exceptional work! You've mastered this topic.";
+    } else if (percentage >= 50) {
+        encouragement = "Good effort! You're on the right track.";
+    } else {
+        encouragement = "Keep going! Mastery takes practice, and we're here to help.";
+    }
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+        to_email: email,
+        name: name,
+        score: `${score}/${total}`,
+        status: status,
+        personal_note: encouragement, // Add {{personal_note}} to your EmailJS template!
+        exam_id: currentExam.config.id
+    });
+}
+
+
+
+
+const uid = name.replace(/\s+/g, '') + "_" + Math.floor(Math.random() * 99999);
+
+
+db.ref(`live/${tId}/${eId}/${uid}`).set({
+    name: name,
+    done: false, // Explicitly track if they are still testing
+    joined: true
+});
+
+
+
+// --- TEACHER LOGIC ---
+async function authTeacher() {
+    const user = document.getElementById('t-user').value.trim().toLowerCase();
+    const pass = document.getElementById('t-pass').value;
+    if(!user || !pass) return alert("Please fill all fields");
+    const snap = await db.ref(`teachers/${user}/auth`).once('value');
+    if(snap.exists() && snap.val().pass !== pass) return alert("Incorrect Password");
+    if(!snap.exists()) await db.ref(`teachers/${user}/auth`).set({pass});
+    currentTeacher = user;
+    document.getElementById('user-display').innerText = `Teacher: ${user}`;
+    switchView('view-setup');
+    initHistoryListener();
+}
+
+function addQField(type) {
+    const container = document.getElementById('setup-qs');
+    const div = document.createElement('div');
+    div.className = "card";
+    div.style.background = "#1e293b";
+    div.dataset.type = type;
+    div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <b>${type === 'mcq' ? 'Multiple Choice' : 'Long Answer'}</b>
+            <button onclick="this.parentElement.parentElement.remove()" class="btn btn-sm btn-danger">Remove</button>
+        </div>
+        <input type="text" class="q-txt" placeholder="Question Text">
+        <input type="number" class="q-marks" placeholder="Marks" value="${type === 'mcq' ? 1 : 10}" style="width: 100px;">
+        ${type === 'mcq' ? `
+            <input type="text" class="o1" placeholder="Option A">
+            <input type="text" class="o2" placeholder="Option B">
+            <input type="text" class="q-cor" placeholder="Exact Correct Text (Case Sensitive)" style="border-color: var(--success)">
+        ` : `<p><small>System will flag this for manual grading after student submission.</small></p>`}
+    `;
+    container.appendChild(div);
+}
+
+async function launchExam() {
+    const id = document.getElementById('ex-id').value.trim();
+    const expiry = document.getElementById('ex-expiry').value;
+    if(!id || !expiry) return alert("Exam ID and Expiry Date are required");
+
+    const qs = [];
+    document.querySelectorAll('#setup-qs .card').forEach(c => {
+        const type = c.dataset.type;
+        qs.push({
+            type,
+            text: c.querySelector('.q-txt').value,
+            marks: parseInt(c.querySelector('.q-marks').value),
+            options: type === 'mcq' ? [c.querySelector('.o1').value, c.querySelector('.o2').value] : null,
+            correct: type === 'mcq' ? c.querySelector('.q-cor').value : null
+        });
+    });
+
+    const config = {
+        id,
+        dur: document.getElementById('ex-duration').value || 30,
+        passLimit: document.getElementById('ex-pass').value || 40,
+        expiry: new Date(expiry).getTime(),
+        negative: document.getElementById('ex-neg').checked,
+        hold: document.getElementById('ex-hold').checked,
+        emailEnabled: document.getElementById('ex-email').checked,
+        createdAt: Date.now()
+    };
+
+    await db.ref(`teachers/${currentTeacher}/exams/${id}`).set({config, questions: qs});
+    alert("Test Launched Successfully!");
+    document.getElementById('setup-qs').innerHTML = "";
+    document.getElementById('ex-id').value = "";
+}
+
+function initHistoryListener() {
+    db.ref(`teachers/${currentTeacher}/exams`).on('value', snap => {
+        const container = document.getElementById('history-list');
+        container.innerHTML = "";
+        const tests = snap.val();
+        if(!tests) return container.innerHTML = "<p>No tests created yet.</p>";
+        Object.keys(tests).forEach(id => {
+            const t = tests[id];
+            const expired = Date.now() > t.config.expiry;
+            container.innerHTML += `
+                <div class="card" style="border-top: 4px solid ${expired ? 'var(--danger)' : 'var(--success)'}">
+                    <h4 style="margin:0">${id}</h4>
+                    <p style="font-size:12px; color:#94a3b8">Expiry: ${new Date(t.config.expiry).toLocaleDateString()}</p>
+                    <div style="display:flex; gap:5px; margin-top:10px;">
+                        <button onclick="openMonitor('${id}')" class="btn btn-sm btn-primary">Monitor</button>
+                        <button onclick="deleteExam('${id}')" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+    });
+}
+
+// function openMonitor(id) {
+//     db.ref(`teachers/${currentTeacher}/exams/${id}`).once('value', snap => {
+//         currentExam = snap.val();
+//         document.getElementById('mon-id').innerText = id;
+//         switchView('view-monitor');
+//         startMonitorSync(id);
+//     });
+// }
+
+
+function openMonitor(id) {
+    db.ref(`teachers/${currentTeacher}/exams/${id}`).once('value', snap => {
+        currentExam = snap.val();
+        document.getElementById('mon-id').innerText = id;
+        
+        // 1. Build the table structure with the new Voice ID header
+        const monitorCard = document.getElementById('monitor-card');
+        if (monitorCard) {
+            monitorCard.innerHTML = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Voice ID</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Integrity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monitor-body"></tbody>
+                </table>
+            `;
+        }
+
+        switchView('view-monitor');
+        startMonitorSync(id);
+    });
+}
+
+
+
+
+// function startMonitorSync(id) {
+//     document.getElementById('qrcode-mon').innerHTML = "";
+//     new QRCode(document.getElementById("qrcode-mon"), { 
+//         text: `${window.location.origin}${window.location.pathname}?res=${currentTeacher}:${id}`, 
+//         width: 150, height: 150 
+//     });
+
+//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
+//         const body = document.getElementById('monitor-body');
+//         body.innerHTML = "";
+//         const students = snap.val();
+//         const count = students ? Object.keys(students).length : 0;
+//         document.getElementById('live-count').innerText = count;
+
+//         if(!students) return body.innerHTML = "<tr><td colspan='5' style='text-align:center'>Waiting for students...</td></tr>";
+
+//         Object.keys(students).forEach(name => {
+//             const s = students[name];
+//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
+//             if(currentFilter === 'fail' && s.status !== 'Fail') return;
+//             if(currentFilter === 'grading' && !s.needsGrading) return;
+
+//             body.innerHTML += `
+//                 <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
+//                     <td><b>${name}</b><br><small>${s.email}</small></td>
+//                     <td>
+//     ${s.voiceAuth ? `
+//         <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary)">
+//             <i class="fas fa-microphone"></i> Listen
+//         </button>` : 'No Voice'}
+// </td>
+//                     <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
+//                     <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
+//                     <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
+//                     <td>
+//                         ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
+//                     </td>
+//                 </tr>
+//             `;
+//         });
+//     });
+// }
+
+
+ function startMonitorSync(id) {
+    document.getElementById('qrcode-mon').innerHTML = "";
+    new QRCode(document.getElementById("qrcode-mon"), { 
+        text: `${window.location.origin}${window.location.pathname}?res=${currentTeacher}:${id}`, 
+        width: 150, height: 150 
+    });
+
+    db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
+        const body = document.getElementById('monitor-body');
+        body.innerHTML = "";
+        const students = snap.val();
+        const count = students ? Object.keys(students).length : 0;
+        document.getElementById('live-count').innerText = count;
+
+        // UPDATED: colspan='6' to match your 6 table headers
+        if(!students) return body.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>Waiting for students...</td></tr>";
+
+        Object.keys(students).forEach(name => {
+            const s = students[name];
+            if(currentFilter === 'pass' && s.status !== 'Pass') return;
+            if(currentFilter === 'fail' && s.status !== 'Fail') return;
+            if(currentFilter === 'grading' && !s.needsGrading) return;
+
+            body.innerHTML += `
+                <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
+                    <td><b>${name}</b><br><small>${s.email}</small></td>
+                    
+                    <td>
+                        ${s.voiceAuth ? `
+                            <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary); color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px;">
+                                <i class="fas fa-microphone"></i> Listen
+                            </button>` : '<span style="color:#888">No Voice</span>'}
+                    </td>
+
+                    <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
+                    <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
+                    <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
+                    <td>
+                        ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
+                    </td>
+                </tr>
+            `;
+        });
+    });
+}   
+
+// Helper function to create a pause
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function bulkEmailResults() {
+    if(!confirm("Send emails to all completed students?")) return;
+    
+    const snap = await db.ref(`live/${currentTeacher}/${currentExam.config.id}`).once('value');
+    const students = snap.val();
+    if(!students) return;
+
+    const uids = Object.keys(students);
+    let count = 0;
+
+    for (const uid of uids) {
+        const s = students[uid];
+        
+        if(!s.needsGrading && s.done && s.email) {
+            sendEmailResult(s.name, s.email, s.score, s.totalPossible, s.status);
+            count++;
+
+      
+            await sleep(1000); 
+            
+            console.log(`Sent ${count} of ${uids.length}`);
+        }
+    }
+    
+    alert(`Successfully processed ${count} emails.`);
+}
+
+async function exportToExcel() {
+    const snap = await db.ref(`live/${currentTeacher}/${currentExam.config.id}`).once('value');
+    const students = snap.val();
+    if(!students) return alert("No data to export");
+
+    const rows = Object.keys(students).map(name => ({
+        Name: name,
+        Email: students[name].email,
+        Score: students[name].score,
+        Total: students[name].totalPossible,
+        Status: students[name].status,
+        Pastes: students[name].pastes
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
+    XLSX.writeFile(workbook, `${currentExam.config.id}_Results.xlsx`);
+}
+
+// --- PROFESSIONAL GRADING MODAL ---
+function openGradingModal(stName) {
+    gradingStudent = stName;
+    db.ref(`live/${currentTeacher}/${currentExam.config.id}/${stName}`).once('value', snap => {
+        const s = snap.val();
+        document.getElementById('modal-st-name').innerText = `Reviewing: ${stName}`;
+        let html = "";
+        currentExam.questions.forEach((q, i) => {
+            if(q.type === 'long') {
+                html += `
+                    <div style="background:#0f172a; padding:15px; border-radius:8px; margin-bottom:15px; border-left:4px solid var(--warn)">
+                        <p><b>Question:</b> ${q.text}</p>
+                        <p style="color:#94a3b8"><b>Student Answer:</b></p>
+                        <div style="background:#1e293b; padding:10px; border-radius:5px; white-space:pre-wrap;">${s.ans[i] || 'No Answer'}</div>
+                    </div>
+                `;
+            }
+        });
+        document.getElementById('modal-body').innerHTML = html;
+        document.getElementById('gradeModal').style.display = 'block';
+    });
+}
+
+function closeModal() {
+    document.getElementById('gradeModal').style.display = 'none';
+}
+
+async function submitManualGrade() {
+    const marks = document.getElementById('manual-marks').value;
+    if(marks === "") return alert("Please enter marks");
+    
+    const snap = await db.ref(`live/${currentTeacher}/${currentExam.config.id}/${gradingStudent}`).once('value');
+    const s = snap.val();
+    
+    const finalScore = (s.mcqScore || 0) + parseInt(marks);
+    const status = (finalScore / s.totalPossible * 100) >= currentExam.config.passLimit ? "Pass" : "Fail";
+    
+    await db.ref(`live/${currentTeacher}/${currentExam.config.id}/${gradingStudent}`).update({
+        score: finalScore, status, needsGrading: false
+    });
+
+    if(currentExam.config.emailEnabled) {
+        sendEmailResult(gradingStudent, s.email, finalScore, s.totalPossible, status);
+    }
+
+    closeModal();
+    alert("Grading Updated!");
+}
+
+
+function studentJoin() {
+    const tId = document.getElementById('st-teacher-id').value.trim().toLowerCase();
+    const eId = document.getElementById('st-code').value.trim();
+    const name = document.getElementById('st-name').value.trim();
+    const email = document.getElementById('st-email').value.trim();
+    if(!tId || !eId || !name) return alert("All fields are mandatory");
+
+    db.ref(`teachers/${tId}/exams/${eId}`).once('value', snap => {
+        const test = snap.val();
+        if(!test) return alert("Examination not found!");
+        if(Date.now() > test.config.expiry) return alert("This test link has expired!");
+        currentExam = test;
+        stState = { name, email, id: eId, teacher: tId, answers: {}, pastes: 0 };
+        
+        // Pre-create student record for Live Counter
+        db.ref(`live/${tId}/${eId}/${name}`).update({joined: true, email: email, status: 'In Progress'});
+        
+        renderExamPaper();
+        switchView('view-paper');
+        startMainClock(test.config.dur);
+    });
+}
+
+function renderExamPaper() {
+    const cont = document.getElementById('paper-content');
+    cont.innerHTML = currentExam.questions.map((q, i) => `
+        <div class="q-box">
+            <p><b>Question ${i+1}: ${q.text}</b> <span style="float:right">(${q.marks}M)</span></p>
+            ${q.type === 'mcq' ? 
+                q.options.map((opt, idx) => `
+                    <label style="display:block; margin: 10px 0; cursor:pointer;">
+                        <input type="radio" name="q${i}" onclick="saveProgress(${i}, '${opt}')"> ${opt}
+                    </label>
+                `).join('') 
+                : `<textarea oninput="saveProgress(${i}, this.value)" onpaste="stState.pastes++" placeholder="Type your answer here..."></textarea>`
+            }
+        </div>
+    `).join('');
+}
+
+
+// function studentJoin() {
+//     const tId = document.getElementById('st-teacher-id').value.trim().toLowerCase();
+//     const eId = document.getElementById('st-code').value.trim();
+//     const name = document.getElementById('st-name').value.trim();
+//     const email = document.getElementById('st-email').value.trim();
+    
+//     if(!tId || !eId || !name) return alert("All fields are mandatory");
+
+//     db.ref(`teachers/${tId}/exams/${eId}`).once('value', snap => {
+//         const test = snap.val();
+//         if(!test) return alert("Examination not found!");
+//         if(Date.now() > test.config.expiry) return alert("This test link has expired!");
+        
+//         currentExam = test;
+        
+//         // Create a unique ID to prevent overwriting same-name students
+//         const studentUID = name.replace(/\s+/g, '') + "_" + Math.floor(Math.random() * 9999);
+        
+//         // Initialize global student state
+//         stState = { 
+//             uid: studentUID, 
+//             name: name, 
+//             email: email, 
+//             id: eId, 
+//             teacher: tId, 
+//             answers: {}, 
+//             pastes: 0 
+//         };
+        
+//         // Push to Firebase Live Monitor
+//         db.ref(`live/${tId}/${eId}/${studentUID}`).update({
+//             name: name,
+//             joined: true, 
+//             email: email, 
+//             status: 'In Progress',
+//             pastes: 0,
+//             done: false
+//         });
+
+//         // --- ANTI-CHEAT: AUTOSUBMIT ON TAB SWITCH ---
+//         document.addEventListener("visibilitychange", function handleSecurity() {
+//             if (document.hidden) {
+//                 // Remove listener so it doesn't loop
+//                 document.removeEventListener("visibilitychange", handleSecurity);
+                
+//                 stState.pastes++;
+//                 alert("SECURITY VIOLATION: You left the exam screen. Your test is being submitted automatically.");
+//                 finishTest(); 
+//             }
+//         });
+
+//         renderExamPaper();
+//         switchView('view-paper');
+//         startMainClock(test.config.dur);
+//     });
+// }
+// let currentQIndex = 0; // Track progress for adaptive flow
+
+// function renderExamPaper() {
+//     const cont = document.getElementById('paper-content');
+    
+  
+    
+//     const q = currentExam.questions[currentQIndex];
+    
+//     cont.innerHTML = `
+//         <div class="q-box animate-fade-in">
+//             <div style="display:flex; justify-content:space-between;">
+//                 <span>Question ${currentQIndex + 1} of ${currentExam.questions.length}</span>
+//                 <span class="badge">Level: ${q.level || 'Standard'}</span>
+//             </div>
+//             <p style="font-size:1.2rem; margin:15px 0;"><b>${q.text}</b></p>
+            
+//             ${q.type === 'mcq' ? 
+//                 q.options.map((opt, idx) => `
+//                     <label class="opt-label" style="display:block; margin: 10px 0; padding:15px; border:1px solid #ddd; border-radius:8px; cursor:pointer;">
+//                         <input type="radio" name="adaptive-q" value="${opt}" onclick="saveProgress(${currentQIndex}, '${opt}')"> ${opt}
+//                     </label>
+//                 `).join('') 
+//                 : `<textarea class="adaptive-textarea" oninput="saveProgress(${currentQIndex}, this.value)" onpaste="stState.pastes++" placeholder="Type your answer here..."></textarea>`
+//             }
+            
+//             <button onclick="nextAdaptiveStep()" class="btn btn-primary" style="margin-top:20px; width:100%">
+//                 ${currentQIndex === currentExam.questions.length - 1 ? 'FINISH EXAM' : 'NEXT QUESTION'}
+//             </button>
+//         </div>
+//     `;
+// }
+
+function saveProgress(qIdx, val) {
+    stState.answers[qIdx] = val;
+    db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
+        ans: stState.answers, pastes: stState.pastes, lastActive: Date.now()
+    });
+}
+
+function startMainClock(mins) {
+    let timeLeft = mins * 60;
+    const interval = setInterval(() => {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById('timer-clock').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        if(timeLeft <= 0) { clearInterval(interval); finishTest(); }
+        timeLeft--;
+    }, 1000);
+}
+
+async function finishTest() {
+    let mcqScore = 0;
+    let totalPossible = 0;
+    let hasLong = false;
+
+    currentExam.questions.forEach((q, i) => {
+        totalPossible += q.marks;
+        if(q.type === 'mcq') {
+            const isCorrect = (stState.answers[i] === q.correct);
+            if(isCorrect) mcqScore += q.marks;
+            else if(currentExam.config.negative && stState.answers[i]) mcqScore -= 1;
+        } else hasLong = true;
+    });
+
+    const perc = (mcqScore / totalPossible) * 100;
+    const status = perc >= currentExam.config.passLimit ? "Pass" : "Fail";
+
+    const finalData = {
+        email: stState.email,
+        mcqScore,
+        totalPossible,
+        needsGrading: hasLong,
+        timestamp: Date.now(),
+        ans: stState.answers,
+        pastes: stState.pastes,
+        done: true,
+        status: hasLong ? "Reviewing" : status,
+        score: hasLong ? null : mcqScore
+    };
+
+    const scoreBox = document.getElementById('student-score-box');
+    const statusBox = document.getElementById('student-status-box');
+
+    if(!hasLong) {
+        if(!currentExam.config.hold) {
+            scoreBox.innerHTML = `<h3>Your Score: ${mcqScore} / ${totalPossible}</h3>`;
+            statusBox.innerHTML = `Status: <span style="color:${status === 'Pass' ? 'var(--success)' : 'var(--danger)'}">${status}</span>`;
+        } else {
+            scoreBox.innerHTML = `<h3>Submitted Successfully</h3>`;
+            statusBox.innerHTML = `<p>Results are being held by the teacher.</p>`;
+        }
+        
+        if(currentExam.config.emailEnabled) {
+            sendEmailResult(stState.name, stState.email, mcqScore, totalPossible, status);
+        }
+    } else {
+        scoreBox.innerHTML = `<h3>Descriptive Test Submitted</h3>`;
+        statusBox.innerHTML = `<p>Manual grading required. Teacher will review your answers.</p>`;
+    }
+
+    await db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).set(finalData);
+    switchView('view-result');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function deleteExam(id) {
+    if(confirm(`Delete all data for test ${id}?`)) {
+        await db.ref(`teachers/${currentTeacher}/exams/${id}`).remove();
+        await db.ref(`live/${currentTeacher}/${id}`).remove();
+    }
+}
+
+function loadPublicBoard() {
+    const tId = document.getElementById('res-t-id').value.trim().toLowerCase();
+    const eId = document.getElementById('res-e-id').value.trim();
+    db.ref(`live/${tId}/${eId}`).once('value', snap => {
+        const container = document.getElementById('public-board-body');
+        container.innerHTML = "";
+        const data = snap.val();
+        if(!data) return alert("No results found.");
+        const sorted = Object.keys(data).sort((a,b) => (data[b].score || 0) - (data[a].score || 0));
+        sorted.forEach((name, i) => {
+            const s = data[name];
+            container.innerHTML += `
+                <tr>
+                    <td>${i+1}</td>
+                    <td>${name}</td>
+                    <td>${s.score !== null && s.score !== undefined ? s.score + '/' + s.totalPossible : 'Grading...'}</td>
+                    <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Pending'}</span></td>
+                </tr>
+            `;
+        });
+    });
+}
+
+
+
+function toggleFilter(f) {
+    currentFilter = f;
+    startMonitorSync(currentExam.config.id);
+}
+
+function genSubmissionPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("EduFlow Submission Receipt", 10, 20);
+    doc.setFontSize(12);
+    doc.text(`Student: ${stState.name}`, 10, 40);
+    doc.text(`Test: ${stState.id}`, 10, 50);
+    doc.text(`Status: Submitted`, 10, 60);
+    doc.text(`Date: ${new Date().toLocaleString()}`, 10, 70);
+    doc.save(`${stState.name}_Receipt.pdf`);
+}
+
+window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    if(params.has('res')) {
+        const [t, e] = params.get('res').split(':');
+        switchView('view-public-results');
+        document.getElementById('res-t-id').value = t;
+        document.getElementById('res-e-id').value = e;
+        loadPublicBoard();
+    }
+}
+async function downloadQR() {
+    const container = document.getElementById("qrcode-mon");
+    const qrCanvas = container.querySelector("canvas");
+    const qrImg = container.querySelector("img");
+    
+    let source;
+    if (qrCanvas) {
+        source = qrCanvas;
+    } else if (qrImg) {
+        // If it's an image, we need to ensure it's loaded before drawing
+        source = qrImg;
+    } else {
+        return alert("Generate QR first!");
+    }
+
+    const virtualCanvas = document.createElement("canvas");
+    const ctx = virtualCanvas.getContext("2d");
+    
+    virtualCanvas.width = 180; 
+    virtualCanvas.height = 210;
+
+    // Background
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, virtualCanvas.width, virtualCanvas.height);
+
+    const drawAndDownload = () => {
+        try {
+            // Draw QR
+            ctx.drawImage(source, 15, 10, 150, 150);
+
+            // Add Text
+            ctx.fillStyle = "black";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            const examTitle = currentExam ? currentExam.config.title : "Exam_Results";
+            ctx.fillText(examTitle, virtualCanvas.width / 2, 190);
+
+            // Download
+            const link = document.createElement("a");
+            link.href = virtualCanvas.toDataURL("image/png");
+            link.download = `${examTitle.replace(/\s+/g, '_')}_QR.png`;
+            link.click();
+        } catch (err) {
+            console.error("Canvas Export Failed:", err);
+            alert("Security restriction: Could not download QR. Try right-clicking the QR to save it.");
+        }
+    };
+
+    // If source is an <img> and not yet loaded, wait for it
+    if (source.tagName === 'IMG' && !source.complete) {
+        source.onload = drawAndDownload;
+    } else {
+        drawAndDownload();
+    }
+}
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
