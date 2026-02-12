@@ -49,6 +49,127 @@
             .btn { width: 100%; margin-bottom: 5px; }
             .history-grid { grid-template-columns: 1fr; }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+.view-section {
+    display: none; /* Default hidden */
+}
+.view-section.active {
+    display: block; /* Shown when active */
+}
+@media (max-width: 900px) {
+    .monitor-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- GLOBAL RESPONSIVE OVERRIDES --- */
+
+/* 1. The Monitor Grid Fix */
+/* This forces the 1fr 350px grid to become 1 column on tablets and phones */
+@media (max-width: 992px) {
+    .monitor-grid {
+        display: block !important; /* Disables the side-by-side grid */
+    }
+
+    .monitor-grid > .card {
+        width: 100% !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* Make the sidebar feed full width */
+    #realtime-feed {
+        height: 350px !important;
+    }
+}
+
+/* 2. Table Protection */
+/* Prevents the table from squashing and breaking the layout */
+.table-container {
+    width: 100% !important;
+    overflow-x: auto !important;
+    display: block !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-res {
+    min-width: 600px !important; /* Ensures columns stay readable */
+}
+
+/* 3. Join & Result Screen Fixes */
+@media (max-width: 600px) {
+    #view-join .card, #view-result .card, #view-public-results .card {
+        width: 95% !important;
+        margin: 10px auto !important;
+        padding: 15px !important;
+    }
+
+    /* Stack the public search inputs */
+    #view-public-results div[style*="grid-template-columns"] {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    #timer-banner {
+        font-size: 14px !important;
+        padding: 10px !important;
+        text-align: center;
+    }
+}
+
+/* 4. General Cleanup */
+input, button {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.card {
+    box-sizing: border-box !important;
+}
+
+/* Fixes the side-by-side buttons in the monitor */
+div[style*="display:flex"] {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+}
+
     </style>
 </head>
 <body>
@@ -71,7 +192,8 @@
     </div>
 
     <div id="app">
-        <section id="view-start" class="view-section active">
+          <section id="view-start" class="view-section active">  
+          
             <div style="text-align: center; margin-top: 10vh;">
                 <h1><i class="fas fa-graduation-cap"></i> EDUFLOW PRO</h1>
                 <p style="color:#94a3b8">Hybrid MCQ & Long-Answer Assessment System</p>
@@ -105,8 +227,15 @@
                     <input type="text" id="ex-id" placeholder="Exam Code (e.g., TEST-01)">
                     <input type="number" id="ex-duration" placeholder="Total Time (Mins)">
                     <input type="number" id="ex-pass" placeholder="Passing Score %">
-                    <input type="date" id="ex-expiry" title="Expiry Date">
+                    <!-- <input type="date" id="ex-expiry" title="Expiry Date"> -->
+              <div style="display: flex; gap: 5px;">
+    <input type="date" id="ex-expiry-date" title="Expiry Date" style="flex: 2;">
+    <input type="time" id="ex-expiry-time" title="Expiry Time" style="flex: 1;">
+</div>
                 </div>
+
+
+
                 
                 <div style="margin: 15px 0; display: flex; gap: 20px; flex-wrap: wrap; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
                     <label><input type="checkbox" id="ex-neg"> Enable Negative Marking (-1)</label>
@@ -129,6 +258,10 @@
             </div>
         </section>
 
+
+
+
+<!-- 
         <section id="view-monitor" class="view-section">
             <div id="timer-banner">
                 MONITORING: <span id="mon-id"></span>
@@ -165,14 +298,93 @@
                 </div>
             </div>
 
-            <!-- <div class="card" style="text-align: center;">
+        
+             <div class="card" style="text-align: center;">
                 <h4>Exam Result QR Code</h4>
                 <div id="qrcode-mon" style="background:white; padding:15px; display:inline-block; border-radius:10px;"></div>
              
                 <p><small>Students can scan this to check the result list for this specific test.</small></p>
-            </div> -->
+            </div>
+</section> -->
 
-            <div class="card" style="text-align: center;">
+<section id="view-monitor" class="view-section" style="display: none;">
+    <div id="timer-banner">
+        MONITORING: <span id="mon-id"></span>
+        <span class="badge-count">Live Students: <span id="live-count">0</span></span>
+    </div>
+
+    <div class="card" style="margin-top: 10px; padding: 10px;">
+        <div style="position: relative;">
+            <i class="fas fa-search" style="position: absolute; left: 10px; top: 12px; color: #888;"></i>
+            <input type="text" id="student-search" placeholder="Search student name..." 
+                   onkeyup="filterMonitorTable()" 
+                   style="width: 100%; padding: 8px 8px 8px 35px; border-radius: 20px; border: 1px solid #ddd; outline: none;">
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 350px; gap: 15px; margin-top: 10px; align-items: start;" class="monitor-grid">
+        
+        <div class="card" style="margin-top: 0;">
+            <div style="display:flex; gap:5px; margin-bottom:15px; flex-wrap: wrap; justify-content: space-between;">
+                <div>
+                    <button class="btn btn-sm btn-primary" onclick="toggleFilter('all')">All</button>
+                    <button class="btn btn-sm btn-success" onclick="toggleFilter('pass')">Passed</button>
+                    <button class="btn btn-sm btn-danger" onclick="toggleFilter('fail')">Failed</button>
+                    <button class="btn btn-sm btn-warn" onclick="toggleFilter('grading')">Need Review</button>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-warn" onclick="bulkEmailResults()"><i class="fas fa-envelope"></i> Email All</button>
+                    <button class="btn btn-sm btn-success" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table-res">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Score</th>
+                            <th>Result</th>
+                            <th>Integrity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monitor-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 0; position: sticky; top: 10px;">
+            <h4 style="margin-bottom: 10px;"><i class="fas fa-bolt" style="color: #ffc107;"></i> Real-Time Feed</h4>
+            <div id="realtime-feed" style="height: 400px; overflow-y: auto; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; font-size: 13px;">
+                <p style="color: #888; text-align: center; margin-top: 20px;">Waiting for activity...</p>
+            </div>
+            <p style="font-size: 10px; color: #666; margin-top: 5px;">*Shows first selected option only</p>
+        </div>
+    </div>
+
+    <div class="card" style="text-align: center; margin-top: 15px;">
+        <h4>Exam Result QR Code</h4>
+        <div id="qrcode-mon" style="background:white; padding:15px; display:inline-block; border-radius:10px;"></div>
+        
+        <div style="margin-top: 10px;">
+            <button onclick="downloadQR()" class="btn btn-sm" style="background: var(--primary); color: white; cursor: pointer;">
+                <i class="fas fa-download"></i> Download QR
+            </button>
+            <button onclick="printQRCode()" class="btn btn-sm" style="background: #6c757d; color: white; cursor: pointer;">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+
+        <p><small>Students can scan this to check the result list for this specific test.</small></p>
+    </div>
+
+    <button onclick="switchView('view-setup')" class="btn btn-primary" style="width: 100%; margin-top: 15px;">Return to Dashboard</button>
+
+</section>
+
+
+            <!-- <div class="card" style="text-align: center;">
     <h4>Exam Result QR Code</h4>
     <div id="qrcode-mon" style="background:white; padding:15px; display:inline-block; border-radius:10px;"></div>
     
@@ -190,7 +402,13 @@
 
 
             <button onclick="switchView('view-setup')" class="btn btn-primary">Return to Dashboard</button>
-        </section>
+        </section>   -->
+
+
+
+
+
+        
 
         <section id="view-join" class="view-section">
             <div class="card" style="max-width: 400px; margin: auto;">
@@ -213,7 +431,7 @@
 
 
 
-        <section id="view-result" class="view-section">
+        <!-- <section id="view-result" class="view-section">
             <div class="card" style="text-align:center; margin-top:10vh;">
                 <div id="res-status-ui">
                     <i class="fas fa-check-circle" style="font-size:70px; color:var(--success)"></i>
@@ -224,7 +442,22 @@
                 <button onclick="genSubmissionPDF()" class="btn btn-primary" style="margin-top:20px;">Download Receipt (PDF)</button>
                 <button onclick="location.reload()" class="btn btn-sm" style="display:block; margin: 20px auto; color:#94a3b8">Back to Home</button>
             </div>
-        </section>
+        </section> -->
+
+        <section id="view-result" class="view-section">
+    <div id="student-score-box" class="card" style="background: white; color: #1e293b; max-width: 500px; margin: 5vh auto; padding: 20px; border-radius: 15px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+        </div>
+    <div id="student-status-box" style="text-align:center; margin-top:20px; font-weight:bold; font-size:1.2rem;"></div>
+    
+    <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <button onclick="genSubmissionPDF()" class="btn btn-primary" style="width: 250px;">
+            <i class="fas fa-file-pdf"></i> Download Receipt (PDF)
+        </button>
+        <button onclick="location.href=window.location.pathname" class="btn" style="margin-top:20px; background: var(--slate); color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; width: 250px;">
+            <i class="fas fa-home"></i> Return to Home
+        </button>
+    </div>
+</section>
 
         <section id="view-public-results" class="view-section">
             <div class="card">
@@ -269,12 +502,64 @@ db.ref('.info/connected').on('value', s => {
     document.getElementById('db-status').innerHTML = s.val() ? '<i class="fas fa-circle" style="color:var(--success)"></i> Live' : '<i class="fas fa-circle" style="color:var(--danger)"></i> Offline';
 });
 
-function switchView(id) {
-    document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    window.scrollTo(0,0);
-}
+// function switchView(id) {
+//     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+//     document.getElementById(id).classList.add('active');
+//     window.scrollTo(0,0);
+// }
 
+
+// function switchView(id) {
+//     const target = document.getElementById(id);
+//     if (!target) {
+//         console.error("View not found: " + id);
+//         // Fallback: If the target view is missing, go back to start
+//         const start = document.getElementById('view-start');
+//         if(start) start.classList.add('active');
+//         return;
+//     }
+
+//     // 1. Remove active class from ALL sections
+//     document.querySelectorAll('.view-section').forEach(v => {
+//         v.classList.remove('active');
+//     });
+
+//     // 2. Add active class to the requested section
+//     target.classList.add('active');
+
+//     // 3. Reset scroll position
+//     window.scrollTo(0,0);
+// }
+
+
+function switchView(id) {
+    const target = document.getElementById(id);
+    
+    // Safety check: if the requested ID doesn't exist, show the home screen
+    if (!target) {
+        console.error("View not found: " + id);
+        const start = document.getElementById('view-start');
+        if (start) {
+            start.classList.add('active');
+            start.style.display = 'block';
+        }
+        return;
+    }
+
+    // 1. Hide EVERY section and remove active class
+    document.querySelectorAll('.view-section').forEach(v => {
+        v.classList.remove('active');
+        v.style.display = 'none'; // Force hide
+    });
+
+    // 2. Show ONLY the requested section
+    target.classList.add('active');
+    target.style.display = 'block'; // Force show
+
+    // 3. Reset scroll position
+    window.scrollTo(0,0);
+    console.log("Navigated to:", id);
+}
 
 
 const PUBLIC_KEY = "aDv7N0Ry8Yq1VsNlw"; 
@@ -313,14 +598,14 @@ function sendEmailResult(name, email, score, total, status) {
 
 
 
-const uid = name.replace(/\s+/g, '') + "_" + Math.floor(Math.random() * 99999);
+// const uid = name.replace(/\s+/g, '') + "_" + Math.floor(Math.random() * 99999);
 
 
-db.ref(`live/${tId}/${eId}/${uid}`).set({
-    name: name,
-    done: false, // Explicitly track if they are still testing
-    joined: true
-});
+// db.ref(`live/${tId}/${eId}/${uid}`).set({
+//     name: name,
+//     done: false, // Explicitly track if they are still testing
+//     joined: true
+// });
 
 
 
@@ -360,10 +645,122 @@ function addQField(type) {
     container.appendChild(div);
 }
 
+// async function launchExam() {
+//     const id = document.getElementById('ex-id').value.trim();
+//     const expiry = document.getElementById('ex-expiry').value;
+//     if(!id || !expiry) return alert("Exam ID and Expiry Date are required");
+
+//     const qs = [];
+//     document.querySelectorAll('#setup-qs .card').forEach(c => {
+//         const type = c.dataset.type;
+//         qs.push({
+//             type,
+//             text: c.querySelector('.q-txt').value,
+//             marks: parseInt(c.querySelector('.q-marks').value),
+//             options: type === 'mcq' ? [c.querySelector('.o1').value, c.querySelector('.o2').value] : null,
+//             correct: type === 'mcq' ? c.querySelector('.q-cor').value : null
+//         });
+//     });
+
+//     const config = {
+//         id,
+//         dur: document.getElementById('ex-duration').value || 30,
+//         passLimit: document.getElementById('ex-pass').value || 40,
+//         expiry: new Date(expiry).getTime(),
+//         negative: document.getElementById('ex-neg').checked,
+//         hold: document.getElementById('ex-hold').checked,
+//         emailEnabled: document.getElementById('ex-email').checked,
+//         createdAt: Date.now()
+//     };
+
+//     await db.ref(`teachers/${currentTeacher}/exams/${id}`).set({config, questions: qs});
+//     alert("Test Launched Successfully!");
+//     document.getElementById('setup-qs').innerHTML = "";
+//     document.getElementById('ex-id').value = "";
+// }
+
+
+
+
+
+
+// async function launchExam() {
+//     const id = document.getElementById('ex-id').value.trim();
+//     const expiryDate = document.getElementById('ex-expiry').value; // Date from input
+    
+//     if(!id || !expiryDate) return alert("Exam ID and Expiry Date are required");
+
+//     const qs = [];
+//     document.querySelectorAll('#setup-qs .card').forEach(c => {
+//         const type = c.dataset.type;
+//         qs.push({
+//             type,
+//             text: c.querySelector('.q-txt').value,
+//             marks: parseInt(c.querySelector('.q-marks').value),
+//             options: type === 'mcq' ? [c.querySelector('.o1').value, c.querySelector('.o2').value] : null,
+//             correct: type === 'mcq' ? c.querySelector('.q-cor').value : null
+//         });
+//     });
+
+//     // Create a specific timestamp for "Time Launched"
+//     const now = new Date();
+//     const timeString = now.toLocaleTimeString(); // e.g., "10:30:15 AM"
+
+//     const config = {
+//         id,
+//         dur: document.getElementById('ex-duration').value || 30,
+//         passLimit: document.getElementById('ex-pass').value || 40,
+//         expiry: new Date(expiryDate).getTime(),
+//         negative: document.getElementById('ex-neg').checked,
+//         hold: document.getElementById('ex-hold').checked,
+//         emailEnabled: document.getElementById('ex-email').checked,
+//         createdAt: Date.now(),
+//         launchTime: timeString // Added the exact time
+//     };
+
+//     try {
+//         // 1. Save to Database
+//         await db.ref(`teachers/${currentTeacher}/exams/${id}`).set({config, questions: qs});
+        
+//         // 2. CRITICAL: Generate the QR Code for the Monitor View
+//         // This ensures the QR contains the correct Teacher and Exam ID
+//         if (typeof generateMonitorQR === "function") {
+//             generateMonitorQR(currentTeacher, id);
+//         }
+
+//         alert(`Test Launched Successfully at ${timeString}!`);
+        
+//         // 3. UI Updates
+//         document.getElementById('mon-id').innerText = id;
+//         switchView('view-monitor'); // Move to monitor screen to see the QR
+        
+//         // Clear fields
+//         document.getElementById('setup-qs').innerHTML = "";
+//         document.getElementById('ex-id').value = "";
+//     } catch (error) {
+//         console.error("Launch failed:", error);
+//         alert("Error launching test. Check console.");
+//     }
+// }
+
+
+
+
+
+
 async function launchExam() {
     const id = document.getElementById('ex-id').value.trim();
-    const expiry = document.getElementById('ex-expiry').value;
-    if(!id || !expiry) return alert("Exam ID and Expiry Date are required");
+    
+    // --- NECESSARY CHANGE START: Collect separate Date and Time ---
+    const dateInput = document.getElementById('ex-expiry-date').value;
+    const timeInput = document.getElementById('ex-expiry-time').value;
+    
+    if(!id || !dateInput || !timeInput) return alert("Exam ID, Expiry Date, and Time are required");
+
+    // Combine Date and Time into one Date object
+    const combinedExpiryString = `${dateInput}T${timeInput}`; 
+    const expiryTimestamp = new Date(combinedExpiryString).getTime();
+    // --- NECESSARY CHANGE END ---
 
     const qs = [];
     document.querySelectorAll('#setup-qs .card').forEach(c => {
@@ -377,22 +774,46 @@ async function launchExam() {
         });
     });
 
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+
     const config = {
         id,
         dur: document.getElementById('ex-duration').value || 30,
         passLimit: document.getElementById('ex-pass').value || 40,
-        expiry: new Date(expiry).getTime(),
+        expiry: expiryTimestamp, // Using the new combined timestamp
         negative: document.getElementById('ex-neg').checked,
         hold: document.getElementById('ex-hold').checked,
         emailEnabled: document.getElementById('ex-email').checked,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        launchTime: timeString 
     };
 
-    await db.ref(`teachers/${currentTeacher}/exams/${id}`).set({config, questions: qs});
-    alert("Test Launched Successfully!");
-    document.getElementById('setup-qs').innerHTML = "";
-    document.getElementById('ex-id').value = "";
+    try {
+        await db.ref(`teachers/${currentTeacher}/exams/${id}`).set({config, questions: qs});
+        
+        if (typeof generateMonitorQR === "function") {
+            generateMonitorQR(currentTeacher, id);
+        }
+
+        alert(`Test Launched Successfully at ${timeString}!`);
+        
+        document.getElementById('mon-id').innerText = id;
+        switchView('view-monitor');
+        
+        document.getElementById('setup-qs').innerHTML = "";
+        document.getElementById('ex-id').value = "";
+        // Clear the new date/time fields too
+        document.getElementById('ex-expiry-date').value = "";
+        document.getElementById('ex-expiry-time').value = "";
+    } catch (error) {
+        console.error("Launch failed:", error);
+        alert("Error launching test. Check console.");
+    }
 }
+
+
+
 
 function initHistoryListener() {
     db.ref(`teachers/${currentTeacher}/exams`).on('value', snap => {
@@ -504,51 +925,265 @@ function openMonitor(id) {
 // }
 
 
- function startMonitorSync(id) {
-    document.getElementById('qrcode-mon').innerHTML = "";
-    new QRCode(document.getElementById("qrcode-mon"), { 
-        text: `${window.location.origin}${window.location.pathname}?res=${currentTeacher}:${id}`, 
-        width: 150, height: 150 
-    });
+//  function startMonitorSync(id) {
+//     document.getElementById('qrcode-mon').innerHTML = "";
+//     new QRCode(document.getElementById("qrcode-mon"), { 
+//         text: `${window.location.origin}${window.location.pathname}?res=${currentTeacher}:${id}`, 
+//         width: 150, height: 150 
+//     });
 
+//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
+//         const body = document.getElementById('monitor-body');
+//         body.innerHTML = "";
+//         const students = snap.val();
+//         const count = students ? Object.keys(students).length : 0;
+//         document.getElementById('live-count').innerText = count;
+
+//         // UPDATED: colspan='6' to match your 6 table headers
+//         if(!students) return body.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>Waiting for students...</td></tr>";
+
+//         Object.keys(students).forEach(name => {
+//             const s = students[name];
+//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
+//             if(currentFilter === 'fail' && s.status !== 'Fail') return;
+//             if(currentFilter === 'grading' && !s.needsGrading) return;
+
+//             body.innerHTML += `
+//                 <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
+//                     <td><b>${name}</b><br><small>${s.email}</small></td>
+                    
+//                     <td>
+//                         ${s.voiceAuth ? `
+//                             <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary); color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px;">
+//                                 <i class="fas fa-microphone"></i> Listen
+//                             </button>` : '<span style="color:#888">No Voice</span>'}
+//                     </td>
+
+//                     <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
+//                     <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
+//                     <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
+//                     <td>
+//                         ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
+//                     </td>
+//                 </tr>
+//             `;
+//         });
+//     });
+// }   
+
+
+
+
+// function startMonitorSync(id) {
+//     // Corrected QR Logic: Ensure currentTeacher and id are valid
+//     const qrBox = document.getElementById('qrcode-mon');
+//     qrBox.innerHTML = "";
+
+//     if (currentTeacher && id) {
+//         // Construct clean URL: Base Path + ?res=Teacher:Exam
+//         const cleanURL = window.location.origin + window.location.pathname + `?res=${encodeURIComponent(currentTeacher)}:${encodeURIComponent(id)}`;
+        
+//         new QRCode(qrBox, { 
+//             text: cleanURL, 
+//             width: 150, 
+//             height: 150,
+//             correctLevel: QRCode.CorrectLevel.H 
+//         });
+//         console.log("Monitor QR Link:", cleanURL);
+//     } else {
+//         qrBox.innerHTML = "<p style='color:red;font-size:10px;'>Error: Missing Teacher/Exam ID</p>";
+//     }
+
+//     // --- KEEPING ALL YOUR ORIGINAL FIREBASE & TABLE LOGIC BELOW ---
+//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
+//         const body = document.getElementById('monitor-body');
+//         body.innerHTML = "";
+//         const students = snap.val();
+//         const count = students ? Object.keys(students).length : 0;
+//         document.getElementById('live-count').innerText = count;
+
+//         if(!students) return body.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>Waiting for students...</td></tr>";
+
+//         Object.keys(students).forEach(name => {
+//             const s = students[name];
+//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
+//             if(currentFilter === 'fail' && s.status !== 'Fail') return;
+//             if(currentFilter === 'grading' && !s.needsGrading) return;
+
+//             body.innerHTML += `
+//                 <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
+//                     <td><b>${name}</b><br><small>${s.email}</small></td>
+                    
+//                     <td>
+//                         ${s.voiceAuth ? `
+//                             <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary); color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px;">
+//                                 <i class="fas fa-microphone"></i> Listen
+//                             </button>` : '<span style="color:#888">No Voice</span>'}
+//                     </td>
+
+//                     <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
+//                     <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
+//                     <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
+//                     <td>
+//                         ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
+//                     </td>
+//                 </tr>
+//             `;
+//         });
+//     });
+// }
+
+
+
+
+
+let monitorInterval;
+
+function startMonitorSync(id) {
+    // RECOVERY: If currentTeacher is lost, try to get it from a global state or prompt
+    if (!currentTeacher) {
+        console.error("Monitor error: Teacher ID is missing!");
+        // Optional: currentTeacher = localStorage.getItem('lastTeacher');
+        return;
+    }
+
+
+    const qrBox = document.getElementById('qrcode-mon');
+    qrBox.innerHTML = "";
+
+    // Correct URL generation
+    const cleanURL = window.location.origin + window.location.pathname + `?res=${encodeURIComponent(currentTeacher)}:${encodeURIComponent(id)}`;
+    
+    new QRCode(qrBox, { 
+        text: cleanURL, 
+        width: 150, 
+        height: 150,
+        correctLevel: QRCode.CorrectLevel.H 
+    });
+    listenToFeed(id);
+
+    // REAL-TIME LISTENER
+    // We use .on('value') which is perfect for real-time typing/updates
     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
         const body = document.getElementById('monitor-body');
-        body.innerHTML = "";
         const students = snap.val();
+        
+        // Update the live counter header
         const count = students ? Object.keys(students).length : 0;
-        document.getElementById('live-count').innerText = count;
+        const countEl = document.getElementById('live-count');
+        if(countEl) countEl.innerText = count;
 
-        // UPDATED: colspan='6' to match your 6 table headers
-        if(!students) return body.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>Waiting for students...</td></tr>";
+        if(!students) {
+            body.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>Waiting for students...</td></tr>";
+            return;
+        }
 
+        let html = "";
         Object.keys(students).forEach(name => {
             const s = students[name];
+            
+            // Filter Logic
             if(currentFilter === 'pass' && s.status !== 'Pass') return;
             if(currentFilter === 'fail' && s.status !== 'Fail') return;
             if(currentFilter === 'grading' && !s.needsGrading) return;
 
-            body.innerHTML += `
-                <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
-                    <td><b>${name}</b><br><small>${s.email}</small></td>
-                    
-                    <td>
-                        ${s.voiceAuth ? `
-                            <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary); color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px;">
-                                <i class="fas fa-microphone"></i> Listen
-                            </button>` : '<span style="color:#888">No Voice</span>'}
-                    </td>
+            // REAL-TIME VISUAL: Change row color if they are currently typing/active
+            const isTyping = (Date.now() - (s.lastActive || 0)) < 1000; 
 
-                    <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
-                    <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
-                    <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
+            html += `
+                <tr style="background: ${isTyping ? 'rgba(34, 197, 94, 0.1)' : (s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent')}">
+                    <td>
+                        <b>${name}</b> ${isTyping ? '<small style="color:var(--success)">✍️ typing...</small>' : ''}
+                        <br><small>${s.email || ''}</small>
+                    </td>
+                    <td>
+                        ${s.voiceAuth ? `<button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary)">Listen</button>` : '<span style="color:#667">No Voice</span>'}
+                    </td>
+                    <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible || 0}</td>
+                    <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Testing'}</span></td>
+                    <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes}</span>` : 'Clean'}</td>
                     <td>
                         ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
                     </td>
                 </tr>
             `;
         });
+        body.innerHTML = html;
     });
-}   
+}
+
+
+
+
+
+
+
+
+
+// let monitorInterval; // Global variable to manage the timer
+
+// function startMonitorSync(id) {
+//     if (!currentTeacher) return;
+
+//     // Clear any existing interval to prevent memory leaks
+//     if (monitorInterval) clearInterval(monitorInterval);
+
+//     const qrBox = document.getElementById('qrcode-mon');
+//     qrBox.innerHTML = "";
+//     const cleanURL = window.location.origin + window.location.pathname + `?res=${encodeURIComponent(currentTeacher)}:${encodeURIComponent(id)}`;
+//     new QRCode(qrBox, { text: cleanURL, width: 150, height: 150 });
+
+//     const updateUI = (students) => {
+//         const body = document.getElementById('monitor-body');
+//         if(!students) {
+//             body.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Waiting...</td></tr>";
+//             return;
+//         }
+
+//         let html = "";
+//         Object.keys(students).forEach(name => {
+//             const s = students[name];
+//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
+//             // ... (keep your other filters here)
+
+//             // SHORTER WINDOW: Only 3 seconds of inactivity allowed
+//             const isTyping = (Date.now() - (s.lastActive || 0)) < 1000; 
+
+//             html += `
+//                 <tr style="background: ${isTyping ? 'rgba(34, 197, 94, 0.1)' : 'transparent'}">
+//                     <td>
+//                         <b>${name}</b> ${isTyping ? '<small style="color:#22c55e; font-weight:bold;">✍️ typing...</small>' : ''}
+//                         <br><small>${s.email || ''}</small>
+//                     </td>
+//                     <td>${s.score || 0} / ${s.totalPossible || 0}</td>
+//                     <td><span class="btn-sm">${s.status || 'Active'}</span></td>
+//                     <td>${s.pastes > 0 ? `<span style="color:red">⚠️ ${s.pastes}</span>` : 'Clean'}</td>
+//                     <td>${s.needsGrading ? 'Grading...' : '✅'}</td>
+//                 </tr>
+//             `;
+//         });
+//         body.innerHTML = html;
+//     };
+
+//     // 1. Firebase Listener
+//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
+//         const students = snap.val();
+//         const count = students ? Object.keys(students).length : 0;
+//         document.getElementById('live-count').innerText = count;
+        
+//         updateUI(students);
+
+//         // 2. HEARTBEAT: Force UI refresh every 2 seconds to hide "typing" status 
+//         // even if no new data comes from Firebase
+//         if (monitorInterval) clearInterval(monitorInterval);
+//         monitorInterval = setInterval(() => {
+//             updateUI(students);
+//         }, 2000);
+//     });
+// }
+
+
+
 
 // Helper function to create a pause
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -780,12 +1415,110 @@ function renderExamPaper() {
 //     `;
 // }
 
+
+
+
+
+
+
+
+// function saveProgress(qIdx, val) {
+//     stState.answers[qIdx] = val;
+//     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
+//         ans: stState.answers, pastes: stState.pastes, lastActive: Date.now()
+//     });
+// }
+
+
+
+
+
+
+
+
+
+// function saveProgress(qIdx, val) {
+//     // 1. Update local state
+//     stState.answers[qIdx] = val;
+//     stState.lastActive = Date.now();
+
+//     // 2. Push to Firebase
+//     // We include 'status' so the teacher doesn't just see a blank space
+//     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
+//         ans: stState.answers, 
+//         pastes: stState.pastes, 
+//         lastActive: stState.lastActive,
+//         status: 'In Progress',
+//         done: false
+//     }).catch(err => console.error("Sync Error:", err));
+// }
+
+
+// function saveProgress(qIdx, val) {
+//     // 1. Update local state
+//     stState.answers[qIdx] = val;
+//     stState.lastActive = Date.now();
+
+//     // 2. Push to Firebase (Official State - this updates every time they click)
+//     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
+//         ans: stState.answers, 
+//         pastes: stState.pastes, 
+//         lastActive: stState.lastActive,
+//         status: 'In Progress',
+//         done: false
+//     }).catch(err => console.error("Sync Error:", err));
+
+//     // --- NEW: Real-Time Feed Logic (Capture FIRST click only) ---
+//     // We check if a log for this specific question already exists before saving
+//     const logRef = db.ref(`logs/${stState.teacher}/${stState.id}/${stState.name}/q${qIdx}`);
+    
+//     logRef.once('value').then(snap => {
+//         if (!snap.exists()) {
+//             // If it doesn't exist, this is the first time they clicked this question
+//             logRef.set({
+//                 qNum: qIdx + 1,
+//                 answer: val,
+//                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+//             });
+//         }
+//         // If it DOES exist, we do nothing. The teacher's feed stays with the first answer.
+//     });
+// }
+
+
+
+
 function saveProgress(qIdx, val) {
+    // 1. Update local state
     stState.answers[qIdx] = val;
+    stState.lastActive = Date.now();
+
+    // 2. Push to Firebase (Official State)
     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
-        ans: stState.answers, pastes: stState.pastes, lastActive: Date.now()
+        ans: stState.answers, 
+        pastes: stState.pastes, 
+        lastActive: stState.lastActive,
+        status: 'In Progress',
+        done: false
+    }).catch(err => console.error("Sync Error:", err));
+
+    // --- Real-Time Feed Logic (Ensuring Question & Answer are visible) ---
+    const logRef = db.ref(`logs/${stState.teacher}/${stState.id}/${stState.name}/q${qIdx}`);
+    
+    logRef.once('value').then(snap => {
+        if (!snap.exists()) {
+            // We use qNum and answer keys. 
+            // We also ensure 'val' is converted to a string in case it's a number/null.
+            logRef.set({
+                qNum: qIdx + 1,
+                answer: val ? val.toString() : "No selection", 
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+        }
     });
 }
+
+
 
 function startMainClock(mins) {
     let timeLeft = mins * 60;
@@ -917,65 +1650,150 @@ function genSubmissionPDF() {
     doc.save(`${stState.name}_Receipt.pdf`);
 }
 
-window.onload = () => {
-    const params = new URLSearchParams(window.location.search);
-    if(params.has('res')) {
-        const [t, e] = params.get('res').split(':');
-        switchView('view-public-results');
-        document.getElementById('res-t-id').value = t;
-        document.getElementById('res-e-id').value = e;
-        loadPublicBoard();
-    }
-}
+// window.onload = () => {
+//     const params = new URLSearchParams(window.location.search);
+//     if(params.has('res')) {
+//         const [t, e] = params.get('res').split(':');
+//         switchView('view-public-results');
+//         document.getElementById('res-t-id').value = t;
+//         document.getElementById('res-e-id').value = e;
+//         loadPublicBoard();
+//     }
+// }
+// async function downloadQR() {
+//     const container = document.getElementById("qrcode-mon");
+//     const qrCanvas = container.querySelector("canvas");
+//     const qrImg = container.querySelector("img");
+    
+//     let source;
+//     if (qrCanvas) {
+//         source = qrCanvas;
+//     } else if (qrImg) {
+//         // If it's an image, we need to ensure it's loaded before drawing
+//         source = qrImg;
+//     } else {
+//         return alert("Generate QR first!");
+//     }
+
+//     const virtualCanvas = document.createElement("canvas");
+//     const ctx = virtualCanvas.getContext("2d");
+    
+//     virtualCanvas.width = 180; 
+//     virtualCanvas.height = 210;
+
+//     // Background
+//     ctx.fillStyle = "white";
+//     ctx.fillRect(0, 0, virtualCanvas.width, virtualCanvas.height);
+
+//     const drawAndDownload = () => {
+//         try {
+//             // Draw QR
+//             ctx.drawImage(source, 15, 10, 150, 150);
+
+//             // Add Text
+//             ctx.fillStyle = "black";
+//             ctx.font = "bold 14px Arial";
+//             ctx.textAlign = "center";
+//             const examTitle = currentExam ? currentExam.config.title : "Exam_Results";
+//             ctx.fillText(examTitle, virtualCanvas.width / 2, 190);
+
+//             // Download
+//             const link = document.createElement("a");
+//             link.href = virtualCanvas.toDataURL("image/png");
+//             link.download = `${examTitle.replace(/\s+/g, '_')}_QR.png`;
+//             link.click();
+//         } catch (err) {
+//             console.error("Canvas Export Failed:", err);
+//             alert("Security restriction: Could not download QR. Try right-clicking the QR to save it.");
+//         }
+//     };
+
+//     // If source is an <img> and not yet loaded, wait for it
+//     if (source.tagName === 'IMG' && !source.complete) {
+//         source.onload = drawAndDownload;
+//     } else {
+//         drawAndDownload();
+//     }
+// }
+// function generateMonitorQR(teacherId, examId) {
+//     const qrContainer = document.getElementById('qrcode-mon');
+//     if (!qrContainer) return; // Safety check
+    
+//     qrContainer.innerHTML = ""; 
+
+//     // USE 'res' and ':' to match your window.onload logic
+//     // This creates: .../index.html?res=shakib:123
+//     const resultLink = `${window.location.origin}${window.location.pathname}?res=${teacherId}:${examId}`;
+
+//     new QRCode(qrContainer, {
+//         text: resultLink,
+//         width: 150,
+//         height: 150,
+//         colorDark: "#000000",
+//         colorLight: "#ffffff",
+//         // H level allows the QR to be readable even if slightly damaged or small
+//         correctLevel: QRCode.CorrectLevel.H
+//     });
+    
+//     console.log("QR Link Generated:", resultLink);
+// }
+
+
+
 async function downloadQR() {
     const container = document.getElementById("qrcode-mon");
     const qrCanvas = container.querySelector("canvas");
     const qrImg = container.querySelector("img");
     
-    let source;
-    if (qrCanvas) {
-        source = qrCanvas;
-    } else if (qrImg) {
-        // If it's an image, we need to ensure it's loaded before drawing
-        source = qrImg;
-    } else {
-        return alert("Generate QR first!");
-    }
+    let source = qrCanvas || qrImg;
+    if (!source) return alert("Generate QR first!");
 
     const virtualCanvas = document.createElement("canvas");
     const ctx = virtualCanvas.getContext("2d");
     
     virtualCanvas.width = 180; 
-    virtualCanvas.height = 210;
+    virtualCanvas.height = 230; // Increased slightly for time/date text
 
-    // Background
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, virtualCanvas.width, virtualCanvas.height);
 
     const drawAndDownload = () => {
         try {
-            // Draw QR
             ctx.drawImage(source, 15, 10, 150, 150);
 
-            // Add Text
             ctx.fillStyle = "black";
-            ctx.font = "bold 14px Arial";
             ctx.textAlign = "center";
-            const examTitle = currentExam ? currentExam.config.title : "Exam_Results";
-            ctx.fillText(examTitle, virtualCanvas.width / 2, 190);
+            
+            // 1. Get Exam ID from the UI or variable
+            const examId = document.getElementById('mon-id').innerText || "Exam";
+            
+            // 2. Get Current Date/Time for the label
+            const now = new Date();
+            const dateStr = now.toLocaleDateString();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            // Download
+            // Draw Text
+            ctx.font = "bold 12px Arial";
+            ctx.fillText(`ID: ${examId}`, virtualCanvas.width / 2, 185);
+            
+            ctx.font = "10px Arial";
+            ctx.fillStyle = "#666";
+            ctx.fillText(`${dateStr} | ${timeStr}`, virtualCanvas.width / 2, 202);
+            
+            ctx.fillStyle = "black";
+            ctx.font = "italic 10px Arial";
+            ctx.fillText("Scan to view results", virtualCanvas.width / 2, 220);
+
             const link = document.createElement("a");
             link.href = virtualCanvas.toDataURL("image/png");
-            link.download = `${examTitle.replace(/\s+/g, '_')}_QR.png`;
+            link.download = `QR_${examId}_${dateStr.replace(/\//g, '-')}.png`;
             link.click();
         } catch (err) {
             console.error("Canvas Export Failed:", err);
-            alert("Security restriction: Could not download QR. Try right-clicking the QR to save it.");
+            alert("Security restriction: Try right-clicking the QR to save.");
         }
     };
 
-    // If source is an <img> and not yet loaded, wait for it
     if (source.tagName === 'IMG' && !source.complete) {
         source.onload = drawAndDownload;
     } else {
@@ -983,13 +1801,222 @@ async function downloadQR() {
     }
 }
 
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const resParam = urlParams.get('res');
+
+    if (resParam) {
+        // CASE A: QR Code Scanned
+        const parts = resParam.split(':');
+        if (parts.length === 2) {
+            const [tId, eId] = parts;
+            
+            // Fill inputs
+            document.getElementById('res-t-id').value = decodeURIComponent(tId);
+            document.getElementById('res-e-id').value = decodeURIComponent(eId);
+
+            // Show results view
+            switchView('view-public-results');
+            
+            // Load the data
+            setTimeout(() => {
+                loadPublicBoard();
+            }, 500);
+        } else {
+            // If the QR link is broken/wrong, show home
+            switchView('view-start');
+        }
+    } else {
+        // CASE B: Normal visit (No QR) - Show Home Screen
+        switchView('view-start');
+        
+        // Restore student name if saved
+        const savedName = localStorage.getItem('tempName');
+        const nameInput = document.getElementById('st-name');
+        if (savedName && nameInput) nameInput.value = savedName;
+    }
+};
+
+
+
+// This ensures something ALWAYS shows up
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const resParam = urlParams.get('res');
+
+    if (resParam) {
+        const parts = resParam.split(':');
+        if (parts.length === 2) {
+            const [tId, eId] = parts;
+            
+            // Fill inputs for public board
+            if(document.getElementById('res-t-id')) document.getElementById('res-t-id').value = decodeURIComponent(tId);
+            if(document.getElementById('res-e-id')) document.getElementById('res-e-id').value = decodeURIComponent(eId);
+
+            switchView('view-public-results');
+            
+            setTimeout(() => {
+                if (typeof loadPublicBoard === 'function') loadPublicBoard();
+            }, 500);
+            return; 
+        }
+    }
+
+    // If no special link is found, show the Home Screen
+    switchView('view-start');
+});
+
+
+// PASTE THIS AT THE ABSOLUTE BOTTOM OF YOUR SCRIPT
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const resValue = params.get('res');
+
+    if (resValue && resValue.includes(':')) {
+        const [teacher, exam] = resValue.split(':');
+        
+        // 1. Switch View
+        switchView('view-public-results');
+
+        // 2. Fill Inputs
+        const tIn = document.getElementById('res-t-id');
+        const eIn = document.getElementById('res-e-id');
+        if(tIn) tIn.value = decodeURIComponent(teacher);
+        if(eIn) eIn.value = decodeURIComponent(exam);
+
+        // 3. Load Data
+        setTimeout(() => {
+            if (typeof loadPublicBoard === 'function') loadPublicBoard();
+        }, 500);
+    } else {
+        // Only show start if it's not a QR link
+        switchView('view-start');
+    }
+})();
 
 
 
 
+// function filterMonitorTable() {
+//     const query = document.getElementById('student-search').value.toLowerCase();
+//     const rows = document.querySelectorAll('#monitor-body tr');
+//     rows.forEach(row => {
+//         const text = row.innerText.toLowerCase();
+//         row.style.display = text.includes(query) ? '' : 'none';
+//     });
+// }
+
+
+function filterMonitorTable() {
+    const query = document.getElementById('student-search').value.toLowerCase();
+    
+    // 1. Filter the Main Table (Your existing logic)
+    const tableRows = document.querySelectorAll('#monitor-body tr');
+    tableRows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+    });
+
+    // 2. Filter the Real-Time Feed Sidebar
+    // We look for the 'data-student' attribute we added to each feed item
+    const feedItems = document.querySelectorAll('#realtime-feed .feed-item');
+    feedItems.forEach(item => {
+        const studentName = item.getAttribute('data-student').toLowerCase();
+        
+        // If the student's name in the feed matches the search, show it
+        if (studentName.includes(query)) {
+            item.style.setProperty('display', 'block', 'important');
+        } else {
+            item.style.setProperty('display', 'none', 'important');
+        }
+    });
+}
 
 
 
+// // Add this inside your teacher's startMonitorSync or a similar initialization function
+// function listenToFeed(examId) {
+//     const feed = document.getElementById('realtime-feed');
+//     if(!feed) return;
+
+//     feed.innerHTML = ""; 
+//     db.ref(`logs/${currentTeacher}/${examId}`).off(); 
+
+//     db.ref(`logs/${currentTeacher}/${examId}`).on('child_added', studentSnap => {
+//         const sName = studentSnap.key;
+        
+//         studentSnap.ref.on('child_added', logSnap => {
+//             const data = logSnap.val();
+            
+//             // Debugging: If it still fails, check your console to see what 'data' contains
+//             console.log("Realtime Feed Data:", data);
+
+//             const div = document.createElement('div');
+//             div.style = "padding: 8px; border-bottom: 1px solid #ddd; background: aqua; margin-bottom: 5px; border-radius: 4px; border-left: 4px solid var(--primary); animation: fadeIn 0.3s;";
+            
+//             // Use logical OR ( || ) to show 'N/A' if the data is missing
+//             const questionNum = data.qNum || "Unknown";
+//             const studentAns = data.answer || "No selection";
+//             const actionTime = data.time || "--:--";
+
+//             div.innerHTML = `
+//                 <strong>${sName}</strong> → 
+//                 <b>Q${questionNum}: ${studentAns}</b> 
+//                 <br><small style="color:#999">${actionTime}</small>
+//             `;
+            
+//             feed.prepend(div);
+//             if(feed.children.length > 30) feed.lastChild.remove();
+//         });
+//     });
+// }
+
+
+function listenToFeed(examId) {
+    const feed = document.getElementById('realtime-feed');
+    if(!feed) return;
+
+    feed.innerHTML = ""; 
+    db.ref(`logs/${currentTeacher}/${examId}`).off(); 
+
+    db.ref(`logs/${currentTeacher}/${examId}`).on('child_added', studentSnap => {
+        const sName = studentSnap.key;
+        
+        studentSnap.ref.on('child_added', logSnap => {
+            const data = logSnap.val();
+            
+            console.log("Realtime Feed Data:", data);
+
+            const div = document.createElement('div');
+            
+            // --- NECESSARY CHANGES FOR SEARCHING ---
+            div.className = "feed-item";             // 1. Give it a class to find
+            div.setAttribute('data-student', sName); // 2. Store the name for filtering
+            // ---------------------------------------
+
+            div.style = "padding: 8px; border-bottom: 1px solid #ddd; background: aqua; margin-bottom: 5px; border-radius: 4px; border-left: 4px solid var(--primary); animation: fadeIn 0.3s;";
+            
+            const questionNum = data.qNum || "Unknown";
+            const studentAns = data.answer || "No selection";
+            const actionTime = data.time || "--:--";
+
+            div.innerHTML = `
+                <strong>${sName}</strong> → 
+                <b>Q${questionNum}: ${studentAns}</b> 
+                <br><small style="color:#999">${actionTime}</small>
+            `;
+            
+            // Apply current search filter immediately if teacher is already searching
+            const query = document.getElementById('student-search').value.toLowerCase();
+            if (query && !sName.toLowerCase().includes(query)) {
+                div.style.display = 'none';
+            }
+
+            feed.prepend(div);
+            if(feed.children.length > 30) feed.lastChild.remove();
+        });
+    });
+}
 
 </script>
 </body>
