@@ -1396,7 +1396,7 @@ function displayLogs(logs, highlightTerm = "") {
                 <div style="display:flex; flex-direction:column; gap:4px;">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <input type="checkbox" class="log-checkbox" data-index="${index}" style="width:18px; height:18px;">
-                        <strong style="font-size: clamp(14px, 4vw, 16px);">
+                        <strong style="font-size: clamp(14px, 4vw, 16px); color: #10b981 !important;">
                             <i class="fas fa-user"></i> ${item.studentName || 'Unknown'} 
                             <span style="font-size: 1.2rem; margin-left: 5px;">${item.mood || ''}</span>
                             ${tagUI} 
@@ -2745,6 +2745,7 @@ function downloadAsPDF(studentName) {
 </html>
 </body>
 </html>
+
 
 
 
