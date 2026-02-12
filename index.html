@@ -1390,7 +1390,7 @@ function displayLogs(logs, highlightTerm = "") {
 
         return `
         <div class="data-card admin-log-item" id="log-card-${index}" 
-             style="border-left: 5px solid ${item.mood === '😕' ? '#ef4444' : '#6366f1'}; background:green; margin-bottom:20px; border-radius:12px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+             style="border-left: 5px solid ${item.mood === '😕' ? '#ef4444' : '#6366f1'}; background:white; margin-bottom:20px; border-radius:12px; padding:15px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
             
             <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; border-bottom: 1px solid #e2e8f0; padding-bottom:10px; margin-bottom:10px;">
                 <div style="display:flex; flex-direction:column; gap:4px;">
@@ -1422,7 +1422,7 @@ function displayLogs(logs, highlightTerm = "") {
 
             <div class="responsive-paper-wrapper" 
                  onclick="this.classList.toggle('zoomed')"
-                 style="width: 100%; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 8px; background: green; cursor:zoom-in; transition: 0.3s;">
+                 style="width: 100%; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor:zoom-in; transition: 0.3s;">
                 
                 <div id="content-body-${index}" class="scaler-engine" 
                      style="width: 900px; transform-origin: top left; position: relative;">
@@ -2745,5 +2745,6 @@ function downloadAsPDF(studentName) {
 </html>
 </body>
 </html>
+
 
 
