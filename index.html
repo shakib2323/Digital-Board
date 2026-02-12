@@ -1346,7 +1346,7 @@ function displayLogs(logs, highlightTerm = "") {
                         <i class="fas fa-exclamation-triangle"></i> Needs Immediate Help
                     </h4>
                     <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                        ${priorityStudents.map(s => `<span style="background:#ef4444; color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold;">${s.studentName}</span>`).join('')}
+                        ${priorityStudents.map(s => `<span style="background:#ef4444; color:green; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold;">${s.studentName}</span>`).join('')}
                     </div>
                 </div>`;
         } else {
@@ -2745,3 +2745,4 @@ function downloadAsPDF(studentName) {
 </html>
 </body>
 </html>
+
