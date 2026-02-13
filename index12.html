@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,31 +51,7 @@
             .history-grid { grid-template-columns: 1fr; }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
+  
 
 .view-section {
     display: none; /* Default hidden */
@@ -90,20 +67,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-/* --- GLOBAL RESPONSIVE OVERRIDES --- */
-
-/* 1. The Monitor Grid Fix */
-/* This forces the 1fr 350px grid to become 1 column on tablets and phones */
 @media (max-width: 992px) {
     .monitor-grid {
         display: block !important; /* Disables the side-by-side grid */
@@ -262,55 +225,6 @@ div[style*="display:flex"] {
             </div>
         </section>
 
-
-
-
-<!-- 
-        <section id="view-monitor" class="view-section">
-            <div id="timer-banner">
-                MONITORING: <span id="mon-id"></span>
-                <span class="badge-count">Live Students: <span id="live-count">0</span></span>
-            </div>
-            
-            <div class="card" style="margin-top: 10px;">
-                <div style="display:flex; gap:5px; margin-bottom:15px; flex-wrap: wrap; justify-content: space-between;">
-                   <div>
-                        <button class="btn btn-sm btn-primary" onclick="toggleFilter('all')">All</button>
-                        <button class="btn btn-sm btn-success" onclick="toggleFilter('pass')">Passed</button>
-                        <button class="btn btn-sm btn-danger" onclick="toggleFilter('fail')">Failed</button>
-                        <button class="btn btn-sm btn-warn" onclick="toggleFilter('grading')">Need Review</button>
-                   </div>
-                   <div>
-                        <button class="btn btn-sm btn-warn" onclick="bulkEmailResults()"><i class="fas fa-envelope"></i> Email All</button>
-                        <button class="btn btn-sm btn-success" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
-                   </div>
-                </div>
-                
-                <div class="table-container">
-                    <table class="table-res">
-                        <thead>
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Score</th>
-                                <th>Result</th>
-                                <th>Integrity</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="monitor-body"></tbody>
-                    </table>
-                </div>
-            </div>
-
-        
-             <div class="card" style="text-align: center;">
-                <h4>Exam Result QR Code</h4>
-                <div id="qrcode-mon" style="background:white; padding:15px; display:inline-block; border-radius:10px;"></div>
-             
-                <p><small>Students can scan this to check the result list for this specific test.</small></p>
-            </div>
-</section> -->
-
 <section id="view-monitor" class="view-section" style="display: none;">
     <div id="timer-banner">
         MONITORING: <span id="mon-id"></span>
@@ -339,6 +253,21 @@ div[style*="display:flex"] {
                 <div>
                     <button class="btn btn-sm btn-warn" onclick="bulkEmailResults()"><i class="fas fa-envelope"></i> Email All</button>
                     <button class="btn btn-sm btn-success" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                                        <div style="margin-top: 15px; background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
+    <button onclick="bulkAiGrade()" id="btn-bulk-ai" class="btn btn-sm" style="background: #8b5cf6; color: white;">
+        🤖 Bulk AI Grade (All Students)
+    </button>
+    
+    <div id="ai-progress-container" style="display:none; margin-top: 10px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span id="bulk-ai-status" style="font-size: 12px; color: #e2e8f0;">Ready...</span>
+            <span id="ai-perc" style="font-size: 12px; font-weight: bold; color: #a78bfa;">0%</span>
+        </div>
+        <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; overflow: hidden;">
+            <div id="ai-bar" style="width: 0%; height: 100%; background: #8b5cf6; transition: width 0.3s;"></div>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
             
@@ -388,29 +317,6 @@ div[style*="display:flex"] {
 </section>
 
 
-            <!-- <div class="card" style="text-align: center;">
-    <h4>Exam Result QR Code</h4>
-    <div id="qrcode-mon" style="background:white; padding:15px; display:inline-block; border-radius:10px;"></div>
-    
-    <div style="margin-top: 10px;">
-        <button onclick="downloadQR()" class="btn btn-sm" style="background: var(--primary); color: white; cursor: pointer;">
-            <i class="fas fa-download"></i> Download QR
-        </button>
-        <button onclick="printQRCode()" class="btn btn-sm" style="background: #6c757d; color: white; cursor: pointer;">
-    <i class="fas fa-print"></i> Print for Classroom
-</button>
-    </div>
-
-    <p><small>Students can scan this to check the result list for this specific test.</small></p>
-</div>
-
-
-            <button onclick="switchView('view-setup')" class="btn btn-primary">Return to Dashboard</button>
-        </section>   -->
-
-
-
-
 
         
 
@@ -431,22 +337,6 @@ div[style*="display:flex"] {
             <div id="paper-content" style="margin-top:20px;"></div>
             <button onclick="finishTest()" class="btn btn-success full-w" style="padding: 20px; font-size: 1.2rem; margin-top: 20px;">SUBMIT TEST</button>
         </section> 
-
-
-
-
-        <!-- <section id="view-result" class="view-section">
-            <div class="card" style="text-align:center; margin-top:10vh;">
-                <div id="res-status-ui">
-                    <i class="fas fa-check-circle" style="font-size:70px; color:var(--success)"></i>
-                    <h2>Submission Successful</h2>
-                    <div id="student-score-box"></div>
-                    <div id="student-status-box" style="margin-top:10px; font-weight:bold; font-size:1.2rem;"></div>
-                </div>
-                <button onclick="genSubmissionPDF()" class="btn btn-primary" style="margin-top:20px;">Download Receipt (PDF)</button>
-                <button onclick="location.reload()" class="btn btn-sm" style="display:block; margin: 20px auto; color:#94a3b8">Back to Home</button>
-            </div>
-        </section> -->
 
         <section id="view-result" class="view-section">
     <div id="student-score-box" class="card" style="background: white; color: #1e293b; max-width: 500px; margin: 5vh auto; padding: 20px; border-radius: 15px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
@@ -506,34 +396,7 @@ db.ref('.info/connected').on('value', s => {
     document.getElementById('db-status').innerHTML = s.val() ? '<i class="fas fa-circle" style="color:var(--success)"></i> Live' : '<i class="fas fa-circle" style="color:var(--danger)"></i> Offline';
 });
 
-// function switchView(id) {
-//     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-//     document.getElementById(id).classList.add('active');
-//     window.scrollTo(0,0);
-// }
 
-
-// function switchView(id) {
-//     const target = document.getElementById(id);
-//     if (!target) {
-//         console.error("View not found: " + id);
-//         // Fallback: If the target view is missing, go back to start
-//         const start = document.getElementById('view-start');
-//         if(start) start.classList.add('active');
-//         return;
-//     }
-
-//     // 1. Remove active class from ALL sections
-//     document.querySelectorAll('.view-section').forEach(v => {
-//         v.classList.remove('active');
-//     });
-
-//     // 2. Add active class to the requested section
-//     target.classList.add('active');
-
-//     // 3. Reset scroll position
-//     window.scrollTo(0,0);
-// }
 
 
 function switchView(id) {
@@ -600,19 +463,6 @@ function sendEmailResult(name, email, score, total, status) {
 }
 
 
-
-
-// const uid = name.replace(/\s+/g, '') + "_" + Math.floor(Math.random() * 99999);
-
-
-// db.ref(`live/${tId}/${eId}/${uid}`).set({
-//     name: name,
-//     done: false, // Explicitly track if they are still testing
-//     joined: true
-// });
-
-
-
 // --- TEACHER LOGIC ---
 async function authTeacher() {
     const user = document.getElementById('t-user').value.trim().toLowerCase();
@@ -648,109 +498,6 @@ function addQField(type) {
     `;
     container.appendChild(div);
 }
-
-// async function launchExam() {
-//     const id = document.getElementById('ex-id').value.trim();
-//     const expiry = document.getElementById('ex-expiry').value;
-//     if(!id || !expiry) return alert("Exam ID and Expiry Date are required");
-
-//     const qs = [];
-//     document.querySelectorAll('#setup-qs .card').forEach(c => {
-//         const type = c.dataset.type;
-//         qs.push({
-//             type,
-//             text: c.querySelector('.q-txt').value,
-//             marks: parseInt(c.querySelector('.q-marks').value),
-//             options: type === 'mcq' ? [c.querySelector('.o1').value, c.querySelector('.o2').value] : null,
-//             correct: type === 'mcq' ? c.querySelector('.q-cor').value : null
-//         });
-//     });
-
-//     const config = {
-//         id,
-//         dur: document.getElementById('ex-duration').value || 30,
-//         passLimit: document.getElementById('ex-pass').value || 40,
-//         expiry: new Date(expiry).getTime(),
-//         negative: document.getElementById('ex-neg').checked,
-//         hold: document.getElementById('ex-hold').checked,
-//         emailEnabled: document.getElementById('ex-email').checked,
-//         createdAt: Date.now()
-//     };
-
-//     await db.ref(`teachers/${currentTeacher}/exams/${id}`).set({config, questions: qs});
-//     alert("Test Launched Successfully!");
-//     document.getElementById('setup-qs').innerHTML = "";
-//     document.getElementById('ex-id').value = "";
-// }
-
-
-
-
-
-
-// async function launchExam() {
-//     const id = document.getElementById('ex-id').value.trim();
-//     const expiryDate = document.getElementById('ex-expiry').value; // Date from input
-    
-//     if(!id || !expiryDate) return alert("Exam ID and Expiry Date are required");
-
-//     const qs = [];
-//     document.querySelectorAll('#setup-qs .card').forEach(c => {
-//         const type = c.dataset.type;
-//         qs.push({
-//             type,
-//             text: c.querySelector('.q-txt').value,
-//             marks: parseInt(c.querySelector('.q-marks').value),
-//             options: type === 'mcq' ? [c.querySelector('.o1').value, c.querySelector('.o2').value] : null,
-//             correct: type === 'mcq' ? c.querySelector('.q-cor').value : null
-//         });
-//     });
-
-//     // Create a specific timestamp for "Time Launched"
-//     const now = new Date();
-//     const timeString = now.toLocaleTimeString(); // e.g., "10:30:15 AM"
-
-//     const config = {
-//         id,
-//         dur: document.getElementById('ex-duration').value || 30,
-//         passLimit: document.getElementById('ex-pass').value || 40,
-//         expiry: new Date(expiryDate).getTime(),
-//         negative: document.getElementById('ex-neg').checked,
-//         hold: document.getElementById('ex-hold').checked,
-//         emailEnabled: document.getElementById('ex-email').checked,
-//         createdAt: Date.now(),
-//         launchTime: timeString // Added the exact time
-//     };
-
-//     try {
-//         // 1. Save to Database
-//         await db.ref(`teachers/${currentTeacher}/exams/${id}`).set({config, questions: qs});
-        
-//         // 2. CRITICAL: Generate the QR Code for the Monitor View
-//         // This ensures the QR contains the correct Teacher and Exam ID
-//         if (typeof generateMonitorQR === "function") {
-//             generateMonitorQR(currentTeacher, id);
-//         }
-
-//         alert(`Test Launched Successfully at ${timeString}!`);
-        
-//         // 3. UI Updates
-//         document.getElementById('mon-id').innerText = id;
-//         switchView('view-monitor'); // Move to monitor screen to see the QR
-        
-//         // Clear fields
-//         document.getElementById('setup-qs').innerHTML = "";
-//         document.getElementById('ex-id').value = "";
-//     } catch (error) {
-//         console.error("Launch failed:", error);
-//         alert("Error launching test. Check console.");
-//     }
-// }
-
-
-
-
-
 
 async function launchExam() {
     const id = document.getElementById('ex-id').value.trim();
@@ -835,22 +582,13 @@ function initHistoryListener() {
                     <div style="display:flex; gap:5px; margin-top:10px;">
                         <button onclick="openMonitor('${id}')" class="btn btn-sm btn-primary">Monitor</button>
                         <button onclick="deleteExam('${id}')" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+  
                     </div>
                 </div>
             `;
         });
     });
 }
-
-// function openMonitor(id) {
-//     db.ref(`teachers/${currentTeacher}/exams/${id}`).once('value', snap => {
-//         currentExam = snap.val();
-//         document.getElementById('mon-id').innerText = id;
-//         switchView('view-monitor');
-//         startMonitorSync(id);
-//     });
-// }
-
 
 function openMonitor(id) {
     db.ref(`teachers/${currentTeacher}/exams/${id}`).once('value', snap => {
@@ -881,162 +619,6 @@ function openMonitor(id) {
         startMonitorSync(id);
     });
 }
-
-
-
-
-// function startMonitorSync(id) {
-//     document.getElementById('qrcode-mon').innerHTML = "";
-//     new QRCode(document.getElementById("qrcode-mon"), { 
-//         text: `${window.location.origin}${window.location.pathname}?res=${currentTeacher}:${id}`, 
-//         width: 150, height: 150 
-//     });
-
-//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
-//         const body = document.getElementById('monitor-body');
-//         body.innerHTML = "";
-//         const students = snap.val();
-//         const count = students ? Object.keys(students).length : 0;
-//         document.getElementById('live-count').innerText = count;
-
-//         if(!students) return body.innerHTML = "<tr><td colspan='5' style='text-align:center'>Waiting for students...</td></tr>";
-
-//         Object.keys(students).forEach(name => {
-//             const s = students[name];
-//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
-//             if(currentFilter === 'fail' && s.status !== 'Fail') return;
-//             if(currentFilter === 'grading' && !s.needsGrading) return;
-
-//             body.innerHTML += `
-//                 <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
-//                     <td><b>${name}</b><br><small>${s.email}</small></td>
-//                     <td>
-//     ${s.voiceAuth ? `
-//         <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary)">
-//             <i class="fas fa-microphone"></i> Listen
-//         </button>` : 'No Voice'}
-// </td>
-//                     <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
-//                     <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
-//                     <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
-//                     <td>
-//                         ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
-//                     </td>
-//                 </tr>
-//             `;
-//         });
-//     });
-// }
-
-
-//  function startMonitorSync(id) {
-//     document.getElementById('qrcode-mon').innerHTML = "";
-//     new QRCode(document.getElementById("qrcode-mon"), { 
-//         text: `${window.location.origin}${window.location.pathname}?res=${currentTeacher}:${id}`, 
-//         width: 150, height: 150 
-//     });
-
-//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
-//         const body = document.getElementById('monitor-body');
-//         body.innerHTML = "";
-//         const students = snap.val();
-//         const count = students ? Object.keys(students).length : 0;
-//         document.getElementById('live-count').innerText = count;
-
-//         // UPDATED: colspan='6' to match your 6 table headers
-//         if(!students) return body.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>Waiting for students...</td></tr>";
-
-//         Object.keys(students).forEach(name => {
-//             const s = students[name];
-//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
-//             if(currentFilter === 'fail' && s.status !== 'Fail') return;
-//             if(currentFilter === 'grading' && !s.needsGrading) return;
-
-//             body.innerHTML += `
-//                 <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
-//                     <td><b>${name}</b><br><small>${s.email}</small></td>
-                    
-//                     <td>
-//                         ${s.voiceAuth ? `
-//                             <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary); color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px;">
-//                                 <i class="fas fa-microphone"></i> Listen
-//                             </button>` : '<span style="color:#888">No Voice</span>'}
-//                     </td>
-
-//                     <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
-//                     <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
-//                     <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
-//                     <td>
-//                         ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
-//                     </td>
-//                 </tr>
-//             `;
-//         });
-//     });
-// }   
-
-
-
-
-// function startMonitorSync(id) {
-//     // Corrected QR Logic: Ensure currentTeacher and id are valid
-//     const qrBox = document.getElementById('qrcode-mon');
-//     qrBox.innerHTML = "";
-
-//     if (currentTeacher && id) {
-//         // Construct clean URL: Base Path + ?res=Teacher:Exam
-//         const cleanURL = window.location.origin + window.location.pathname + `?res=${encodeURIComponent(currentTeacher)}:${encodeURIComponent(id)}`;
-        
-//         new QRCode(qrBox, { 
-//             text: cleanURL, 
-//             width: 150, 
-//             height: 150,
-//             correctLevel: QRCode.CorrectLevel.H 
-//         });
-//         console.log("Monitor QR Link:", cleanURL);
-//     } else {
-//         qrBox.innerHTML = "<p style='color:red;font-size:10px;'>Error: Missing Teacher/Exam ID</p>";
-//     }
-
-//     // --- KEEPING ALL YOUR ORIGINAL FIREBASE & TABLE LOGIC BELOW ---
-//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
-//         const body = document.getElementById('monitor-body');
-//         body.innerHTML = "";
-//         const students = snap.val();
-//         const count = students ? Object.keys(students).length : 0;
-//         document.getElementById('live-count').innerText = count;
-
-//         if(!students) return body.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>Waiting for students...</td></tr>";
-
-//         Object.keys(students).forEach(name => {
-//             const s = students[name];
-//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
-//             if(currentFilter === 'fail' && s.status !== 'Fail') return;
-//             if(currentFilter === 'grading' && !s.needsGrading) return;
-
-//             body.innerHTML += `
-//                 <tr style="background: ${s.needsGrading ? 'rgba(245, 158, 11, 0.1)' : 'transparent'}">
-//                     <td><b>${name}</b><br><small>${s.email}</small></td>
-                    
-//                     <td>
-//                         ${s.voiceAuth ? `
-//                             <button onclick="playVoice('${s.voiceAuth}')" class="btn-sm" style="background:var(--primary); color:white; border:none; cursor:pointer; padding:5px 10px; border-radius:4px;">
-//                                 <i class="fas fa-microphone"></i> Listen
-//                             </button>` : '<span style="color:#888">No Voice</span>'}
-//                     </td>
-
-//                     <td>${s.score !== undefined && s.score !== null ? s.score : '??'} / ${s.totalPossible}</td>
-//                     <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Reviewing'}</span></td>
-//                     <td>${s.pastes > 0 ? `<span style="color:var(--danger)">⚠️ ${s.pastes} Pastes</span>` : 'Clean'}</td>
-//                     <td>
-//                         ${s.needsGrading ? `<button onclick="openGradingModal('${name}')" class="btn btn-sm btn-warn">Grade</button>` : '<i class="fas fa-check-circle" style="color:var(--success)"></i>'}
-//                     </td>
-//                 </tr>
-//             `;
-//         });
-//     });
-// }
-
 
 
 
@@ -1115,78 +697,6 @@ function startMonitorSync(id) {
         body.innerHTML = html;
     });
 }
-
-
-
-
-
-
-
-
-
-// let monitorInterval; // Global variable to manage the timer
-
-// function startMonitorSync(id) {
-//     if (!currentTeacher) return;
-
-//     // Clear any existing interval to prevent memory leaks
-//     if (monitorInterval) clearInterval(monitorInterval);
-
-//     const qrBox = document.getElementById('qrcode-mon');
-//     qrBox.innerHTML = "";
-//     const cleanURL = window.location.origin + window.location.pathname + `?res=${encodeURIComponent(currentTeacher)}:${encodeURIComponent(id)}`;
-//     new QRCode(qrBox, { text: cleanURL, width: 150, height: 150 });
-
-//     const updateUI = (students) => {
-//         const body = document.getElementById('monitor-body');
-//         if(!students) {
-//             body.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Waiting...</td></tr>";
-//             return;
-//         }
-
-//         let html = "";
-//         Object.keys(students).forEach(name => {
-//             const s = students[name];
-//             if(currentFilter === 'pass' && s.status !== 'Pass') return;
-//             // ... (keep your other filters here)
-
-//             // SHORTER WINDOW: Only 3 seconds of inactivity allowed
-//             const isTyping = (Date.now() - (s.lastActive || 0)) < 1000; 
-
-//             html += `
-//                 <tr style="background: ${isTyping ? 'rgba(34, 197, 94, 0.1)' : 'transparent'}">
-//                     <td>
-//                         <b>${name}</b> ${isTyping ? '<small style="color:#22c55e; font-weight:bold;">✍️ typing...</small>' : ''}
-//                         <br><small>${s.email || ''}</small>
-//                     </td>
-//                     <td>${s.score || 0} / ${s.totalPossible || 0}</td>
-//                     <td><span class="btn-sm">${s.status || 'Active'}</span></td>
-//                     <td>${s.pastes > 0 ? `<span style="color:red">⚠️ ${s.pastes}</span>` : 'Clean'}</td>
-//                     <td>${s.needsGrading ? 'Grading...' : '✅'}</td>
-//                 </tr>
-//             `;
-//         });
-//         body.innerHTML = html;
-//     };
-
-//     // 1. Firebase Listener
-//     db.ref(`live/${currentTeacher}/${id}`).on('value', snap => {
-//         const students = snap.val();
-//         const count = students ? Object.keys(students).length : 0;
-//         document.getElementById('live-count').innerText = count;
-        
-//         updateUI(students);
-
-//         // 2. HEARTBEAT: Force UI refresh every 2 seconds to hide "typing" status 
-//         // even if no new data comes from Firebase
-//         if (monitorInterval) clearInterval(monitorInterval);
-//         monitorInterval = setInterval(() => {
-//             updateUI(students);
-//         }, 2000);
-//     });
-// }
-
-
 
 
 // Helper function to create a pause
@@ -1330,167 +840,6 @@ function renderExamPaper() {
 }
 
 
-// function studentJoin() {
-//     const tId = document.getElementById('st-teacher-id').value.trim().toLowerCase();
-//     const eId = document.getElementById('st-code').value.trim();
-//     const name = document.getElementById('st-name').value.trim();
-//     const email = document.getElementById('st-email').value.trim();
-    
-//     if(!tId || !eId || !name) return alert("All fields are mandatory");
-
-//     db.ref(`teachers/${tId}/exams/${eId}`).once('value', snap => {
-//         const test = snap.val();
-//         if(!test) return alert("Examination not found!");
-//         if(Date.now() > test.config.expiry) return alert("This test link has expired!");
-        
-//         currentExam = test;
-        
-//         // Create a unique ID to prevent overwriting same-name students
-//         const studentUID = name.replace(/\s+/g, '') + "_" + Math.floor(Math.random() * 9999);
-        
-//         // Initialize global student state
-//         stState = { 
-//             uid: studentUID, 
-//             name: name, 
-//             email: email, 
-//             id: eId, 
-//             teacher: tId, 
-//             answers: {}, 
-//             pastes: 0 
-//         };
-        
-//         // Push to Firebase Live Monitor
-//         db.ref(`live/${tId}/${eId}/${studentUID}`).update({
-//             name: name,
-//             joined: true, 
-//             email: email, 
-//             status: 'In Progress',
-//             pastes: 0,
-//             done: false
-//         });
-
-//         // --- ANTI-CHEAT: AUTOSUBMIT ON TAB SWITCH ---
-//         document.addEventListener("visibilitychange", function handleSecurity() {
-//             if (document.hidden) {
-//                 // Remove listener so it doesn't loop
-//                 document.removeEventListener("visibilitychange", handleSecurity);
-                
-//                 stState.pastes++;
-//                 alert("SECURITY VIOLATION: You left the exam screen. Your test is being submitted automatically.");
-//                 finishTest(); 
-//             }
-//         });
-
-//         renderExamPaper();
-//         switchView('view-paper');
-//         startMainClock(test.config.dur);
-//     });
-// }
-// let currentQIndex = 0; // Track progress for adaptive flow
-
-// function renderExamPaper() {
-//     const cont = document.getElementById('paper-content');
-    
-  
-    
-//     const q = currentExam.questions[currentQIndex];
-    
-//     cont.innerHTML = `
-//         <div class="q-box animate-fade-in">
-//             <div style="display:flex; justify-content:space-between;">
-//                 <span>Question ${currentQIndex + 1} of ${currentExam.questions.length}</span>
-//                 <span class="badge">Level: ${q.level || 'Standard'}</span>
-//             </div>
-//             <p style="font-size:1.2rem; margin:15px 0;"><b>${q.text}</b></p>
-            
-//             ${q.type === 'mcq' ? 
-//                 q.options.map((opt, idx) => `
-//                     <label class="opt-label" style="display:block; margin: 10px 0; padding:15px; border:1px solid #ddd; border-radius:8px; cursor:pointer;">
-//                         <input type="radio" name="adaptive-q" value="${opt}" onclick="saveProgress(${currentQIndex}, '${opt}')"> ${opt}
-//                     </label>
-//                 `).join('') 
-//                 : `<textarea class="adaptive-textarea" oninput="saveProgress(${currentQIndex}, this.value)" onpaste="stState.pastes++" placeholder="Type your answer here..."></textarea>`
-//             }
-            
-//             <button onclick="nextAdaptiveStep()" class="btn btn-primary" style="margin-top:20px; width:100%">
-//                 ${currentQIndex === currentExam.questions.length - 1 ? 'FINISH EXAM' : 'NEXT QUESTION'}
-//             </button>
-//         </div>
-//     `;
-// }
-
-
-
-
-
-
-
-
-// function saveProgress(qIdx, val) {
-//     stState.answers[qIdx] = val;
-//     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
-//         ans: stState.answers, pastes: stState.pastes, lastActive: Date.now()
-//     });
-// }
-
-
-
-
-
-
-
-
-
-// function saveProgress(qIdx, val) {
-//     // 1. Update local state
-//     stState.answers[qIdx] = val;
-//     stState.lastActive = Date.now();
-
-//     // 2. Push to Firebase
-//     // We include 'status' so the teacher doesn't just see a blank space
-//     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
-//         ans: stState.answers, 
-//         pastes: stState.pastes, 
-//         lastActive: stState.lastActive,
-//         status: 'In Progress',
-//         done: false
-//     }).catch(err => console.error("Sync Error:", err));
-// }
-
-
-// function saveProgress(qIdx, val) {
-//     // 1. Update local state
-//     stState.answers[qIdx] = val;
-//     stState.lastActive = Date.now();
-
-//     // 2. Push to Firebase (Official State - this updates every time they click)
-//     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
-//         ans: stState.answers, 
-//         pastes: stState.pastes, 
-//         lastActive: stState.lastActive,
-//         status: 'In Progress',
-//         done: false
-//     }).catch(err => console.error("Sync Error:", err));
-
-//     // --- NEW: Real-Time Feed Logic (Capture FIRST click only) ---
-//     // We check if a log for this specific question already exists before saving
-//     const logRef = db.ref(`logs/${stState.teacher}/${stState.id}/${stState.name}/q${qIdx}`);
-    
-//     logRef.once('value').then(snap => {
-//         if (!snap.exists()) {
-//             // If it doesn't exist, this is the first time they clicked this question
-//             logRef.set({
-//                 qNum: qIdx + 1,
-//                 answer: val,
-//                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-//             });
-//         }
-//         // If it DOES exist, we do nothing. The teacher's feed stays with the first answer.
-//     });
-// }
-
-
-
 
 function saveProgress(qIdx, val) {
     // 1. Update local state
@@ -1590,20 +939,6 @@ async function finishTest() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 async function deleteExam(id) {
     if(confirm(`Delete all data for test ${id}?`)) {
         await db.ref(`teachers/${currentTeacher}/exams/${id}`).remove();
@@ -1653,96 +988,6 @@ function genSubmissionPDF() {
     doc.text(`Date: ${new Date().toLocaleString()}`, 10, 70);
     doc.save(`${stState.name}_Receipt.pdf`);
 }
-
-// window.onload = () => {
-//     const params = new URLSearchParams(window.location.search);
-//     if(params.has('res')) {
-//         const [t, e] = params.get('res').split(':');
-//         switchView('view-public-results');
-//         document.getElementById('res-t-id').value = t;
-//         document.getElementById('res-e-id').value = e;
-//         loadPublicBoard();
-//     }
-// }
-// async function downloadQR() {
-//     const container = document.getElementById("qrcode-mon");
-//     const qrCanvas = container.querySelector("canvas");
-//     const qrImg = container.querySelector("img");
-    
-//     let source;
-//     if (qrCanvas) {
-//         source = qrCanvas;
-//     } else if (qrImg) {
-//         // If it's an image, we need to ensure it's loaded before drawing
-//         source = qrImg;
-//     } else {
-//         return alert("Generate QR first!");
-//     }
-
-//     const virtualCanvas = document.createElement("canvas");
-//     const ctx = virtualCanvas.getContext("2d");
-    
-//     virtualCanvas.width = 180; 
-//     virtualCanvas.height = 210;
-
-//     // Background
-//     ctx.fillStyle = "white";
-//     ctx.fillRect(0, 0, virtualCanvas.width, virtualCanvas.height);
-
-//     const drawAndDownload = () => {
-//         try {
-//             // Draw QR
-//             ctx.drawImage(source, 15, 10, 150, 150);
-
-//             // Add Text
-//             ctx.fillStyle = "black";
-//             ctx.font = "bold 14px Arial";
-//             ctx.textAlign = "center";
-//             const examTitle = currentExam ? currentExam.config.title : "Exam_Results";
-//             ctx.fillText(examTitle, virtualCanvas.width / 2, 190);
-
-//             // Download
-//             const link = document.createElement("a");
-//             link.href = virtualCanvas.toDataURL("image/png");
-//             link.download = `${examTitle.replace(/\s+/g, '_')}_QR.png`;
-//             link.click();
-//         } catch (err) {
-//             console.error("Canvas Export Failed:", err);
-//             alert("Security restriction: Could not download QR. Try right-clicking the QR to save it.");
-//         }
-//     };
-
-//     // If source is an <img> and not yet loaded, wait for it
-//     if (source.tagName === 'IMG' && !source.complete) {
-//         source.onload = drawAndDownload;
-//     } else {
-//         drawAndDownload();
-//     }
-// }
-// function generateMonitorQR(teacherId, examId) {
-//     const qrContainer = document.getElementById('qrcode-mon');
-//     if (!qrContainer) return; // Safety check
-    
-//     qrContainer.innerHTML = ""; 
-
-//     // USE 'res' and ':' to match your window.onload logic
-//     // This creates: .../index.html?res=shakib:123
-//     const resultLink = `${window.location.origin}${window.location.pathname}?res=${teacherId}:${examId}`;
-
-//     new QRCode(qrContainer, {
-//         text: resultLink,
-//         width: 150,
-//         height: 150,
-//         colorDark: "#000000",
-//         colorLight: "#ffffff",
-//         // H level allows the QR to be readable even if slightly damaged or small
-//         correctLevel: QRCode.CorrectLevel.H
-//     });
-    
-//     console.log("QR Link Generated:", resultLink);
-// }
-
-
 
 async function downloadQR() {
     const container = document.getElementById("qrcode-mon");
@@ -1899,18 +1144,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 
 
-
-
-// function filterMonitorTable() {
-//     const query = document.getElementById('student-search').value.toLowerCase();
-//     const rows = document.querySelectorAll('#monitor-body tr');
-//     rows.forEach(row => {
-//         const text = row.innerText.toLowerCase();
-//         row.style.display = text.includes(query) ? '' : 'none';
-//     });
-// }
-
-
 function filterMonitorTable() {
     const query = document.getElementById('student-search').value.toLowerCase();
     
@@ -1935,47 +1168,6 @@ function filterMonitorTable() {
         }
     });
 }
-
-
-
-// // Add this inside your teacher's startMonitorSync or a similar initialization function
-// function listenToFeed(examId) {
-//     const feed = document.getElementById('realtime-feed');
-//     if(!feed) return;
-
-//     feed.innerHTML = ""; 
-//     db.ref(`logs/${currentTeacher}/${examId}`).off(); 
-
-//     db.ref(`logs/${currentTeacher}/${examId}`).on('child_added', studentSnap => {
-//         const sName = studentSnap.key;
-        
-//         studentSnap.ref.on('child_added', logSnap => {
-//             const data = logSnap.val();
-            
-//             // Debugging: If it still fails, check your console to see what 'data' contains
-//             console.log("Realtime Feed Data:", data);
-
-//             const div = document.createElement('div');
-//             div.style = "padding: 8px; border-bottom: 1px solid #ddd; background: aqua; margin-bottom: 5px; border-radius: 4px; border-left: 4px solid var(--primary); animation: fadeIn 0.3s;";
-            
-//             // Use logical OR ( || ) to show 'N/A' if the data is missing
-//             const questionNum = data.qNum || "Unknown";
-//             const studentAns = data.answer || "No selection";
-//             const actionTime = data.time || "--:--";
-
-//             div.innerHTML = `
-//                 <strong>${sName}</strong> → 
-//                 <b>Q${questionNum}: ${studentAns}</b> 
-//                 <br><small style="color:#999">${actionTime}</small>
-//             `;
-            
-//             feed.prepend(div);
-//             if(feed.children.length > 30) feed.lastChild.remove();
-//         });
-//     });
-// }
-
-
 function listenToFeed(examId) {
     const feed = document.getElementById('realtime-feed');
     if(!feed) return;
@@ -2022,6 +1214,155 @@ function listenToFeed(examId) {
     });
 }
 
+
+
+
+// we can delete this tab any time because it is having issues
+
+document.addEventListener("visibilitychange", () => {
+   
+    if (document.visibilityState === "hidden") {
+        
+      
+        const examPaperView = document.getElementById('view-paper');
+        const isExamActive = examPaperView && examPaperView.style.display === 'block';
+
+        if (typeof stState !== 'undefined' && stState && !stState.done && isExamActive) {
+            
+            stState.switches = (stState.switches || 0) + 1;
+            
+           
+            db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
+                tabSwitches: stState.switches
+            });
+
+            if (stState.switches >= 3) {
+                alert("Test terminated due to multiple tab switches.");
+                finishTest(); 
+            } else {
+                alert(`Warning ${stState.switches}/3: If you switch tabs again, your test will be submitted automatically!`);
+            }
+        }
+    }
+});
+
+
+
+
+// Replace with your actual OpenAI Key from https://platform.openai.com/
+ 
+
+async function getGptGrade(question, studentAnswer, maxMarks) {
+    const url = "https://api.openai.com/v1/chat/completions";
+    
+    const requestPayload = {
+        model: "gpt-4o-mini", // Fast and very cheap for grading
+        messages: [
+            {
+                role: "system",
+                content: "You are a teacher grading a student exam. Return only valid JSON."
+            },
+            {
+                role: "user",
+                content: `Grade this student answer fairly.
+                Question: "${question}"
+                Student Answer: "${studentAnswer}"
+                Max Marks: ${maxMarks}
+                Return ONLY this JSON format: {"score": number, "explanation": "string"}`
+            }
+        ],
+        response_format: { "type": "json_object" } // Forces GPT to return perfect JSON
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENAI_API_KEY}`
+            },
+            body: JSON.stringify(requestPayload)
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            console.error("GPT API Error:", data.error.message);
+            return null;
+        }
+
+        const resultText = data.choices[0].message.content;
+        const parsed = JSON.parse(resultText);
+        
+        return {
+            score: Number(parsed.score) || 0,
+            explanation: parsed.explanation || ""
+        };
+
+    } catch (error) {
+        console.error("AI Logic Error:", error);
+        return null;
+    }
+}
+async function bulkAiGrade() {
+    let examId = document.getElementById('mon-id').innerText.trim();
+    if (!examId || examId === "...") return alert("Open Monitor First.");
+
+    const studentsRef = db.ref(`live/${currentTeacher}/${examId}`);
+    const snap = await studentsRef.once('value');
+    const students = snap.val();
+    
+    if (!students) return alert("No students found.");
+    const studentNames = Object.keys(students).filter(name => students[name].needsGrading);
+
+    for (let i = 0; i < studentNames.length; i++) {
+        const name = studentNames[i];
+        const s = students[name];
+        let totalAiMarks = 0;
+
+        for (let qIdx = 0; qIdx < currentExam.questions.length; qIdx++) {
+            const q = currentExam.questions[qIdx];
+            if (q.type === 'long') {
+                const studentAns = (s.ans && s.ans[qIdx]) ? s.ans[qIdx] : "No Answer";
+                
+                let result = await getGptGrade(q.text, studentAns, q.marks || 10);
+                
+                // --- RETRY LOGIC FOR 429 ---
+                if (!result) {
+                    console.log("Waiting 10 seconds to retry due to rate limit...");
+                    await new Promise(r => setTimeout(r, 10000)); // Wait 10 seconds
+                    result = await getGptGrade(q.text, studentAns, q.marks || 10);
+                }
+
+                if (result && typeof result.score === 'number') {
+                    totalAiMarks += result.score;
+                } else {
+                    console.warn(`AI failed permanently for ${name}. Using 0.`);
+                    totalAiMarks += 0; 
+                }
+                
+                // Increased wait to 2 seconds to stay safe
+                await new Promise(r => setTimeout(r, 2000)); 
+            }
+        }
+
+        const finalScore = (s.mcqScore || 0) + totalAiMarks;
+        const totalPossible = s.totalPossible || 100;
+        const passLimit = currentExam.config.passLimit || 40;
+        const percentage = (finalScore / totalPossible) * 100;
+        const passStatus = percentage >= passLimit ? "Pass" : "Fail";
+
+        await studentsRef.child(name).update({
+            score: finalScore,
+            status: passStatus,
+            needsGrading: false,
+            aiGraded: true
+        });
+
+        console.log(`Updated ${name}: Score ${finalScore}, Status ${passStatus}`);
+    }
+    alert("Grading Finished!");
+}
 </script>
 </body>
 </html>
