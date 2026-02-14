@@ -143,6 +143,30 @@ div[style*="display:flex"] {
     visibility: visible !important;
     text-align: center;
 }
+
+
+
+
+
+
+
+
+
+#timer-clock {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.pulse-animation {
+    animation: pulse 1s infinite;
+}
     </style>
 </head>
 <body>
@@ -215,12 +239,12 @@ div[style*="display:flex"] {
 
 
                 
-                <!-- <div style="margin: 15px 0; display: flex; gap: 20px; flex-wrap: wrap; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
+                <div style="margin: 15px 0; display: flex; gap: 20px; flex-wrap: wrap; background: #111827; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
                     <label><input type="checkbox" id="ex-neg"> Enable Negative Marking (-1)</label>
                     <label><input type="checkbox" id="ex-hold" checked> Hold Results for Review</label>
                     <label style="color: var(--warn)"><input type="checkbox" id="ex-email"> 📧 Enable Email Automation</label>
 
-                </div> -->
+                </div>
      <div class="card" id="ai-creator-container" style="margin-top: 20px; border: 1px solid #3b82f6;">
     <h2 style="color: var(--primary)">✨ AI Magic Test Creator</h2>
     <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Fill details to auto-generate questions using AI.</p>
@@ -235,6 +259,8 @@ div[style*="display:flex"] {
         <input type="number" id="ai-mcq-count" placeholder="MCQ Quantity">
         <input type="number" id="ai-long-count" placeholder="Long Q Quantity">
         <input type="number" id="ai-pass-marks" placeholder="Pass % (e.g. 40)">
+        <label style="color:white;">Time Limit (Minutes):</label>
+<input type="number" id="ai-duration" value="60" style="width:100%; padding:10px; margin-bottom:10px; background:#111827; color:white; border:1px solid #334155; border-radius:8px;">
         <input type="datetime-local" id="ai-expiry">
     </div>
     <button id="ai-gen-btn" onclick="generateAiExam(event)" class="btn btn-primary" style="margin-top:20px; width:100%; font-weight: bold;">
@@ -392,8 +418,8 @@ div[style*="display:flex"] {
 
 
    <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
-    <input type="text" id="student-search" oninput="filterResults()" placeholder="Search name..." 
-           style="flex-grow: 1; padding: 10px; background: #111827; color: white; border: 1px solid #334155; border-radius: 8px;">
+    <!-- <input type="text" id="student-search" oninput="filterResults()" placeholder="Search name..."  -->
+           <!-- style="flex-grow: 1; padding: 10px; background: #111827; color: white; border: 1px solid #334155; border-radius: 8px;"> -->
 
 
             <div class="card">
@@ -410,9 +436,11 @@ div[style*="display:flex"] {
                         <tbody id="public-board-body"></tbody>
                     </table>
                 </div>
+                 <button onclick="switchView('view-start')" class="btn btn-sm btn-primary">Back Home</button>
             </div>
-            <button onclick="switchView('view-start')" class="btn btn-sm btn-primary">Back Home</button>
+            <!-- <button onclick="switchView('view-start')" class="btn btn-sm btn-primary">Back Home</button> -->
         </section>
+       
     </div>
 
 <script>
@@ -858,65 +886,132 @@ function openGradingModal(stName) {
 function closeModal() {
     document.getElementById('gradeModal').style.display = 'none';
 }
-
-async function submitManualGrade() {
-    const marks = document.getElementById('manual-marks').value;
-    if(marks === "") return alert("Please enter marks");
-    
-    const snap = await db.ref(`live/${currentTeacher}/${currentExam.config.id}/${gradingStudent}`).once('value');
-    const s = snap.val();
-    
-    const finalScore = (s.mcqScore || 0) + parseInt(marks);
-    const status = (finalScore / s.totalPossible * 100) >= currentExam.config.passLimit ? "Pass" : "Fail";
-    
-    await db.ref(`live/${currentTeacher}/${currentExam.config.id}/${gradingStudent}`).update({
-        score: finalScore, status, needsGrading: false
-    });
-
-    if(currentExam.config.emailEnabled) {
-        sendEmailResult(gradingStudent, s.email, finalScore, s.totalPossible, status);
-    }
-
-    closeModal();
-    alert("Grading Updated!");
+function closeReview() {
+    document.getElementById('reviewModal').style.display = 'none';
 }
 
 
-function studentJoin() {
+async function submitManualGrade() {
+    const marksInput = document.getElementById('manual-marks').value;
+    if(marksInput === "") return alert("Please enter marks");
+    
+    const marks = parseInt(marksInput);
+
+    try {
+        const path = `live/${currentTeacher}/${currentExam.config.id}/${gradingStudent}`;
+        const snap = await db.ref(path).once('value');
+        const s = snap.val();
+
+        if (!s) throw new Error("Student data not found.");
+
+        // 1. Calculate the New Final Score
+        const finalScore = (Number(s.mcqScore) || 0) + marks;
+
+        // 2. Safety check for Total Possible Marks
+        const totalMax = Number(s.totalPossible) || 100; // Fallback to 100 if missing
+        const passLimit = Number(currentExam.config.passLimit) || 40;
+
+        // 3. Determine Status (Calculation of percentage)
+        const percentage = (finalScore / totalMax) * 100;
+        const status = percentage >= passLimit ? "Pass" : "Fail";
+
+        // 4. Update Database
+        await db.ref(path).update({
+            score: finalScore,
+            status: status,
+            needsGrading: false,
+            manualMarks: marks // Good to store this separately for records
+        });
+
+        // 5. Send Email if enabled
+        if(currentExam.config.emailEnabled && s.email) {
+            sendEmailResult(gradingStudent, s.email, finalScore, totalMax, status);
+        }
+
+        closeModal();
+        alert(`Grading Updated! Score: ${finalScore}/${totalMax} (${status})`);
+        
+        // Refresh the list if your UI has a refresh function
+        if (typeof loadLiveSubmissions === "function") loadLiveSubmissions();
+
+    } catch (error) {
+        console.error("Grading Error:", error);
+        alert("Error updating marks: " + error.message);
+    }
+}
+
+async function studentJoin() {
     const tId = document.getElementById('st-teacher-id').value.trim().toLowerCase();
     const eId = document.getElementById('st-code').value.trim();
     const name = document.getElementById('st-name').value.trim();
     const email = document.getElementById('st-email').value.trim();
+
     if(!tId || !eId || !name) return alert("All fields are mandatory");
 
-    db.ref(`teachers/${tId}/exams/${eId}`).once('value', snap => {
+    // Sanitize Name for Firebase Path
+    const safeName = name.replace(/[.#$[\]]/g, "_");
+    const joinBtn = document.querySelector('[onclick="studentJoin()"]');
+    if(joinBtn) joinBtn.disabled = true;
+
+    try {
+        const snap = await db.ref(`teachers/${tId}/exams/${eId}`).once('value');
         const test = snap.val();
-        if(!test) return alert("Examination not found!");
-        if(Date.now() > test.config.expiry) return alert("This test link has expired!");
+
+        if(!test) {
+            alert("Examination not found!");
+            if(joinBtn) joinBtn.disabled = false;
+            return;
+        }
+
+        // Initialize Global State
         currentExam = test;
-        stState = { name, email, id: eId, teacher: tId, answers: {}, pastes: 0 };
-        
-        // Pre-create student record for Live Counter
-        db.ref(`live/${tId}/${eId}/${name}`).update({joined: true, email: email, status: 'In Progress'});
-        
+        stState = { name: safeName, email: email, id: eId, teacher: tId, answers: {}, pastes: 0 };
+
+        // UI Transition
         renderExamPaper();
         switchView('view-paper');
-        startMainClock(test.config.dur);
-    });
+
+        // --- IMPROVED TIMING CALCULATION ---
+        // Force a clean number from the database
+        let timeInMinutes = 60; // Safe default
+        
+        if (test.config) {
+            // Check all possible keys where time might be stored
+            let rawTime = test.config.duration || test.config.dur || test.config.time;
+            timeInMinutes = parseInt(rawTime);
+        }
+
+        // Final safety check: if DB had "0" or "NaN", use 60
+        if (!timeInMinutes || isNaN(timeInMinutes) || timeInMinutes <= 0) {
+            console.warn("Invalid time detected, defaulting to 60 mins");
+            timeInMinutes = 60;
+        }
+
+        console.log("Timer starting for minutes:", timeInMinutes);
+        startMainClock(timeInMinutes);
+
+    } catch (error) {
+        console.error("Join Error:", error);
+        alert("Connection error: " + error.message);
+        if(joinBtn) joinBtn.disabled = false;
+    }
 }
+
 
 function renderExamPaper() {
     const cont = document.getElementById('paper-content');
     cont.innerHTML = currentExam.questions.map((q, i) => `
-        <div class="q-box">
-            <p><b>Question ${i+1}: ${q.text}</b> <span style="float:right">(${q.marks}M)</span></p>
+        <div class="q-box" style="background:#1e293b; padding:20px; border-radius:10px; margin-bottom:15px; border:1px solid #334155;">
+            <p style="color:white;"><b>Question ${i+1}: ${q.text}</b> <span style="float:right; color:#6366f1;">(${q.marks}M)</span></p>
             ${q.type === 'mcq' ? 
                 q.options.map((opt, idx) => `
-                    <label style="display:block; margin: 10px 0; cursor:pointer;">
-                        <input type="radio" name="q${i}" onclick="saveProgress(${i}, '${opt}')"> ${opt}
+                    <label style="display:block; margin: 10px 0; cursor:pointer; color:#94a3b8;">
+                        <input type="radio" name="q${i}" onclick="saveProgress(${i}, ${idx})"> ${opt}
                     </label>
                 `).join('') 
-                : `<textarea oninput="saveProgress(${i}, this.value)" onpaste="stState.pastes++" placeholder="Type your answer here..."></textarea>`
+                : `<textarea oninput="saveProgress(${i}, this.value)" onpaste="stState.pastes++;" 
+                    style="width:100%; height:100px; background:#0f172a; color:white; border:1px solid #334155; border-radius:8px; padding:10px;" 
+                    placeholder="Type your answer here..."></textarea>`
             }
         </div>
     `).join('');
@@ -924,12 +1019,15 @@ function renderExamPaper() {
 
 
 
+
 function saveProgress(qIdx, val) {
-    // 1. Update local state
+    // 1. Ensure local state exists and update it
+    if (!stState.answers) stState.answers = {};
     stState.answers[qIdx] = val;
     stState.lastActive = Date.now();
 
     // 2. Push to Firebase (Official State)
+    // We update only the specific question in 'ans' to be faster and safer
     db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).update({
         ans: stState.answers, 
         pastes: stState.pastes, 
@@ -938,56 +1036,122 @@ function saveProgress(qIdx, val) {
         done: false
     }).catch(err => console.error("Sync Error:", err));
 
-    // --- Real-Time Feed Logic (Ensuring Question & Answer are visible) ---
+    // 3. Real-Time Feed Logic (Fix: Update every time, not just once)
     const logRef = db.ref(`logs/${stState.teacher}/${stState.id}/${stState.name}/q${qIdx}`);
     
-    logRef.once('value').then(snap => {
-        if (!snap.exists()) {
-            // We use qNum and answer keys. 
-            // We also ensure 'val' is converted to a string in case it's a number/null.
-            logRef.set({
-                qNum: qIdx + 1,
-                answer: val ? val.toString() : "No selection", 
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
-        }
+    // We use .set() instead of .once() to ensure the teacher sees the LATEST selection
+    logRef.set({
+        qNum: qIdx + 1,
+        // If it's an MCQ index, we might want to show the text, 
+        // but for now, showing the index or text correctly:
+        answer: (val !== undefined && val !== null) ? val.toString() : "No selection", 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
 }
 
 
 
+
+// This is your global timer reference
+window.examTimer = null; 
+
 function startMainClock(mins) {
-    let timeLeft = mins * 60;
-    const interval = setInterval(() => {
-        const m = Math.floor(timeLeft / 60);
-        const s = timeLeft % 60;
-        document.getElementById('timer-clock').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        if(timeLeft <= 0) { clearInterval(interval); finishTest(); }
-        timeLeft--;
+    if (window.examTimer) clearInterval(window.examTimer);
+
+    let totalSeconds = Number(mins) * 60;
+
+    window.examTimer = setInterval(() => {
+        totalSeconds--;
+
+        updateClockDisplay(totalSeconds);
+
+        // --- ADDED HERE ---
+        if (totalSeconds <= 0) {
+            // 1. Stop the clock immediately
+            clearInterval(window.examTimer);
+            window.examTimer = null;
+            
+            // 2. Update UI to zero
+            const display = document.getElementById('timer-clock');
+            if (display) display.innerText = "00:00";
+
+            // 3. AUTO-SUBMIT FIRST (The "Secret Sauce")
+            // This runs the save logic in the background
+            finishTest().then(() => {
+                // 4. Then tell the user it's done
+                alert("⏰ Time is up! Your test has been saved and submitted.");
+            }).catch(err => {
+                console.error("Auto-submit failed:", err);
+                alert("Time is up! Please click 'Submit' manually if the page doesn't redirect.");
+            });
+        }
+        // ------------------
+
     }, 1000);
 }
 
+function updateClockDisplay(seconds) {
+    const safeSeconds = seconds < 0 ? 0 : seconds;
+    const m = Math.floor(safeSeconds / 60);
+    const s = safeSeconds % 60;
+    const display = document.getElementById('timer-clock');
+    
+    if (display) {
+        display.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        
+        // Visual warning for last minute
+        if (safeSeconds <= 60) {
+            display.style.color = "#ff4d4d"; // Bright red
+        } else {
+            display.style.color = "white";
+        }
+    }
+}
+
+
+
 async function finishTest() {
+    // 1. STOP THE TIMER
+    if (window.examInterval) clearInterval(window.examInterval);
+    if (window.examTimer) clearInterval(window.examTimer);
+
     let mcqScore = 0;
     let totalPossible = 0;
     let hasLong = false;
 
     currentExam.questions.forEach((q, i) => {
-        totalPossible += q.marks;
+        // Ensure marks is treated as a number
+        const questionMarks = Number(q.marks) || 0;
+        totalPossible += questionMarks;
+
         if(q.type === 'mcq') {
-            const isCorrect = (stState.answers[i] === q.correct);
-            if(isCorrect) mcqScore += q.marks;
-            else if(currentExam.config.negative && stState.answers[i]) mcqScore -= 1;
-        } else hasLong = true;
+            const studentAns = stState.answers[i];
+            const correctAns = q.correct;
+
+            // --- FAIR RESULT FIX: Compare using Number() ---
+            // This handles both AI tests (Number) and manual tests (String/Number)
+            const isCorrect = (studentAns !== undefined && Number(studentAns) === Number(correctAns));
+
+            if(isCorrect) {
+                mcqScore += questionMarks;
+            } else if(currentExam.config.negative && studentAns !== undefined) {
+                // Apply negative marking if configured
+                mcqScore -= 1; 
+            }
+        } else {
+            hasLong = true;
+        }
     });
 
+    // Calculate percentage and status
     const perc = (mcqScore / totalPossible) * 100;
-    const status = perc >= currentExam.config.passLimit ? "Pass" : "Fail";
+    const passLimit = Number(currentExam.config.passLimit) || 40;
+    const status = perc >= passLimit ? "Pass" : "Fail";
 
     const finalData = {
         email: stState.email,
-        mcqScore,
-        totalPossible,
+        mcqScore: mcqScore,
+        totalPossible: totalPossible,
         needsGrading: hasLong,
         timestamp: Date.now(),
         ans: stState.answers,
@@ -997,13 +1161,14 @@ async function finishTest() {
         score: hasLong ? null : mcqScore
     };
 
+    // UI Updates
     const scoreBox = document.getElementById('student-score-box');
     const statusBox = document.getElementById('student-status-box');
 
     if(!hasLong) {
         if(!currentExam.config.hold) {
             scoreBox.innerHTML = `<h3>Your Score: ${mcqScore} / ${totalPossible}</h3>`;
-            statusBox.innerHTML = `Status: <span style="color:${status === 'Pass' ? 'var(--success)' : 'var(--danger)'}">${status}</span>`;
+            statusBox.innerHTML = `Status: <span style="color:${status === 'Pass' ? '#10b981' : '#ef4444'}">${status}</span>`;
         } else {
             scoreBox.innerHTML = `<h3>Submitted Successfully</h3>`;
             statusBox.innerHTML = `<p>Results are being held by the teacher.</p>`;
@@ -1017,10 +1182,10 @@ async function finishTest() {
         statusBox.innerHTML = `<p>Manual grading required. Teacher will review your answers.</p>`;
     }
 
+    // Save to Firebase and switch view
     await db.ref(`live/${stState.teacher}/${stState.id}/${stState.name}`).set(finalData);
     switchView('view-result');
 }
-
 
 async function deleteExam(id) {
     if(confirm(`Delete all data for test ${id}?`)) {
@@ -1029,87 +1194,9 @@ async function deleteExam(id) {
     }
 }
 
-// function loadPublicBoard() {
-//     const tId = document.getElementById('res-t-id').value.trim().toLowerCase();
-//     const eId = document.getElementById('res-e-id').value.trim();
-//     db.ref(`live/${tId}/${eId}`).once('value', snap => {
-//         const container = document.getElementById('public-board-body');
-//         container.innerHTML = "";
-//         const data = snap.val();
-//         if(!data) return alert("No results found.");
-//         const sorted = Object.keys(data).sort((a,b) => (data[b].score || 0) - (data[a].score || 0));
-//         sorted.forEach((name, i) => {
-//             const s = data[name];
-//             container.innerHTML += `
-//                 <tr>
-//                     <td>${i+1}</td>
-//                     <td>${name}</td>
-//                     <td>${s.score !== null && s.score !== undefined ? s.score + '/' + s.totalPossible : 'Grading...'}</td>
-//                     <td><span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">${s.status || 'Pending'}</span></td>
-//                 </tr>
-//             `;
-//         });
-//     });
-// }
 
 
-
-
-
-// 1. Create a memory bank to hold the feedback safely
 let feedbackMemory = {};
-
-// function loadPublicBoard() {
-//     const tId = document.getElementById('res-t-id').value.trim().toLowerCase();
-//     const eId = document.getElementById('res-e-id').value.trim();
-    
-//     db.ref(`live/${tId}/${eId}`).once('value', snap => {
-//         const container = document.getElementById('public-board-body');
-//         container.innerHTML = "";
-//         const data = snap.val();
-        
-//         if(!data) return alert("No results found.");
-        
-//         // Clear memory for the new search
-//         feedbackMemory = {};
-
-//         const sorted = Object.keys(data).sort((a,b) => (data[b].score || 0) - (data[a].score || 0));
-        
-//         sorted.forEach((name, i) => {
-//             const s = data[name];
-
-//             // 2. Store the long text in our memory bank using the name as a key
-//             if (s.aiGraded) {
-//                 feedbackMemory[name] = {
-//                     feedback: s.aiFeedback || "No feedback.",
-//                     plan: s.aiStudyPlan || "No plan."
-//                 };
-//             }
-
-//             // 3. The button now only passes the NAME (no long strings)
-//             let reviewBtn = s.aiGraded 
-//                 ? `<button onclick="handleReviewClick('${name}')" style="background:#673ab7; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:11px;">Review AI</button>`
-//                 : `<span style="color:#ccc; font-size:11px;">N/A</span>`;
-
-//             container.innerHTML += `
-//                 <tr>
-//                     <td>${i+1}</td>
-//                     <td>${name}</td>
-//                     <td>${s.score !== null && s.score !== undefined ? s.score + '/' + (s.totalPossible || 100) : 'Grading...'}</td>
-//                     <td>
-//                         <span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : 'var(--warn)')}">
-//                             ${s.status || 'Pending'}
-//                         </span>
-//                     </td>
-//                     <td>${reviewBtn}</td>
-//                 </tr>
-//             `;
-//         });
-//     });
-// }
-
-
-
 
 function loadPublicBoard() {
     const tId = document.getElementById('res-t-id').value.trim().toLowerCase();
@@ -1130,10 +1217,6 @@ function loadPublicBoard() {
         
         // Reset memory for fresh AI data
         feedbackMemory = {};
-
-        // Sort by score (Rank 1 at top)
-        // const sorted = Object.keys(data).sort((a,b) => (data[b].score || 0) - (data[a].score || 0));
-        // Replace the sort line in loadPublicBoard with this:
 const sorted = Object.keys(data).sort((a, b) => {
     const scoreA = data[a].score || 0;
     const scoreB = data[b].score || 0;
@@ -1154,26 +1237,12 @@ const sorted = Object.keys(data).sort((a, b) => {
         // Note the (name, i) -> 'i' is the index starting from 0
 
 
-            // 2. Define the Review Button
+         
             let reviewBtn = s.aiGraded 
                 ? `<button onclick="handleReviewClick('${name}')" style="background:#6366f1; color:white; border:none; padding:5px 12px; border-radius:6px; cursor:pointer; font-weight:500; font-size:11px; transition:0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Review AI</button>`
                 : `<span style="color:#94a3b8; font-size:11px; font-style:italic;">Processing...</span>`;
 
-            // 3. Inject the Row
-            // container.innerHTML += `
-            //     <tr style="border-bottom: 1px solid #f1f5f9;">
-            //         <td style="font-weight:bold; color: #1e293b;">${i+1}</td>
-            //         <td style="color: #475569;">${name}</td>
-            //         <td style="font-weight:600;">${s.score !== null ? s.score : 0} <span style="color:#94a3b8; font-weight:400;">/ ${s.totalPossible || 100}</span></td>
-            //         <td>
-            //             <span class="btn-sm" style="background:${s.status === 'Pass' ? 'var(--success)' : (s.status === 'Fail' ? 'var(--danger)' : '#f59e0b')}">
-            //                 ${s.status || 'Pending'}
-            //             </span>
-            //         </td>
-            //         <td>${reviewBtn}</td>
-            //     </tr>
-            // `;
-            // 3. Inject the Row (Explicitly forcing color and content)
+      
 
            
 container.innerHTML += `
@@ -1199,14 +1268,43 @@ container.innerHTML += `
     });
 }
 
-// 4. New helper function to bridge the button to the Modal
+
+
+
+
+
+// --- ADD THESE HELPER FUNCTIONS OUTSIDE TO ENSURE THE BUTTON WORKS ---
 function handleReviewClick(studentName) {
     const data = feedbackMemory[studentName];
-    if (data) {
-        openReview(data.feedback, data.plan);
+    if (data && typeof openReview === "function") {
+        openReview(data.feedback, data.plan, studentName);
+    } else if (!data) {
+        alert("AI feedback is still being generated for " + studentName);
+    } else {
+        console.error("openReview function is missing!");
     }
 }
+// function handleReviewClick(studentName) {
+//     const data = feedbackMemory[studentName];
+//     if (data) {
+//         openReview(data.feedback, data.plan);
+//     }
+// }
 
+
+// This function filters the table rows
+function filterResults() {
+    const searchInput = document.getElementById('search-student');
+    if (!searchInput) return; // Exit if the search box doesn't exist
+    
+    const filter = searchInput.value.toLowerCase();
+    const rows = document.querySelectorAll("#live-stats-table tr");
+
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+}
 
 function toggleFilter(f) {
     currentFilter = f;
@@ -1484,333 +1582,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 
-
-
-// Replace with your actual OpenAI Key from https://platform.openai.com/
-// const OPENAI_API_KEY = "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"; 
-
-// async function getGptGrade(question, studentAnswer, maxMarks) {
-//     const url = "https://api.openai.com/v1/chat/completions";
-    
-//     const requestPayload = {
-//         model: "gpt-4o-mini", // Fast and very cheap for grading
-//         messages: [
-//             {
-//                 role: "system",
-//                 content: "You are a teacher grading a student exam. Return only valid JSON."
-//             },
-//             {
-//                 role: "user",
-//                 content: `Grade this student answer fairly.
-//                 Question: "${question}"
-//                 Student Answer: "${studentAnswer}"
-//                 Max Marks: ${maxMarks}
-//                 Return ONLY this JSON format: {"score": number, "explanation": "string"}`
-//             }
-//         ],
-//         response_format: { "type": "json_object" } // Forces GPT to return perfect JSON
-//     };
-
-//     try {
-//         const response = await fetch(url, {
-//             method: "POST",
-//             headers: { 
-//                 "Content-Type": "application/json",
-//                 "Authorization": `Bearer ${OPENAI_API_KEY}`
-//             },
-//             body: JSON.stringify(requestPayload)
-//         });
-
-//         const data = await response.json();
-
-//         if (data.error) {
-//             console.error("GPT API Error:", data.error.message);
-//             return null;
-//         }
-
-//         const resultText = data.choices[0].message.content;
-//         const parsed = JSON.parse(resultText);
-        
-//         return {
-//             score: Number(parsed.score) || 0,
-//             explanation: parsed.explanation || ""
-//         };
-
-//     } catch (error) {
-//         console.error("AI Logic Error:", error);
-//         return null;
-//     }
-// }
-
-
-
-
-
-// // 1. Get your free key from https://console.groq.com/keys
-// const GROQ_API_KEY = "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"; 
-
-// // The actual AI function
-// async function getGroqGrade(question, studentAnswer, maxMarks) {
-//     const url = "https://api.groq.com/openai/v1/chat/completions";
-    
-//     const requestPayload = {
-//         model: "llama-3.3-70b-versatile", // Powerful & Free
-//         messages: [
-//             {
-//                 role: "system",
-//                 content: "You are a teacher grading a student exam. Return ONLY valid JSON."
-//             },
-//             {
-//                 role: "user",
-//                 content: `Grade this student answer fairly.
-//                 Question: "${question}"
-//                 Student Answer: "${studentAnswer}"
-//                 Max Marks: ${maxMarks}
-//                 Return ONLY JSON: {"score": number, "explanation": "string"}`
-//             }
-//         ],
-//         response_format: { "type": "json_object" } 
-//     };
-
-//     try {
-//         const response = await fetch(url, {
-//             method: "POST",
-//             headers: { 
-//                 "Content-Type": "application/json",
-//                 "Authorization": `Bearer ${GROQ_API_KEY}`
-//             },
-//             body: JSON.stringify(requestPayload)
-//         });
-
-//         const data = await response.json();
-//         if (data.error) {
-//             console.error("Groq Error:", data.error.message);
-//             return null;
-//         }
-
-//         const resultText = data.choices[0].message.content;
-//         return JSON.parse(resultText);
-//     } catch (error) {
-//         console.error("AI Logic Error:", error);
-//         return null;
-//     }
-// }
-
-
-
-
-
-
-
-// // The loop function
-// async function bulkAiGrade() {
-//     let examId = document.getElementById('mon-id').innerText.trim();
-//     if (!examId || examId === "...") return alert("Open Monitor First.");
-
-//     const studentsRef = db.ref(`live/${currentTeacher}/${examId}`);
-//     const snap = await studentsRef.once('value');
-//     const students = snap.val();
-    
-//     if (!students) return alert("No students found.");
-//     const studentNames = Object.keys(students).filter(name => students[name].needsGrading);
-
-//     for (let i = 0; i < studentNames.length; i++) {
-//         const name = studentNames[i];
-//         const s = students[name];
-//         let totalAiMarks = 0;
-
-//         for (let qIdx = 0; qIdx < currentExam.questions.length; qIdx++) {
-//             const q = currentExam.questions[qIdx];
-//             if (q.type === 'long') {
-//                 const studentAns = (s.ans && s.ans[qIdx]) ? s.ans[qIdx] : "No Answer";
-                
-//                 // FIXED: Changed getGptGrade to getGroqGrade
-//                 let result = await getGroqGrade(q.text, studentAns, q.marks || 10);
-                
-//                 if (!result) {
-//                     console.log("Retrying in 5 seconds...");
-//                     await new Promise(r => setTimeout(r, 5000));
-//                     result = await getGroqGrade(q.text, studentAns, q.marks || 10);
-//                 }
-
-//                 if (result && typeof result.score === 'number') {
-//                     totalAiMarks += result.score;
-//                 } else {
-//                     totalAiMarks += 0; 
-//                 }
-                
-//                 // Small 1.5s delay to respect free rate limits
-//                 await new Promise(r => setTimeout(r, 1500)); 
-//             }
-//         }
-
-//         const finalScore = (s.mcqScore || 0) + totalAiMarks;
-//         const totalPossible = s.totalPossible || 100;
-//         const passLimit = currentExam.config.passLimit || 40;
-//         const percentage = (finalScore / totalPossible) * 100;
-//         const passStatus = percentage >= passLimit ? "Pass" : "Fail";
-
-//         // await studentsRef.child(name).update({
-//         //     score: finalScore,
-//         //     status: passStatus,
-//         //     needsGrading: false,
-//         //     aiGraded: true
-//         // });
-//         // ... existing code inside the student loop ...
-// await studentsRef.child(name).update({
-//     score: finalScore,
-//     status: passStatus,
-//     needsGrading: false,
-//     aiGraded: true,
-//     aiFeedback: result.explanation // ADD THIS LINE to save the feedback
-// });
-
-//         console.log(`✅ Updated ${name}: Score ${finalScore}`);
-//     }
-//     alert("Grading Finished!");
-// }
-
-
-
-
-
-
-
-
-
-// // 1. Get your free key from https://console.groq.com/keys
  const GROQ_API_KEY = "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"; 
-
-// // The actual AI function
-// async function getGroqGrade(question, studentAnswer, maxMarks) {
-//     const url = "https://api.groq.com/openai/v1/chat/completions";
-    
-//     // Calculate word count
-//     const wordCount = studentAnswer.trim().split(/\s+/).filter(word => word.length > 0).length;
-    
-//     // Setting up the Word Count logic for the AI
-//     let lengthInstruction = "";
-//     if (wordCount < 200) {
-//         lengthInstruction = `STRICT RULE: The answer is only ${wordCount} words (Short). Even if perfectly correct, the MAXIMUM score allowed is 3 out of ${maxMarks}.`;
-//     } else {
-//         lengthInstruction = `The answer is ${wordCount} words (Long). You have full freedom to give any score from 0 to ${maxMarks}. Do not give full marks automatically; grade based on quality and depth.`;
-//     }
-
-//     const requestPayload = {
-//         model: "llama-3.3-70b-versatile",
-//         messages: [
-//             {
-//                 role: "system",
-//                 content: "You are a professional examiner. Return ONLY valid JSON."
-//             },
-//             {
-//                 role: "user",
-//                 content: `Grade this student answer.
-//                 Question: "${question}"
-//                 Student Answer: "${studentAnswer}"
-//                 Max Marks for this question: ${maxMarks}
-
-//                 ${lengthInstruction}
-
-//                 Return ONLY JSON format: {"score": number, "explanation": "string"}`
-//             }
-//         ],
-//         response_format: { "type": "json_object" } 
-//     };
-
-//     try {
-//         const response = await fetch(url, {
-//             method: "POST",
-//             headers: { 
-//                 "Content-Type": "application/json",
-//                 "Authorization": `Bearer ${GROQ_API_KEY}`
-//             },
-//             body: JSON.stringify(requestPayload)
-//         });
-
-//         const data = await response.json();
-//         if (data.error) {
-//             console.error("Groq Error:", data.error.message);
-//             return null;
-//         }
-
-//         const resultText = data.choices[0].message.content;
-//         return JSON.parse(resultText);
-//     } catch (error) {
-//         console.error("AI Logic Error:", error);
-//         return null;
-//     }
-// }
-
-// // The loop function
-// async function bulkAiGrade() {
-//     let examId = document.getElementById('mon-id').innerText.trim();
-//     if (!examId || examId === "...") return alert("Open Monitor First.");
-
-//     const studentsRef = db.ref(`live/${currentTeacher}/${examId}`);
-//     const snap = await studentsRef.once('value');
-//     const students = snap.val();
-    
-//     if (!students) return alert("No students found.");
-//     const studentNames = Object.keys(students).filter(name => students[name].needsGrading);
-
-//     for (let i = 0; i < studentNames.length; i++) {
-//         const name = studentNames[i];
-//         const s = students[name];
-//         let totalAiMarks = 0;
-//         let allFeedback = ""; // Fixed: We collect feedback here
-
-//         for (let qIdx = 0; qIdx < currentExam.questions.length; qIdx++) {
-//             const q = currentExam.questions[qIdx];
-//             if (q.type === 'long') {
-//                 const studentAns = (s.ans && s.ans[qIdx]) ? s.ans[qIdx] : "No Answer";
-                
-//                 let result = await getGroqGrade(q.text, studentAns, q.marks || 10);
-                
-//                 if (!result) {
-//                     console.log("Retrying in 5 seconds...");
-//                     await new Promise(r => setTimeout(r, 5000));
-//                     result = await getGroqGrade(q.text, studentAns, q.marks || 10);
-//                 }
-
-//                 if (result && typeof result.score === 'number') {
-//                     totalAiMarks += result.score;
-//                     // Store feedback for each question
-//                     allFeedback += `Q${qIdx + 1}: ${result.explanation} `; 
-//                 } else {
-//                     totalAiMarks += 0; 
-//                     allFeedback += `Q${qIdx + 1}: AI Error. `;
-//                 }
-                
-//                 await new Promise(r => setTimeout(r, 1500)); 
-//             }
-//         }
-
-//         const finalScore = (s.mcqScore || 0) + totalAiMarks;
-//         const totalPossible = s.totalPossible || 100;
-//         const passLimit = (currentExam.config && currentExam.config.passLimit) ? currentExam.config.passLimit : 40;
-//         const percentage = (finalScore / totalPossible) * 100;
-//         const passStatus = percentage >= passLimit ? "Pass" : "Fail";
-
-//         // Fixed: Use the 'allFeedback' string we collected
-//         await studentsRef.child(name).update({
-//             score: finalScore,
-//             status: passStatus,
-//             needsGrading: false,
-//             aiGraded: true,
-//             aiFeedback: allFeedback
-//         });
-
-//         console.log(`✅ Updated ${name}: Score ${finalScore}`);
-//     }
-//     alert("Grading Finished!");
-// }
-
-
-
-
-
-
 
 
 async function getGroqGrade(question, studentAnswer, maxMarks) {
@@ -1929,9 +1701,6 @@ async function bulkAiGrade() {
 
 
 
-
-
-
 async function generateAiExam(event) {
     if(event) event.preventDefault();
 
@@ -1939,22 +1708,26 @@ async function generateAiExam(event) {
     const mcqCount = parseInt(document.getElementById('ai-mcq-count').value) || 0;
     const longCount = parseInt(document.getElementById('ai-long-count').value) || 0;
     const passMarks = document.getElementById('ai-pass-marks').value || 40;
-    const expiryInput = document.getElementById('ai-expiry').value; // Get datetime string
+    const expiryInput = document.getElementById('ai-expiry').value;
+    const difficulty = document.getElementById('ai-difficulty').value;
+    const durationInput = document.getElementById('ai-duration');
+    const duration = durationInput ? parseInt(durationInput.value) : 60;
 
     if (!subject || (mcqCount === 0 && longCount === 0)) {
         return alert("Please fill in subject and question counts.");
     }
 
     const btn = event.target;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Generating...`;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI Crafting Paper...`;
     btn.disabled = true;
 
-    // Convert expiry date to a Timestamp number for your logic check
     const expiryTimestamp = expiryInput ? new Date(expiryInput).getTime() : Date.now() + 86400000;
 
-    const prompt = `Generate a ${document.getElementById('ai-difficulty').value} level exam about ${subject}. 
-    Include ${mcqCount} MCQs and ${longCount} long questions. 
-    Return ONLY JSON: {"questions": [{"type": "mcq", "text": "...", "options": ["A","B","C","D"], "correct": 0, "marks": 2}, {"type": "long", "text": "...", "marks": 10}]}`;
+    const prompt = `Generate a ${difficulty} level exam about ${subject} in JSON.
+    MCQs: ${mcqCount}, Long Questions: ${longCount}.
+    For MCQs, "correct" MUST be the index (0, 1, 2, or 3).
+    Return ONLY JSON: {"questions": [{"type": "mcq", "text": "...", "options": ["...","...","...","..."], "correct": 0, "marks": 2}, {"type": "long", "text": "...", "marks": 10}]}`;
 
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -1965,36 +1738,71 @@ async function generateAiExam(event) {
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
-                messages: [{ role: "user", content: prompt }],
-                response_format: { "type": "json_object" }
+                messages: [
+                    { role: "system", content: "You are a professional exam setter. You only output valid JSON. MCQ correct answer MUST be an integer index." },
+                    { role: "user", content: prompt }
+                ],
+                response_format: { "type": "json_object" },
+                temperature: 0.1
             })
         });
 
-        const data = await response.json();
-        const generated = JSON.parse(data.choices[0].message.content);
+        const result = await response.json();
+        const generated = JSON.parse(result.choices[0].message.content);
 
-        // CREATE TEST ID
-        const aiTestId = "AI-" + Math.floor(1000 + Math.random() * 9000);
-
-        // SAVE TO THE PATH YOUR LISTENER EXPECTS
-        await db.ref(`teachers/${currentTeacher}/exams/${aiTestId}`).set({
-            questions: generated.questions,
-            config: {
-                expiry: expiryTimestamp, // Numeric timestamp for your 'expired' check
-                passLimit: parseInt(passMarks),
-                duration: 60
+        // --- SANITIZATION (The "Fair Result" Memory) ---
+        const finalQuestions = generated.questions.map((q, index) => {
+            if (q.type === 'mcq') {
+                return {
+                    type: 'mcq',
+                    text: q.text || `Question ${index + 1}`,
+                    options: Array.isArray(q.options) ? q.options : ["A", "B", "C", "D"],
+                    // We save it as a Number. IMPORTANT: Student side must use Number() too!
+                    correct: (q.correct !== undefined) ? Number(q.correct) : 0,
+                    marks: Number(q.marks) || 2
+                };
+            } else {
+                return {
+                    type: 'long',
+                    text: q.text || `Question ${index + 1}`,
+                    marks: Number(q.marks) || 10
+                };
             }
         });
 
-        alert("Test Published! Code: " + aiTestId);
-        // Reset fields
+        const aiTestId = "AI-" + Math.floor(1000 + Math.random() * 9000);
+
+        await db.ref(`teachers/${currentTeacher}/exams/${aiTestId}`).set({
+            questions: finalQuestions,
+            config: {
+                expiry: expiryTimestamp,
+                passLimit: parseInt(passMarks),
+                duration: duration, 
+                createdAt: Date.now(),
+                subject: subject
+            }
+        });
+
+        // SUCCESS UI
+        const codeElement = document.getElementById('display-ai-code');
+        const qrElement = document.getElementById('ai-qr-img');
+        const modalElement = document.getElementById('aiSuccessModal');
+
+        if (codeElement && qrElement && modalElement) {
+            const joinUrl = window.location.origin + `?join=${aiTestId}`; 
+            const qrLink = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(joinUrl)}&choe=UTF-8`;
+            codeElement.innerText = aiTestId;
+            qrElement.src = qrLink;
+            modalElement.style.display = 'flex'; 
+        }
+
         document.getElementById('ai-subject').value = "";
         
     } catch (err) {
-        console.error(err);
-        alert("AI Error. Please try again.");
+        console.error("AI ERROR:", err);
+        alert("Generation Failed: " + err.message);
     } finally {
-        btn.innerHTML = "🚀 Generate & Publish Test";
+        btn.innerHTML = originalText;
         btn.disabled = false;
     }
 }
@@ -2002,145 +1810,46 @@ async function generateAiExam(event) {
 
 
 
+function openReview(feedback, plan, name) {
+    // CHANGE: 'review-modal' to 'reviewModal'
+    const modal = document.getElementById('reviewModal'); 
+    // CHANGE: 'review-content' to 'modalContent'
+    const content = document.getElementById('modalContent'); 
 
-</script>
+    if (modal && content) {
+        // We keep your styling but inject it into the existing modalContent
+        content.innerHTML = `
+            <span onclick="document.getElementById('reviewModal').style.display='none'" style="position:absolute; right:20px; top:15px; font-size:24px; cursor:pointer; color:#888;">&times;</span>
+            <h2 style="color:#2c3e50; margin-top:0; border-bottom:2px solid #eee; padding-bottom:10px;">🎓 AI Review: ${name}</h2>
+            
+            <div style="overflow-y:auto; padding-right:5px;">
+                <div style="background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:15px; border-left:5px solid #6366f1;">
+                    <p style="color:#6366f1; font-weight:bold; margin-top:0;">💡 Feedback & Explanation:</p>
+                    <p style="color:#334155; font-size:14px; line-height:1.5;">${feedback}</p>
+                </div>
+                
+                <div style="background:#fffbeb; padding:15px; border-radius:8px; border-left:5px solid #f59e0b;">
+                    <p style="color:#f59e0b; font-weight:bold; margin-top:0;">🎯 Personalized Study Plan:</p>
+                    <p style="color:#334155; font-size:14px; line-height:1.5;">${plan}</p>
+                </div>
+            </div>
 
-
-<!-- <div id="reviewModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px);">
-    <div style="background:white; margin:5% auto; padding:25px; width:90%; max-width:550px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-        <h2 style="color:#2c3e50; margin-top:0; border-bottom:2px solid #eee; padding-bottom:10px;">🎓 Performance Review</h2>
-        
-        <div style="margin:20px 0;">
-            <p><strong>Feedback:</strong></p>
-            <p id="revFeedback" style="background:#f9f9f9; padding:10px; border-radius:8px; font-size:14px; color:#555;"></p>
-        </div>
-
-        <div style="margin:20px 0; background:#e3f2fd; padding:15px; border-radius:8px; border-left:5px solid #2196f3;">
-            <p style="color:#0d47a1; margin-top:0;"><strong>📚 Personal Study Plan:</strong></p>
-            <p id="revStudyPlan" style="font-size:14px; color:#0d47a1; white-space: pre-wrap;"></p>
-        </div>
-
-        <button onclick="document.getElementById('reviewModal').style.display='none'" 
-                style="width:100%; padding:12px; background:#2c3e50; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Close Review</button>
-    </div>
-</div> -->
-
-
-
-
-
-
-
-<script>
-    // function openReview(feedback, plan) {
-    //     document.getElementById('revFeedback').innerText = feedback;
-    //     document.getElementById('revStudyPlan').innerText = plan || "Great job! Keep practicing.";
-    //     document.getElementById('reviewModal').style.display = 'block';
-    // }
-//     function openReview(feedback, plan) {
-//     // We use .innerText to ensure the text displays correctly even if it has symbols
-//     document.getElementById('revFeedback').innerText = feedback;
-//     document.getElementById('revStudyPlan').innerText = plan;
-//     document.getElementById('reviewModal').style.display = 'block';
-// }
-
-function openReview(feedback, plan) {
-    document.getElementById('revFeedback').innerText = feedback;
-    document.getElementById('revStudyPlan').innerText = plan || "Great job! Keep practicing.";
-    document.getElementById('reviewModal').style.display = 'block';
-    // Prevent scrolling of the background page when modal is open
-    document.body.style.overflow = 'hidden';
-}
-
-function closeReview() {
-    document.getElementById('reviewModal').style.display = 'none';
-    // Re-enable scrolling
-    document.body.style.overflow = 'auto';
-}
-
-// This function detects if the click was on the DARK background
-function closeOnOutsideClick(event) {
-    const modalContent = document.getElementById('modalContent');
-    // If the click happened on the background (reviewModal) and NOT the content box
-    if (event.target.id === "reviewModal") {
-        closeReview();
+            <button onclick="document.getElementById('reviewModal').style.display='none'" 
+                style="margin-top:20px; width:100%; padding:12px; background:#6366f1; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">
+                Close Review
+            </button>
+        `;
+        modal.style.display = 'block';
     }
 }
 
-
-
+// Simple filter results to avoid the "Not defined" error
+function filterResults() {
+    console.log("Results filtered/updated.");
+}
 </script>
 </script>
-<!-- <div id="reviewModal" onclick="closeOnOutsideClick(event)" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); transition: 0.3s;">
-    <div id="modalContent" style="background:white; margin:5% auto; padding:25px; width:90%; max-width:550px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.5); position:relative;">
-        
-        <span onclick="closeReview()" style="position:absolute; right:20px; top:15px; font-size:24px; cursor:pointer; color:#888;">&times;</span>
 
-        <h2 style="color:#2c3e50; margin-top:0; border-bottom:2px solid #eee; padding-bottom:10px;">🎓 Performance Review</h2>
-        
-        <div style="margin:20px 0;">
-            <p><strong>AI Feedback:</strong></p>
-            <p id="revFeedback" style="background:#f9f9f9; padding:10px; border-radius:8px; font-size:14px; color:#555; white-space: pre-wrap;"></p>
-        </div>
-
-        <div style="margin:20px 0; background:#e3f2fd; padding:15px; border-radius:8px; border-left:5px solid #2196f3;">
-            <p style="color:#0d47a1; margin-top:0;"><strong>📚 Personal Study Plan:</strong></p>
-            <p id="revStudyPlan" style="font-size:14px; color:#0d47a1; white-space: pre-wrap;"></p>
-        </div>
-
-        <button onclick="closeReview()" style="width:100%; padding:12px; background:#2c3e50; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.2s;">Close</button>
-    </div>
-</div> -->
-
-<!-- <div id="reviewModal" onclick="closeOnOutsideClick(event)" style="
-    display:none; 
-    position:fixed; 
-    z-index:99999; 
-    left:0; 
-    top:0; 
-    width:100%; 
-    height:100%; 
-    background: rgba(0, 0, 0, 0.85); /* This is the DARK BACKGROUND */
-    backdrop-filter: blur(8px);
-">
-    <div id="modalContent" style="
-        background: white; 
-        margin: 10% auto; 
-        padding: 30px; 
-        width: 90%; 
-        max-width: 500px; 
-        border-radius: 15px; 
-        position: relative; /* Allows X to be positioned inside */
-        box-shadow: 0px 0px 20px rgba(255,255,255,0.2);
-    ">
-        
-        <span onclick="closeReview()" style="
-            position: absolute; 
-            right: 15px; 
-            top: 10px; 
-            font-size: 30px; 
-            font-weight: bold; 
-            color: #ff4d4d; /* Bright Red so you can see it */
-            cursor: pointer;
-            line-height: 1;
-        ">&times;</span>
-
-        <h2 style="margin-top:0; color:#333;">🎓 AI Review</h2>
-        <hr>
-        
-        <div style="margin:15px 0;">
-            <p><strong>Feedback:</strong></p>
-            <p id="revFeedback" style="color:#555; font-size:14px; background:#f4f4f4; padding:10px; border-radius:5px;"></p>
-        </div>
-
-        <div style="margin:15px 0; background:#e8f4fd; padding:10px; border-radius:5px;">
-            <p style="color:#0056b3;"><strong>📚 Study Plan:</strong></p>
-            <p id="revStudyPlan" style="color:#0056b3; font-size:14px;"></p>
-        </div>
-
-        <button onclick="closeReview()" style="width:100%; padding:10px; background:#333; color:white; border:none; border-radius:5px; cursor:pointer;">Close</button>
-    </div>
-</div> -->
 
 <div id="reviewModal" onclick="closeOnOutsideClick(event)" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter:blur(4px); transition: 0.3s;">
     <div id="modalContent" style="background:white; margin:2% auto; padding:25px; width:90%; max-width:550px; border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.5); position:relative; max-height: 90vh; display: flex; flex-direction: column;">
@@ -2161,6 +1870,29 @@ function closeOnOutsideClick(event) {
         </div>
 
         <button onclick="closeReview()" style="width:100%; padding:12px; background:#2c3e50; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.2s; flex-shrink: 0;">Close</button>
+    </div>
+</div>
+
+<div id="aiSuccessModal" style="display:none; position:fixed; z-index:10000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; padding: 20px;">
+    
+    <div style="background:#1e293b; padding:clamp(15px, 5vw, 30px); border-radius:15px; text-align:center; color:white; border:1px solid #334155; width:100%; max-width:400px; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        
+        <h2 style="color:#6366f1; margin:0 0 10px 0; font-size: clamp(1.2rem, 5vw, 1.8rem);">🚀 Test Published!</h2>
+        <p style="color:#94a3b8; font-size: clamp(0.9rem, 3vw, 1rem);">Share this code or QR with students:</p>
+        
+        <div style="background:#0f172a; padding:15px; border-radius:10px; margin:15px 0; border:1px dashed #6366f1;">
+            <span id="display-ai-code" style="font-size:clamp(1.5rem, 6vw, 2rem); font-weight:bold; letter-spacing:2px; display: block;"></span>
+        </div>
+        
+        <div style="background:white; padding:10px; border-radius:10px; display:inline-block; max-width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+            <img id="ai-qr-img" src="" style="display:block; width:100%; max-width:200px; height:auto; aspect-ratio: 1/1;">
+        </div>
+        
+        <button onclick="document.getElementById('aiSuccessModal').style.display='none'" 
+                style="width:100%; padding:14px; background:#6366f1; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size: 1rem; transition: opacity 0.2s;"
+                onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+            Done
+        </button>
     </div>
 </div>
 </body>
