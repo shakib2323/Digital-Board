@@ -167,6 +167,40 @@ div[style*="display:flex"] {
 .pulse-animation {
     animation: pulse 1s infinite;
 }
+
+
+
+
+
+.zenith-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
+}
+
+.zenith-modal {
+    width: 90%; max-width: 1000px; height: 600px;
+    background: #0f172a; border: 1px solid #334155;
+    border-radius: 24px; display: flex; overflow: hidden;
+}
+
+.auth-card { padding: 40px; color: white; width: 100%; text-align: center; }
+
+.zid-tag {
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    padding: 8px 15px; border-radius: 8px; font-weight: bold;
+    font-family: monospace; letter-spacing: 2px;
+}
+
+.prime-action {
+    background: #6366f1; color: white; border: none;
+    padding: 15px; border-radius: 12px; font-weight: 600;
+    cursor: pointer; transition: 0.3s;
+}
+
+.prime-action:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+
+
     </style>
 </head>
 <body>
@@ -198,6 +232,63 @@ div[style*="display:flex"] {
                     <button onclick="switchView('view-teacher-login')" class="btn btn-primary">TEACHER PORTAL</button>
                     <button onclick="switchView('view-join')" class="btn btn-success">STUDENT JOIN</button>
                     <button onclick="switchView('view-public-results')" class="btn btn-warn">VIEW RESULTS (QR)</button>
+
+
+
+
+
+
+
+<!-- <button id="zenith-launch-btn" class="glow-btn" onclick="toggleZenithUI()">Launch Zenith AI Console</button>
+
+<div id="zenith-app-overlay" class="zenith-overlay hidden">
+    <div class="zenith-modal">
+        <div id="auth-box" class="auth-card">
+            <h2>Zenith ID Registration</h2>
+            <div class="form-grid">
+                <input type="text" id="fname" placeholder="First Name">
+                <input type="text" id="lname" placeholder="Last Name">
+                <div class="phone-group">
+                    <span>+91</span>
+                    <input type="tel" id="u-phone" placeholder="Mobile Number">
+                </div>
+                <input type="password" id="u-pass" placeholder="Create Password">
+                <select id="u-goal">
+                    <option value="Full Stack Developer">Full Stack Developer (6m)</option>
+                    <option value="Data Scientist">Data Scientist (6m)</option>
+                    <option value="UI/UX Designer">UI/UX Designer (4m)</option>
+                </select>
+                <button class="prime-action" onclick="zenithRegister()">Create My Permanent ID</button>
+            </div>
+            <p onclick="toggleAuthMode()">Already have an ID? Login</p>
+        </div>
+
+        <div id="main-console" class="hidden">
+            <aside class="console-sidebar">
+                <div class="zid-tag" id="zid-display">Z-882-ID</div>
+                <nav>
+                    <button onclick="showTab('tasks')">📅 Study Roadmap</button>
+                    <button onclick="showTab('scripts')">🎬 Viral Scripts</button>
+                    <button onclick="showTab('history')">📜 Growth History</button>
+                </nav>
+            </aside>
+            <main class="console-body">
+                <div id="tasks-tab">
+                    <h3>Today's Milestone</h3>
+                    <div class="task-ui">
+                        <p id="current-task-text">Initializing AI Roadmap...</p>
+                        <div class="yes-no-group">
+                            <button class="btn-y" onclick="processDay(true)">Task Completed</button>
+                            <button class="btn-n" onclick="processDay(false)">Incomplete (Reschedule)</button>
+                        </div>
+                    </div>
+                </div>
+                </main>
+        </div>
+    </div>
+</div> -->
+
+
                     <a href="index.html" style="text-decoration: none; color: white; background: green; padding: 10px; display: inline-block;">
   Go To Home
 </a>
@@ -2024,6 +2115,67 @@ function closeOnOutsideClick(event) {
 function closeReview() {
     document.getElementById('reviewModal').style.display = 'none';
 }
+
+
+
+
+
+
+
+
+
+
+
+
+const ZenithStore = {
+    async register() {
+        const fname = document.getElementById('fname').value;
+        const phone = "+91" + document.getElementById('u-phone').value;
+        const pass = document.getElementById('u-pass').value;
+        const goal = document.getElementById('u-goal').value;
+
+        // 1. Generate Unique ID: Z-YEAR-RANDOM
+        const zid = `Z-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+        const profile = {
+            zid, fname, phone, pass, goal,
+            enrolledOn: new Date().toISOString(),
+            currentDay: 1,
+            history: []
+        };
+
+        // 2. Save to Database (Firebase)
+        await db.ref(`zenith_v1/students/${zid}`).set(profile);
+        
+        // 3. Trigger Welcome SMS
+        this.sendSMS(phone, `Welcome ${fname}! Your ID: ${zid}. Your ${goal} plan is now active.`);
+        
+        alert(`Account Created! Your ID is: ${zid}\nSave this for future logins.`);
+        this.loadProfile(profile);
+    },
+
+    async sendSMS(number, msg) {
+        console.log(`📡 AI DISPATCHING TO ${number}: ${msg}`);
+        // Here you integrate with your backend Twilio function
+    },
+
+    async processDay(success) {
+        const student = this.getActiveStudent();
+        if (success) {
+            student.currentDay++;
+            student.history.push({day: student.currentDay, status: 'Completed', date: new Date().toLocaleDateString()});
+            // Unlock next viral script
+            this.sendSMS(student.phone, `🔥 Viral Hook Unlocked: "Stop learning coding like it's 2010. Use this 3-step AI workflow..."`);
+        } else {
+            // THE REARRANGE ENGINE
+            const prompt = `Student fell behind on ${student.goal}. Compress next 3 days of tasks.`;
+            const revisedPlan = await callGroqAI(prompt);
+            this.autoDownloadPDF(revisedPlan);
+            this.sendSMS(student.phone, `🚨 Warning: Schedule slipped. New compressed PDF plan sent to your console.`);
+        }
+        db.ref(`zenith_v1/students/${student.zid}`).update(student);
+    }
+};
 </script>
 </script>
 
@@ -2074,4 +2226,3 @@ function closeReview() {
 </div>
 </body>
 </html>
-
