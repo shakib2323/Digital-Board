@@ -4,19 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduFlow Ultimate-ZinqFitness | Pro Teaching Board</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <style>
+     -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style> 
         :root {
             --primary: #6366f1;
              --bg-dark: #0f172a; 
@@ -148,9 +174,6 @@
         .voice-btn { background: #ef4444 !important; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-/* =========================
-   RESPONSIVE ENHANCEMENTS
-   ========================= */
 
 html, body {
     overflow-x: hidden;
@@ -219,16 +242,16 @@ html, body {
     width: 90%; 
     max-width: 900px;
     margin: 40px auto; 
-    min-height: 100vh; /* Starts at full screen */
-    height: auto;      /* Grows with content */
-    overflow: visible; /* Ensures html2canvas sees everything */
+    min-height: 100vh; 
+    height: auto;      
+    overflow: visible; 
     position: relative;
     background-image: repeating-linear-gradient(white 0px, white 34px, #e5e7eb 35px);
     line-height: 35px; 
     font-size: 18px; 
     outline: none; 
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    word-wrap: break-word; /* Prevents long text from going off-side */
+    word-wrap: break-word;
 }
 
 
@@ -398,14 +421,6 @@ body.sharing-active .toolbar-top {
 }
 
 
-
-
-
-
-
-
-
-/* Helper button styles */
 .admin-btn {
     color: white; 
     border: none; 
@@ -415,13 +430,28 @@ body.sharing-active .toolbar-top {
     font-size: 12px;
 }
 
-/* Zoom class for mobile users who want to see text larger */
 .responsive-paper-wrapper.zoomed {
     overflow-x: auto !important;
     cursor: zoom-out !important;
 }
 .responsive-paper-wrapper.zoomed .scaler-engine {
     transform: scale(1) !important;
+}
+
+
+
+
+
+
+
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+.pulse-animation {
+    animation: pulse 2s infinite;
 }
     </style>
 </head>
@@ -517,10 +547,7 @@ body.sharing-active .toolbar-top {
         <button onclick="toggleFocusMode()" id="focusBtn" title="Focus Mode" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-expand"></i></button>
         <button onclick="generateQR()" title="Share Board" style="background:#475569; color:white; border:none; padding:10px; width:45px; border-radius:6px; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
         
-<!-- 
-        <div id="autosave-status" style="font-size: 11px; color: #94a3b8; margin-left: 10px; min-width: 90px; text-align: center;">
-            <i class="fas fa-cloud"></i> Ready
-        </div> -->
+
 
         <label for="studentPdfInp" style="background:#f59e0b; color:white; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px; font-weight:bold;">
     <i class="fas fa-file-pdf"></i> Upload PDF
@@ -538,24 +565,162 @@ body.sharing-active .toolbar-top {
         <div id="collab-container" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; margin-bottom: 15px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                 <h4 style="margin: 0; color: #1e293b; font-size: 0.95rem;"><i class="fas fa-users"></i> 2-in-1 Live Mode</h4>
+                <span id="partner-status" style="color: #10b981; font-weight: bold;">Initializing...</span>
+                
+
+
+                <div id="share-area" style="display:none; margin: 15px auto; padding: 16px; background: rgba(255, 255, 255, 0.9); border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); max-width: 500px; width: 95%;">
+    
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <div style="background: #6366f1; width: 4px; height: 16px; border-radius: 2px;"></div>
+        <p style="margin:0; font-size: 14px; font-weight: 700; color: #1e293b; letter-spacing: -0.01em;">Invite Partner</p>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; border: 1px solid #cbd5e1;">
+            <input type="text" id="collabUrl" readonly 
+                style="flex: 1; font-size: 12px; padding: 8px 12px; border: none; background: transparent; color: #475569; outline: none; min-width: 0;" 
+                value="Generating link...">
+            <button onclick="copyCollabLink()" 
+                style="background: #6366f1; color: white; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; white-space: nowrap;">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+            <button onclick="shareToWhatsApp()" style="flex: 1; min-width: 100px; background: #25D366; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i class="fab fa-whatsapp" style="font-size: 14px;"></i> WhatsApp
+            </button>
+            
+            <button onclick="shareToEmail()" style="flex: 1; min-width: 100px; background: #ef4444; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i class="fas fa-envelope" style="font-size: 14px;"></i> Email
+            </button>
+
+            <button id="nativeShareBtn" onclick="shareNative()" style="flex: 1; min-width: 100px; background: #1e293b; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <i class="fas fa-share-alt" style="font-size: 14px;"></i> More
+            </button>
+        </div>
+    </div>
+</div>
+
+
+                <!-- <div id="collaboration-lobby" style="background: #ec2c2c; padding: 15px; border-radius: 12px; margin-top: 10px; border: 1px solid #e2e8f0;">
+    <h4 style="margin: 0 0 10px 0;"><i class="fas fa-users"></i> Online Students</h4>
+    <div id="user-list" style="max-height: 200px; overflow-y: auto;">
+        <p style="font-size: 12px; color: #94a3b8;">Logging in to see active students...</p>
+    </div>
+</div> -->
+<!-- <div id="lobby-container" style="margin: 15px auto; padding: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; max-width: 500px; width: 95%; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h5 style="margin: 0; font-size: 14px; color: #1e293b;"><i class="fas fa-users" style="color: #6366f1;"></i> Active Students</h5>
+        <span id="online-count" style="background: #e0e7ff; color: #4338ca; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold;">0 Online</span>
+    </div>
+    
+    <div id="user-list" style="display: flex; flex-direction: column; gap: 8px;">
+        <p style="font-size: 12px; color: #94a3b8; text-align: center; margin: 10px 0;">Looking for online students...</p>
+    </div>
+</div>
+
+<div id="invite-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border-radius:15px; box-shadow:0 10px 25px rgba(0,0,0,0.2); z-index:10000; text-align:center; min-width:300px;">
+    <h3>Collaboration Invite!</h3>
+    <p id="invite-text"></p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+        <button id="accept-btn" style="background:#10b981; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">Accept</button>
+        <button onclick="document.getElementById('invite-modal').style.display='none'" style="background:#ef4444; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">Decline</button>
+    </div>
+</div> -->
+
+<div id="advanced-collab-panel" style="margin: 15px auto; max-width: 500px; width: 95%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <div style="background: white; padding: 20px; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+        
+        <h5 style="margin: 0 0 12px 0; font-size: 14px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-book-open" style="color: #6366f1;"></i> What are you writing about?
+        </h5>
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <input type="text" id="subjectInput" placeholder="e.g. Physics Notes, Creative Story..." 
+                style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 13px; outline: none; transition: border 0.3s;">
+            <button onclick="handleCollabMode()" id="collabToggleBtn"
+                style="background: #6366f1; color: white; border: none; padding: 0 20px; border-radius: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+                Go Live
+            </button>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
+            <h5 style="margin: 0; font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Active Students</h5>
+            <span id="online-count" style="background: #ecfdf5; color: #059669; font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: 800;">0 Online</span>
+        </div>
+
+        <div id="user-list" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto;">
+            <p style="text-align: center; color: #94a3b8; font-size: 12px; padding: 20px;">Enter your subject to join the lobby.</p>
+        </div>
+    </div>
+</div>
+
+<div id="invite-notification" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:10000; width:90%; max-width:420px; background:white; padding:18px; border-radius:24px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); border:1px solid #6366f1; animation: slideInTop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
+        <div style="background:linear-gradient(135deg, #6366f1, #a855f7); width:50px; height:50px; border-radius:15px; display:flex; align-items:center; justify-content:center; color:white; font-size:20px;">
+            <i class="fas fa-paper-plane"></i>
+        </div>
+        <div style="flex:1;">
+            <h4 style="margin:0; font-size:15px; color:#1e293b; font-weight:700;">Collaboration Request!</h4>
+            <p id="invite-msg" style="margin:2px 0 0 0; font-size:13px; color:#64748b; line-height:1.4;"></p>
+        </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <button id="accept-invite-btn" style="flex:2; background:#6366f1; color:white; border:none; padding:12px; border-radius:14px; font-weight:700; cursor:pointer; font-size:13px; transition: 0.2s;">Accept & Join</button>
+        <button onclick="closeInvite()" style="flex:1; background:#f1f5f9; color:#475569; border:none; padding:12px; border-radius:14px; font-weight:600; cursor:pointer; font-size:13px;">Decline</button>
+    </div>
+</div>
+
+<style>
+@keyframes slideInTop {
+    from { top: -150px; opacity: 0; }
+    to { top: 20px; opacity: 1; }
+}
+#user-list::-webkit-scrollbar { width: 4px; }
+#user-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+</style>
+
+
+
                 <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; max-width: 220px;">
                     Enable Collab Writing
                 </button>
-
-                
+         
             </div>
+            
         </div>
     </div>
 
-    <!-- <div id="canvas-container" style="position: relative; max-width: 900px; margin: 0 auto;">
-        <canvas id="studentShapeCanvas" style="position: absolute; top: 0; left: 0; z-index: 10; pointer-events: none; background: transparent;"></canvas>
-        
-        <div id="draw-timer" style="display:none; position:fixed; background:rgba(239, 68, 68, 0.9); color:white; padding:2px 8px; border-radius:4px; font-size:12px; pointer-events:none; z-index:10001; font-weight:bold;">0.0s</div>
 
-        <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true" style="position: relative; z-index: 1; min-height: 500px;">
-            Student: Write or use Voice Note...
+      <!-- <div id="share-area" style="display:none; margin-top:10px; padding:15px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px;">
+    <p style="margin:0 0 10px 0; font-size:13px; font-weight:bold; color:#1e293b;">Invite your partner to write together:</p>
+    
+    <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="collabUrl" readonly style="flex:1; font-size:12px; padding:8px; border-radius:6px; border:1px solid #ddd; background:#fff;">
+            <button onclick="copyCollabLink()" style="background:#6366f1; color:white; border:none; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
+                <i class="fas fa-copy"></i> Copy
+            </button>
         </div>
-    </div> -->
+
+        <div style="display:flex; gap:10px; align-items:center; justify-content:center; margin-top:5px;">
+            <button onclick="shareToWhatsApp()" style="background:#25D366; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:5px;">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+            
+            <button onclick="shareToEmail()" style="background:#ea4335; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:5px;">
+                <i class="fas fa-envelope"></i> Email
+            </button>
+
+            <button id="nativeShareBtn" onclick="shareNative()" style="background:#1e293b; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:5px;">
+                <i class="fas fa-share-alt"></i> Other
+            </button>
+        </div>
+    </div>
+</div> -->
+
+
 
 
     <div id="canvas-container" style="position: relative; max-width: 900px; margin: 0 auto;">
@@ -581,24 +746,6 @@ body.sharing-active .toolbar-top {
         <i class="fas fa-compress"></i>
     </button>
 </div>
-
-    <!-- <div style="position: relative; max-width: 900px; margin: 0 auto;">
-        <canvas id="studentShapeCanvas" style="position: absolute; top: 0; left: 0; z-index: 5; pointer-events: none; touch-action: none;"></canvas>
-        
-        <div id="draw-timer" style="display:none; position:fixed; background:rgba(239, 68, 68, 0.9); color:white; padding:2px 8px; border-radius:4px; font-size:12px; pointer-events:none; z-index:10001; font-weight:bold;">0.0s</div>
-
-        <div id="studentEditor" class="student-paper responsive-editor" contenteditable="true" style="z-index: 1;">
-            Student: Write or use Voice Note...
-        </div>
-    </div>
-
-    <button id="exitFocusBtn" onclick="toggleFocusMode()" style="display:none; position:fixed; bottom:20px; right:20px; z-index:9999; background:rgba(30,41,59,0.8); color:white; border:none; padding:15px; border-radius:50%; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-        <i class="fas fa-compress"></i>
-    </button>
-</div> -->
-
-
-
 
 
         <div id="saveModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.9); z-index:1000; justify-content:center; align-items:center;">
@@ -719,13 +866,12 @@ body.sharing-active .toolbar-top {
         <input type="range" min="50" max="1500" style="width:100%;" oninput="resizeImage(this.value)">
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script>
     
     const firebaseConfig = {
         apiKey: "AIzaSyD4NZ7BhlCVmRRiRqdXRs5TluNBgCtxBOU",
         authDomain: "eduflow-storage.firebaseapp.com",
+        databaseURL: "https://eduflow-storage-default-rtdb.firebaseio.com",
         projectId: "eduflow-storage",
         storageBucket: "eduflow-storage.firebasestorage.app",
         messagingSenderId: "1031861595930",
@@ -737,12 +883,6 @@ body.sharing-active .toolbar-top {
 
 // Define the tools
 
-
-
-//new featurs started
-
-
-// ... Firebase init code (firebase.initializeApp, etc.) ...
 
 // --- ADD THE TIME TRACKING CODE HERE ---
 let activeSeconds = 0;
@@ -774,7 +914,7 @@ function updateTimerUI() {
     if(display) display.innerText = `Active Work: ${formatTime(activeSeconds)}`;
 }
 
-// IMPORTANT: This listener must go after the studentEditor element exists in the DOM
+
 // Or place it inside your 'window.onload' function
 document.addEventListener('DOMContentLoaded', () => {
     const editor = document.getElementById('studentEditor');
@@ -782,13 +922,6 @@ document.addEventListener('DOMContentLoaded', () => {
         editor.addEventListener('input', trackActiveTime);
     }
 });
-
-
-
-
-
-
-
 
 
     // --- YOUR EXISTING VARIABLES ---
@@ -1003,112 +1136,10 @@ function saveSession() {
 
 
 
-
-// async function saveSession() {
-//     const nameInput = document.getElementById('studentNameInput');
-//     const editor = document.getElementById('studentEditor');
-//     const canvas = document.getElementById('studentShapeCanvas');
-
-//     if (!nameInput.value) {
-//         showToast("❌ Please enter a student name");
-//         return;
-//     }
-
-//     // 1. Capture the text content
-//     const boardContent = editor.innerHTML;
-
-//     // 2. Capture the Drawing (Convert canvas to image string)
-//     // This creates a small data string of your shapes
-//     const shapeData = canvas.toDataURL("image/png");
-
-//     const dataToSave = {
-//         studentName: nameInput.value,
-//         data: boardContent,
-//         shapes: shapeData, // <--- ADD THIS LINE
-//         timestamp: Date.now(),
-//         mood: document.getElementById('ai-mood-suggestion').innerText
-//     };
-
-//     try {
-//         await db.collection("edu_logs").add(dataToSave);
-//         showToast("✅ Record & Shapes Saved!");
-        
-//         // Clear canvas after successful save if desired
-//         clearAllShapes(); 
-//     } catch (error) {
-//         console.error("Save Error:", error);
-//         showToast("❌ Save Failed");
-//     }
-// }
-
-
-
-
-
 // Helper to close modal
 function closeSaveModal() {
     document.getElementById('saveModal').style.display = 'none';
 }
-
-
-
-// async function finalizeSave() {
-//     const studentName = document.getElementById('studentNameInput').value.trim();
-//     const studentContent = document.getElementById('studentEditor').innerHTML;
-    
-//     // Get the selected mood
-//     const moodElement = document.querySelector('input[name="mood"]:checked');
-//     const studentMood = moodElement ? moodElement.value : "😊";
-
-//     if (!studentName) {
-//         alert("Please enter a name before saving!");
-//         return;
-//     }
-
-//     showToast("Saving unique record...");
-    
-//     try {
-//         const timestamp = Date.now();
-//         const dateString = new Date().toLocaleString();
-//         const finalActiveTime = formatTime(activeSeconds);
-
-//         // --- KEY CHANGE: Use .add() instead of .doc(studentName) ---
-//         // This generates a unique ID like "JkL928sk..." so it never overwrites!
-//         await db.collection("edu_logs").add({
-//             studentName: studentName,
-//             data: studentContent,
-//             mood: studentMood,
-//             timestamp: timestamp,
-//             dateString: dateString,
-//             totalActiveTime: finalActiveTime,
-//             // We no longer need the "versions" array logic because 
-//             // every save is now its own version in the database.
-//             isVersion: true 
-//         });
-
-//         isSaved = true; 
-//         showToast("✅ Saved as a new record!");
-//         document.getElementById('saveBtn').style.background = "#059669";
-        
-//         // --- RESET TIMER AND CLEAN UP ---
-//         activeSeconds = 0; 
-//         updateTimerUI(); 
-        
-//         closeSaveModal();
-//         // Clear name input so the next save requires a fresh check
-//         document.getElementById('studentNameInput').value = ""; 
-        
-//     } catch (e) {
-//         console.error("Save Error:", e);
-//         showToast("❌ Save Failed!");
-//     }
-// }
-
-
-
-
-
-
 
 
 async function finalizeSave() {
@@ -1182,141 +1213,6 @@ async function finalizeSave() {
         showToast("Error loading logs");
     });
 }
-
-
-
-// function displayLogs(logs, highlightTerm = "") {
-//     // 1. Update Stats Bar
-//     const happyCount = logs.filter(l => l.mood === '😊').length;
-//     const neutralCount = logs.filter(l => l.mood === '😐').length;
-//     const confusedCount = logs.filter(l => l.mood === '😕').length;
-
-//     if(document.getElementById('stat-happy')) document.getElementById('stat-happy').innerText = happyCount;
-//     if(document.getElementById('stat-neutral')) document.getElementById('stat-neutral').innerText = neutralCount;
-//     if(document.getElementById('stat-confused')) document.getElementById('stat-confused').innerText = confusedCount;
-
-//     const list = document.getElementById('admin-content-list');
-//     const totalCount = document.getElementById('total-logs');
-//     if(totalCount) totalCount.innerText = `Logs: ${logs.length}`;
-
-//     // 2. Handle Empty State
-//     if (logs.length === 0) {
-//         list.innerHTML = "<p style='text-align:center; padding:20px;'>No records found.</p>";
-//         return;
-//     }
-
-//     // 3. Handle Priority Alerts
-//     const priorityStudents = logs.filter(item => item.mood === '😕');
-//     const priorityDiv = document.getElementById('priority-alerts');
-    
-//     if (priorityDiv) {
-//         if (priorityStudents.length > 0) {
-//             priorityDiv.innerHTML = `
-//                 <div style="background:#fef2f2; border:2px solid #ef4444; padding:15px; border-radius:12px; margin-bottom:20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-//                     <h4 style="color:#991b1b; margin:0 0 10px 0; display:flex; align-items:center; gap:8px;">
-//                         <i class="fas fa-exclamation-triangle"></i> Needs Immediate Help
-//                     </h4>
-//                     <div style="display:flex; flex-wrap:wrap; gap:8px;">
-//                         ${priorityStudents.map(s => `<span style="background:#ef4444; color:white; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:bold;">${s.studentName}</span>`).join('')}
-//                     </div>
-//                 </div>`;
-//         } else {
-//             priorityDiv.innerHTML = "";
-//         }
-//     }
-
-//     // 4. Render Main List
-//     list.innerHTML = logs.map((item, index) => {
-//         let content = item.data;
-        
-//         // --- MOVED OUTSIDE: Detect subject based on content ---
-//         const textForTag = (item.data || "").toLowerCase();
-//         let tag = "";
-//         if (textForTag.includes("#math") || textForTag.includes("fraction") || textForTag.includes("=")) tag = "Math";
-//         else if (textForTag.includes("#science") || textForTag.includes("atom") || textForTag.includes("energy")) tag = "Science";
-//         else if (textForTag.includes("#english") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "English";
-//          else if (textForTag.includes("#java") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Java";
-//           else if (textForTag.includes("#Python") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Python";
-//            else if (textForTag.includes("#Oracle") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "Oracle";
-//             else if (textForTag.includes("#AI") || textForTag.includes("verb") || textForTag.includes("poem")) tag = "AI";
-
-//         const tagUI = tag ? `<span style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:10px; text-transform:uppercase;">${tag}</span>` : "";
-
-//         // Keyword Highlight
-//         if (highlightTerm && highlightTerm.length > 2) {
-//             const regex = new RegExp(`(${highlightTerm})`, 'gi');
-//             content = content.replace(regex, `<mark style="background:yellow; color:black; font-weight:bold;">$1</mark>`);
-//         }
-
-//         // Version History Slider Logic
-//         const hasHistory = item.versions && item.versions.length > 1;
-//         const versionUI = hasHistory ? `
-//             <div style="margin: 10px 0; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: flex; align-items:center; gap:10px;">
-//                 <span style="font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase;">History:</span>
-//                 <input type="range" min="0" max="${item.versions.length - 1}" value="${item.versions.length - 1}" 
-//                        oninput="updateCardContent('${index}', this.value)" 
-//                        style="flex-grow: 1; cursor: pointer;">
-//                 <span id="version-label-${index}" style="font-size: 11px; color: #6366f1;">Latest</span>
-//             </div>` : '';
-
-
-
-
-
-// return `
-//         <div class="data-card admin-log-item" id="log-card-${index}" style="border-left: 5px solid ${item.mood === '😕' ? '#ef4444' : '#6366f1'};">
-//             <div style="display:flex; justify-content:space-between; border-bottom: 1px solid #e2e8f0; padding-bottom:10px; margin-bottom:10px;">
-//                 <div style="display:flex; align-items:center; gap:10px;">
-//                     <input type="checkbox" class="log-checkbox" data-index="${index}" style="width:18px; height:18px;">
-//                     <strong>
-//                         <i class="fas fa-user"></i> ${item.studentName || 'Unknown'} 
-//                         <span style="font-size: 1.4rem; margin-left: 5px;" title="Student Mood">${item.mood || ''}</span>
-//                         ${tagUI} </strong>
-//                 </div>
-          
-//                 <p style="font-size:12px; color:#64748b;">
-//                     <i class="fas fa-keyboard"></i> Actual Effort: <b>${item.totalActiveTime || '0s'}</b>
-//                 </p>
-
-//                 <div style="display:flex; gap:6px; align-items:center;">
-//                     <span style="font-size:0.75em; color:#94a3b8; margin-right:5px;">${item.dateString || ''}</span>
-//                     <button onclick="shareRecordQR('${index}')" style="background:#8b5cf6; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Secure Share QR"><i class="fas fa-share-nodes"></i></button>
-//                     <button onclick="sendEmail('${index}')" style="background:#10b981; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Email"><i class="fas fa-envelope"></i></button>
-//                     <button onclick="copyToClipboard('${index}')" style="background:#475569; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="Copy"><i class="fas fa-copy"></i></button>
-//                     <button onclick="downloadSingleRecord('${index}', '${item.studentName}')" style="background:var(--primary); color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer;" title="PDF"><i class="fas fa-file-pdf"></i></button>
-//                 </div>
-//             </div>
-
-//             ${versionUI}
-
-          
-
-
-
-
-
-
-
-//  <div id="content-body-${index}" class="log-data-content" style="background:white; color:black; padding:20px; border-radius:8px; line-height:1.6; border: 1px solid #e2e8f0;">
-//                 ${content}
-//             </div>
-//         </div>`;
-//     }).join('');
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function displayLogs(logs, highlightTerm = "") {
@@ -1447,40 +1343,6 @@ function displayLogs(logs, highlightTerm = "") {
     // Trigger calculation
     handleResponsiveScaling();
 }
-
-
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     function filterLogs(term) {
@@ -1703,17 +1565,6 @@ function toggleSelectAll() {
     showToast(allSelected ? "All selected" : "Selection cleared");
 }
 
-// function generateQR() {
-//     const qrDiv = document.getElementById("qrcode");
-//     qrDiv.innerHTML = ""; // Clear old QR
-//     new QRCode(qrDiv, {
-//         text: window.location.href,
-//         width: 256,
-//         height: 256
-//     });
-//     document.getElementById('qrModal').style.display = 'flex';
-// }
-
 
 function generateRecordQR(docId) {
     const currentUrl = window.location.origin + window.location.pathname;
@@ -1828,71 +1679,52 @@ const shareUrl = `${window.location.origin}${window.location.pathname}?view=${lo
 }
 
 
-
-
-
-
-
-// window.onload = function() {
-//     // --- 1. HANDLE EXTERNAL VIEWS (URL PARAMS) ---
-//     const urlParams = new URLSearchParams(window.location.search);
-//     const viewId = urlParams.get('view');
-//     const portfolioName = urlParams.get('portfolio');
-
-//     if (viewId) {
-//         setupGuestViewContainer(); 
-//         loadSingleSharedRecord(viewId);
-//         return; // Stop here if in view mode
-//     } else if (portfolioName) {
-//         setupGuestViewContainer(); 
-//         loadStudentPortfolio(portfolioName);
-//         return; // Stop here if in portfolio mode
-//     }
-
-//     // --- 2. HANDLE LOCAL STORAGE (FOR AUTO-SAVE) ---
-//     const savedName = localStorage.getItem('tempName');
-//     const nameInput = document.getElementById('studentNameInput');
-    
-//     if (savedName && nameInput) {
-//         nameInput.value = savedName;
-//         // If name exists, we can start the Auto-Save listener
-//         initAutoSaveListener();
-//     }
-// };
-
-
 window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
     const portfolioName = urlParams.get('portfolio');
     const viewId = urlParams.get('view');
-
-    // --- 1. HANDLE PORTFOLIO VIEW ---
+    const roomId = urlParams.get('room'); 
     if (portfolioName) {
-        console.log("Loading Portfolio for:", portfolioName);
         setupGuestViewContainer(); 
-        loadStudentPortfolio(portfolioName); // Make sure this function exists
+        if (typeof loadStudentPortfolio === "function") loadStudentPortfolio(portfolioName);
         return; 
     } 
-
-    // --- 2. HANDLE SINGLE RECORD VIEW ---
     if (viewId) {
-        console.log("Loading Single Record:", viewId);
         setupGuestViewContainer(); 
-        loadSingleSharedRecord(viewId);
+        if (typeof loadSingleSharedRecord === "function") loadSingleSharedRecord(viewId);
         return;
     }
-
-    // --- 3. NORMAL APP MODE (If no URL params) ---
-    const savedName = localStorage.getItem('tempName');
-    const nameInput = document.getElementById('studentNameInput');
-    
-    if (savedName && nameInput) {
-        nameInput.value = savedName;
-        if (typeof initAutoSaveListener === "function") {
-            initAutoSaveListener();
+    if (roomId) {
+        console.log("Found Room ID:", roomId);
+        const btn = document.getElementById('collabToggleBtn');
+        const status = document.getElementById('partner-status');
+        
+        if (btn) {
+            // This turns the button into a "JOIN" button for Student B
+            btn.innerText = "Connect to Partner"; 
+            btn.style.background = "#6366f1"; // Blue color
+            btn.style.boxShadow = "0 0 15px rgba(99, 102, 241, 0.5)";
+        }
+        if (status) {
+            status.innerText = "Partner waiting...";
+            status.style.color = "#6366f1";
         }
     }
+
+    // --- 3. NORMAL APP MODE ---
+    const savedName = localStorage.getItem('tempName');
+    const nameInput = document.getElementById('studentNameInput');
+    if (savedName && nameInput) {
+        nameInput.value = savedName;
+        if (typeof initAutoSaveListener === "function") initAutoSaveListener();
+    }
+    if (roomId) {
+        setTimeout(() => {
+            handleCollabMode(); 
+        }, 500); 
+    }
 };
+
 
 function setupGuestViewContainer() {
     document.body.innerHTML = `
@@ -1903,149 +1735,24 @@ function setupGuestViewContainer() {
         </div>`;
 }
 
-// --- 3. AUTO-SAVE INITIALIZER ---
-// function initAutoSaveListener() {
-//     const editor = document.getElementById('studentEditor');
-//     if (!editor) return;
-
-//     editor.addEventListener('input', () => {
-//         const status = document.getElementById('autosave-status');
-//         if (status) status.innerHTML = '<i class="fas fa-pencil-alt"></i> Typing...';
-
-//         clearTimeout(autoSaveTimeout);
-//         autoSaveTimeout = setTimeout(autoSaveSync, 3000); 
-//     });
-//     console.log("Auto-Save system initialized.");
-// }
-
-
-
-
-
 
 function initAutoSaveListener() {
     const editor = document.getElementById('studentEditor');
-    const moodDisplay = document.getElementById('ai-mood-suggestion'); // Create this element in HTML
+    const moodDisplay = document.getElementById('ai-mood-suggestion'); 
 
     if (!editor) return;
 
     editor.addEventListener('input', () => {
         const text = editor.innerText || editor.value;
         const suggestion = analyzeSentiment(text);
-
-        // UI Feedback: Show the teacher what the AI thinks
         if (text.length > 5) {
             moodDisplay.innerHTML = `AI Suggestion: ${suggestion.emoji}`;
             moodDisplay.style.color = suggestion.color;
-            
-            // Auto-select the radio button if you have them
             const radioToSelect = document.querySelector(`input[value="${suggestion.emoji}"]`);
             if (radioToSelect) radioToSelect.checked = true;
         }
-
-        // ... existing autosave code ...
     });
 }
-
-
-
-// THE NEW PORTFOLIO FUNCTION
-// async function loadSingleSharedRecord(id) { // Changed 'du_logs' to 'id' to match your QR generator
-//     const container = document.getElementById('single-view-container');
-//     if (!container) return;
-
-//     try {
-//         // Use the correct collection name: edu_logs
-//         const docRef = db.collection("edu_logs").doc(id); 
-//         const doc = await docRef.get();
-
-//         if (doc.exists) {
-//             const data = doc.data();
-            
-//             container.innerHTML = `
-//                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-//                     <div>
-//                         <h1 style="margin:0; font-size:1.5rem; color:#f8fafc;">EduFlow Digital Record</h1>
-//                         <span style="background:#10b98122; color:#10b981; padding:4px 10px; border-radius:20px; font-size:0.75rem; border:1px solid #10b98144;">
-//                             <i class="fas fa-shield-check"></i> Verified Record
-//                         </span>
-//                     </div>
-//                     <button onclick="window.print()" style="background:#334155; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer;">
-//                         <i class="fas fa-print"></i>
-//                     </button>
-//                 </div>
-
-//                 <div style="background:white; color:#1e293b; padding:50px; border-radius:15px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); position:relative; overflow:hidden;">
-//                     <div style="position:absolute; left:0; top:0; height:100%; width:5px; background:#6366f1;"></div>
-                    
-//                     <div style="display:flex; justify-content:space-between; border-bottom:2px solid #f1f5f9; padding-bottom:20px; margin-bottom:30px;">
-//                         <div>
-//                             <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Student Name</small>
-//                             <h2 style="margin:5px 0 0 0; color:#0f172a;">${data.studentName}</h2>
-//                         </div>
-//                         <div style="text-align:right;">
-//                             <small style="color:#64748b; text-transform:uppercase; letter-spacing:1px;">Date Recorded</small>
-//                             <p style="margin:5px 0 0 0; font-weight:600;">${data.dateString || 'N/A'}</p>
-//                         </div>
-//                     </div>
-
-//                     <div style="line-height:1.8; font-size:1.1rem; color:#334155; min-height:300px;">
-//                         ${data.data}
-//                     </div>
-
-//                     <div style="margin-top:50px; border-top:1px dashed #cbd5e1; padding-top:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">
-//                         This is an official digital record generated via EduFlow. <br> Reference ID: ${id}
-//                     </div>
-//                 </div>
-
-//                 <div style="text-align:center; margin-top:30px;">
-//                     <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none; font-size:0.9rem;">
-//                         <i class="fas fa-arrow-left"></i> Return to Main Platform
-//                     </a>
-//                 </div>
-//             `;
-//             container.style.opacity = "1";
-//         } else {
-//             container.innerHTML = `<div style="text-align:center; color:white; padding:50px;"><h2>Record Expired</h2><p>This record was not found.</p></div>`;
-//         }
-//     } catch (error) {
-//         console.error("Load Error:", error);
-//         container.innerHTML = `<h3 style="color:white;">Connection Error.</h3>`;
-//     }
-// }
-
-
-// async function loadSingleSharedRecord(id) {
-//     const container = document.getElementById('single-view-container');
-//     if (!container || !id) return;
-
-//     try {
-//         // Fetch from Firebase
-//         const doc = await db.collection("edu_logs").doc(id).get();
-
-//         if (doc.exists) {
-//             const data = doc.data();
-//             container.innerHTML = `
-//                 <div style="background:white; color:#1e293b; padding:40px; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-//                     <h1 style="margin-top:0; color:#0f172a;">${data.studentName}'s Record</h1>
-//                     <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-//                     <div style="font-size:1.1rem; line-height:1.6;">${data.data}</div>
-//                     <p style="margin-top:30px; color:#64748b; font-size:0.8rem;">Reference: ${id}</p>
-//                 </div>
-//                 <p style="text-align:center; margin-top:20px;">
-//                     <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none;">← Return Home</a>
-//                 </p>
-//             `;
-//         } else {
-//             container.innerHTML = "<h2>Record not found.</h2>";
-//         }
-//     } catch (error) {
-//         console.error("Firebase Error:", error);
-//         container.innerHTML = "<h2>Connection Error.</h2>";
-//     }
-// }
-
-
 
 
 
@@ -2058,7 +1765,6 @@ async function loadSingleSharedRecord(id) {
     if (!container || !id) return;
 
     try {
-        // Fetch from Firebase
         const doc = await db.collection("edu_logs").doc(id).get();
 
         if (doc.exists) {
@@ -2152,97 +1858,211 @@ async function resetDailyDashboard() {
 
 
 
-
-
-let currentUser = null;
-let isCollaborating = false;
-
-// 1. Google Auth Logic
-// 1. The main button logic
 async function handleCollabMode() {
+    console.log("Starting Collab Mode...");
+    
+    // Check if we are JOINING an existing room
+    const urlParams = new URLSearchParams(window.location.search);
+    let roomId = urlParams.get('room');
+
+    // GET SUBJECT: Only force it if we are STARTING a new room
+    let subject = document.getElementById('subjectInput')?.value;
+    if (!roomId && !subject) {
+        alert("Please enter a subject name to start a new session!");
+        return;
+    }
+    
+    // If joining a link, default the subject if input is empty
+    if (roomId && !subject) subject = "Joined Session";
+
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
     try {
-        // 1. Check if already logged in, if not, sign in with Google
-        let user = firebase.auth().currentUser;
-        
+        let user = auth.currentUser;
         if (!user) {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            const result = await firebase.auth().signInWithPopup(provider);
-            user = result.user;
-            showToast(`Signed in as ${user.displayName}`);
+            try {
+                // Try popup login
+                const result = await auth.signInWithPopup(provider);
+                user = result.user;
+            } catch (authError) {
+                console.warn("Using Guest Identity.");
+                user = { 
+                    uid: "guest-" + Math.random().toString(36).substring(2, 7),
+                    displayName: "Guest Student" 
+                };
+            }
         }
 
-        // 2. Generate or get the Room ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        let roomId = urlParams.get('room');
+        currentUser = user; 
+        
+        // --- ACTIVATING SYSTEMS ---
+        // This makes the student visible in the "Online" list
+        if (typeof startPresence === "function") startPresence(user, subject); 
+        
+        // This ensures they can RECEIVE the professional slide-down card
+        if (typeof listenForInvites === "function") listenForInvites(user); 
 
+        // --- ROOM LOGIC ---
         if (!roomId) {
-            // Create a unique ID for this session
-            roomId = "collab-" + Math.random().toString(36).substring(2, 10);
+            // No room in URL? We are the Host. Create one.
+            roomId = "collab-" + Math.random().toString(36).substring(2, 8);
             const newUrl = window.location.origin + window.location.pathname + "?room=" + roomId;
-            
-            // Show the link to the user
-            document.getElementById('collabUrl').value = newUrl;
             window.history.pushState({}, '', newUrl);
-        } else {
-            document.getElementById('collabUrl').value = window.location.href;
+        } 
+        
+        // Show the Share Area
+        const collabInput = document.getElementById('collabUrl');
+        const shareArea = document.getElementById('share-area');
+        if(collabInput) collabInput.value = window.location.href;
+        if(shareArea) shareArea.style.display = 'block';
+
+        // UI Feedback
+        const toggleBtn = document.getElementById('collabToggleBtn');
+        if (toggleBtn) {
+            toggleBtn.innerText = "Live Session Active";
+            toggleBtn.style.background = "#10b981"; // Green
         }
-
-        // 3. UI Changes
-        document.getElementById('share-area').style.display = 'block';
-        document.getElementById('collabToggleBtn').innerText = "Live Session Active";
-        document.getElementById('collabToggleBtn').style.background = "#10b981";
-
-        // 4. Start the Syncing Engine
-        startLiveSync(roomId, user);
+        
+        // Connect the editors
+        startLiveSync(roomId);
 
     } catch (error) {
-        console.error("Auth Error:", error);
-        alert("Login failed! Make sure Google Sign-in is enabled in Firebase Console.");
+        console.error("Critical Error in Collab Mode:", error);
     }
 }
 
-// Function to copy the link for the partner
+
+function startLiveSync(roomId) {
+    if (!roomId) return;
+    isCollaborating = true;
+    const editor = document.getElementById('studentEditor');
+    const status = document.getElementById('partner-status');
+
+    if (!editor) return;
+
+    const docRef = db.collection("collab_notes").doc(roomId);
+
+    // 1. LISTEN for changes
+    docRef.onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            
+            // Only update if someone else typed it
+            if (data.lastEditedBy !== currentUser.uid) {
+                // Only update if the content is actually different
+                if (editor.innerHTML !== data.content) {
+                    
+                    // --- ADVANCED CURSOR HANDLING ---
+                    const selection = window.getSelection();
+                    let savedOffset = 0;
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        // Simple offset check (works best for plain text or simple HTML)
+                        savedOffset = range.startOffset;
+                    }
+
+                    // Update the UI
+                    editor.innerHTML = data.content;
+                    
+                    // Update Status
+                    if (status) {
+                        status.innerText = `${data.lastEditedName || "Partner"} is typing...`;
+                        status.style.color = "#f59e0b"; 
+                        clearTimeout(window.partnerTimeout);
+                        window.partnerTimeout = setTimeout(() => {
+                            status.innerText = "Connected";
+                            status.style.color = "#10b981";
+                        }, 2000);
+                    }
+                }
+            }
+        }
+    });
+
+    // 2. SEND changes
+    editor.addEventListener('input', () => {
+        if (!currentUser) return;
+        
+        if (status) {
+            status.innerText = "Syncing...";
+            status.style.color = "#3b82f6";
+        }
+
+        clearTimeout(window.syncTimeout);
+        window.syncTimeout = setTimeout(() => {
+            docRef.set({
+                content: editor.innerHTML,
+                lastEditedBy: currentUser.uid,
+                lastEditedName: currentUser.displayName || "Partner",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).then(() => {
+                if (status) {
+                    status.innerText = "Connected";
+                    status.style.color = "#10b981";
+                }
+            });
+        }, 500); 
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 1. WhatsApp Sharing
+function shareToWhatsApp() {
+    const url = document.getElementById('collabUrl').value;
+    const text = encodeURIComponent("Hey! Join my EduFlow Live session so we can write on the same paper together: " + url);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+// 2. Email Sharing
+function shareToEmail() {
+    const url = document.getElementById('collabUrl').value;
+    const subject = encodeURIComponent("Join my EduFlow Live Writing Session");
+    const body = encodeURIComponent("I'm using the EduFlow Pro Teaching Board. Join me here to collaborate: " + url);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+// 3. Native Phone Share (Triggers the phone's built-in menu)
+async function shareNative() {
+    const shareData = {
+        title: 'EduFlow Live Collaboration',
+        text: 'Join my live writing session on the Teaching Board!',
+        url: document.getElementById('collabUrl').value
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            alert("Native sharing not supported on this browser. Use Copy or WhatsApp instead!");
+        }
+    } catch (err) {
+        console.log("Share cancelled or failed", err);
+    }
+}
+
+// Updated Copy function with visual feedback
 function copyCollabLink() {
     const copyText = document.getElementById("collabUrl");
     copyText.select();
     navigator.clipboard.writeText(copyText.value);
-    showToast("Link Copied! Send this to your partner.");
-}
-
-// 3. The Live Syncing (The "2-in-1" magic)
-function startLiveSync(roomId) {
-    isCollaborating = true;
-    const editor = document.getElementById('studentEditor');
-
-    // LISTEN for changes from the partner
-    db.collection("collab_notes").doc(roomId)
-    .onSnapshot((doc) => {
-        if (doc.exists) {
-            const data = doc.data();
-            // Don't overwrite if YOU are the one typing
-            if (data.lastEditedBy !== currentUser.uid) {
-                editor.innerHTML = data.content;
-                document.getElementById('partner-status').innerText = "Partner is editing...";
-                setTimeout(() => document.getElementById('partner-status').innerText = "Connected", 2000);
-            }
-        }
-    });
     
-    // SEND your changes to the partner
-    editor.addEventListener('input', () => {
-        if (!isCollaborating) return;
-        
-        // Debounce: Wait 300ms so we don't lag the database
-        clearTimeout(window.syncTimeout);
-        window.syncTimeout = setTimeout(() => {
-            db.collection("collab_notes").doc(roomId).set({
-                content: editor.innerHTML,
-                lastEditedBy: currentUser.uid,
-                lastEditedName: currentUser.displayName,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-        }, 300);
-    });
+    // Change button text temporarily
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => btn.innerHTML = originalText, 2000);
 }
 
 
@@ -2483,15 +2303,6 @@ async function uploadVideo() {
 
 
 
-
-
-
-
-
-
-
-
-
 async function uploadStudentPdf() {
     const file = document.getElementById('studentPdfInp').files[0];
     const nameInput = document.getElementById('studentNameInput').value.trim();
@@ -2538,15 +2349,6 @@ async function uploadStudentPdf() {
 
 
 
-
-
-
-
-
-
-
-
-
 window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
     
@@ -2572,48 +2374,6 @@ window.addEventListener('load', () => {
         }
     }
 });
-
-
-
-
-
-
-
-// function analyzeSentiment(text) {
-//     const input = text.toLowerCase();
-    
-//     // Define keyword maps
-//     const sentiments = {
-//         positive: {
-//             words: ['excellent', 'great', 'improved', 'happy', 'focused', 'success', 'amazing', 'brilliant', 'proud'],
-//             emoji: '🌟',
-//             color: '#10b981'
-//         },
-//         negative: {
-//             words: ['struggled', 'difficult', 'upset', 'tired', 'distracted', 'unhappy', 'refused', 'hard', 'slow'],
-//             emoji: '😟',
-//             color: '#ef4444'
-//         },
-//         neutral: {
-//             words: ['steady', 'consistent', 'ok', 'normal', 'completed', 'usual'],
-//             emoji: '😐',
-//             color: '#6366f1'
-//         }
-//     };
-
-//     // Score the text
-//     let score = 0;
-//     sentiments.positive.words.forEach(word => { if(input.includes(word)) score++; });
-//     sentiments.negative.words.forEach(word => { if(input.includes(word)) score--; });
-
-//     if (score > 0) return sentiments.positive;
-//     if (score < 0) return sentiments.negative;
-//     return sentiments.neutral;
-// }
-
-
-
-
 
 
 
@@ -2694,33 +2454,217 @@ function downloadAsPDF(studentName) {
 
 
 
+function updateUserStatus(user) {
+    const statusRef = db.collection("status").doc(user.uid);
+    
+    // Set status to online
+    statusRef.set({
+        name: user.displayName,
+        id: user.uid,
+        status: "online",
+        last_changed: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Listen for all users
+    db.collection("status").onSnapshot((snapshot) => {
+        const userList = document.getElementById('user-list');
+        userList.innerHTML = "";
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.id === user.uid) return; // Skip yourself
+
+            const userRow = document.createElement('div');
+            userRow.style = "display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #f1f5f9; align-items:center;";
+            userRow.innerHTML = `
+                <span style="font-size:13px; font-weight:500;">
+                    <span style="color:#10b981;">●</span> ${data.name} 
+                    <small style="color:#64748b;">(ID: ${data.id.substring(0,5)})</small>
+                </span>
+                <button onclick="sendInvite('${data.id}', '${data.name}')" style="background:#6366f1; color:white; border:none; padding:4px 8px; border-radius:5px; font-size:11px; cursor:pointer;">Invite</button>
+            `;
+            userList.appendChild(userRow);
+        });
+    });
+
+    // Listen for private invites sent TO ME
+    db.collection("invites").doc(user.uid).onSnapshot((doc) => {
+        if (doc.exists && doc.data().status === "pending") {
+            const invite = doc.data();
+            showInviteModal(invite);
+        }
+    });
+}
+
+
+
+
+
+// Start Presence with Name and Subject
+function startPresence(user, subject) {
+    const statusRef = db.collection("status").doc(user.uid);
+    
+    statusRef.set({
+        name: user.displayName || "Unknown Student",
+        subject: subject || "General Study",
+        id: user.uid,
+        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Watch for other students
+    db.collection("status").onSnapshot((snapshot) => {
+        const userList = document.getElementById('user-list');
+        if (!userList) return;
+        userList.innerHTML = "";
+        let count = 0;
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.id === user.uid) return; // Skip self
+
+            count++;
+            const userRow = document.createElement('div');
+            userRow.style = "display:flex; justify-content:space-between; align-items:center; padding:12px; background:#f8fafc; border-radius:15px; border:1px solid #f1f5f9;";
+            userRow.innerHTML = `
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:#1e293b;">${data.name}</div>
+                    <div style="font-size:11px; color:#6366f1; font-weight:600;">📚 ${data.subject}</div>
+                </div>
+                <button onclick="sendInvite('${data.id}', '${data.name}')" style="background:#6366f1; color:white; border:none; padding:8px 14px; border-radius:10px; font-size:11px; font-weight:700; cursor:pointer;">Invite</button>
+            `;
+            userList.appendChild(userRow);
+        });
+        document.getElementById('online-count').innerText = `${count} Online`;
+    });
+}
+function listenForInvites(user) {
+    if (!user) return;
+    console.log("📡 Active: Listening for collaboration requests...");
+
+    // Listen to the document named after the CURRENT user's ID
+    db.collection("invites").doc(user.uid).onSnapshot((doc) => {
+        if (!doc.exists) return;
+
+        const data = doc.data();
+        
+        // Safety check: only trigger for "request" types
+        if (data.type === "request") {
+            const card = document.getElementById('invite-notification');
+            const msg = document.getElementById('invite-msg');
+            const acceptBtn = document.getElementById('accept-invite-btn');
+
+            if (card && msg) {
+                // 1. Play a subtle notification sound
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+                audio.play().catch(() => console.log("Sound blocked by browser"));
+
+                // 2. Populate the professional card with data
+                msg.innerHTML = `
+                    <span style="color:#6366f1; font-weight:800;">${data.fromName}</span> 
+                    is inviting you to study: <br>
+                    <i style="color:#1e293b;">"${data.fromSubject || 'General Notes'}"</i>
+                `;
+                
+                // 3. Show the card
+                card.style.display = 'block';
+
+                // 4. Handle ACCEPT
+                acceptBtn.onclick = () => {
+                    console.log("✅ Invite Accepted. Joining room:", data.roomId);
+                    
+                    // Clear the invite document immediately
+                    db.collection("invites").doc(user.uid).delete();
+                    
+                    // Navigate to the shared room
+                    const collabLink = window.location.origin + window.location.pathname + "?room=" + data.roomId;
+                    window.location.href = collabLink;
+                };
+            }
+        }
+    }, (error) => {
+        console.error("❌ Invite Listener Error:", error);
+    });
+}
+
+// 5. Global Decline/Close function (Linked to your Decline button)
+function closeInvite() {
+    const card = document.getElementById('invite-notification');
+    if (card) card.style.display = 'none';
+
+    if (currentUser) {
+        // Clear the invite from Firestore so it doesn't reappear
+        db.collection("invites").doc(currentUser.uid).delete()
+          .then(() => console.log("Invite declined and cleared."))
+          .catch(err => console.error("Error clearing invite:", err));
+    }
+}
+function sendInvite(targetId, targetName) {
+    if (!currentUser) return alert("Please login first");
+
+    // 1. Generate the shared Room ID
+    const newRoomId = "collab-" + Math.random().toString(36).substring(2, 8);
+    const mySubject = document.getElementById('subjectInput')?.value || "Shared Study";
+
+    // 2. Send the data to the Receiver
+    db.collection("invites").doc(targetId).set({
+        fromName: currentUser.displayName,
+        fromId: currentUser.uid,
+        fromSubject: mySubject,
+        roomId: newRoomId,
+        type: "request"
+    }).then(() => {
+        // --- THE FIX: The Sender must also move to this URL ---
+        const targetUrl = window.location.origin + window.location.pathname + "?room=" + newRoomId;
+        window.location.href = targetUrl; 
+    });
+}
 
 
 
 
 
 
+document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === 'hidden' && currentUser) {
+        // When the user minimizes the app or closes the tab
+        db.collection("status").doc(currentUser.uid).delete();
+    } else if (document.visibilityState === 'visible' && currentUser) {
+        // When they come back to the tab, put them back online
+        db.collection("status").doc(currentUser.uid).set({
+            name: currentUser.displayName,
+            id: currentUser.uid,
+            status: "online",
+            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }
+});
 
 
 
 
 
+// Add this at the very bottom of your JS file
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        currentUser = user;
+        listenForInvites(user); // Keep listening for new requests
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room');
 
-
+        if (roomId) {
+            console.log("🚀 Auto-connecting to room:", roomId);
+            startLiveSync(roomId);
+            
+            // Optional: If they joined via link, they might not have set a subject.
+            // You can mark them online here too.
+            if (typeof startPresence === "function") {
+                startPresence(user, "Collaborating..."); 
+            }
+        }
+    }
+});
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2745,6 +2689,47 @@ function downloadAsPDF(studentName) {
             </button>
         </div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+    <div id="invite-notification" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:9999; width:90%; max-width:400px; background:white; padding:20px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border:1px solid #e2e8f0; animation: slideDown 0.4s ease-out;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+        <div style="background:#e0e7ff; padding:10px; border-radius:12px;">
+            <i class="fas fa-user-friends" style="color:#6366f1; font-size:20px;"></i>
+        </div>
+        <div>
+            <h4 style="margin:0; font-size:16px; color:#1e293b;">Incoming Request</h4>
+            <p id="invite-msg" style="margin:0; font-size:13px; color:#64748b;"></p>
+        </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <button id="accept-invite-btn" style="flex:1; background:#6366f1; color:white; border:none; padding:10px; border-radius:10px; font-weight:600; cursor:pointer;">Accept</button>
+        <button onclick="closeInvite()" style="flex:1; background:#f1f5f9; color:#475569; border:none; padding:10px; border-radius:10px; font-weight:600; cursor:pointer;">Decline</button>
+    </div>
+</div>
+
+
+
+
+
+
+
+<style>
+@keyframes slideDown {
+    from { top: -100px; opacity: 0; }
+    to { top: 20px; opacity: 1; }
+}
+</style>
+
+
 
     </body>
 </html>
