@@ -1509,6 +1509,10 @@ body.sharing-active .toolbar-top {
             <i class="fas fa-file-pdf"></i> Upload PDF
         </label>
         <input type="file" id="studentPdfInp" hidden accept="application/pdf" onchange="uploadStudentPdf()">
+
+        <button onclick="openVideoPanel()" id="videoPanelBtn" title="Watch Video + Take Notes" style="background:linear-gradient(135deg,#e11d48,#be185d); color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <i class="fab fa-youtube"></i> Watch + Notes
+        </button>
     </div>
 
     <div id="student-workspace-ui" style="max-width: 900px; margin: 10px auto; padding: 0 10px; transition: opacity 0.3s ease;">
@@ -1858,8 +1862,6 @@ async function verifyAdminPassword() {
 
     try {
         const configDoc = await db.collection("app_config").doc("admin").get();
-
-        
 
         const correctPassword = configDoc.data().password;
 
@@ -2543,6 +2545,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button onclick="sendEmail('${index}')" class="admin-btn" title="Email" style="background:#10b981;"><i class="fas fa-envelope"></i></button>
                             <button onclick="copyToClipboard('${index}')" class="admin-btn" title="Copy" style="background:#475569;"><i class="fas fa-copy"></i></button>
                             <button onclick="downloadSingleRecord('${index}', '${item.studentName}')" class="admin-btn" title="PDF" style="background:#6366f1;"><i class="fas fa-file-pdf"></i></button>
+                            <button onclick="deleteAdminRecord('${item.id}', '${item.studentName}', ${index})" class="admin-btn" title="Delete Record" style="background:#dc2626;"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -3208,7 +3211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-   
+    // Kept for compatibility but disabled — no guest access
     function continueAsGuest() {
         showToast("Please sign in with Google to continue.");
     }
@@ -3272,7 +3275,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-   
+    // ============================================================
+    // 🔥 FIREBASE AUTH STATE — mandatory gate
+    // App is completely blocked until this resolves with a user.
+    // ============================================================
     firebase.auth().onAuthStateChanged((user) => {
         if (user) {
             currentUser = user;
@@ -3295,16 +3301,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-   
+    // ============================================================
+    // 🔒 PER-USER QR RECORD STORAGE IN FIRESTORE
+    // ============================================================
+    // myOwnRecordIds is declared globally at top of script block.
 
     async function loadMyRecordIds(uid) {
         try {
-         
+            // One-time fetch first (fast)
             const doc = await db.collection("student_qr_map").doc(uid).get();
             myOwnRecordIds = (doc.exists ? doc.data().records : null) || [];
             console.log(`📋 Loaded ${myOwnRecordIds.length} records for uid ${uid}`);
 
-     
+            // Then set up real-time listener so QR panel updates live
             db.collection("student_qr_map").doc(uid).onSnapshot((snap) => {
                 if (snap.exists) {
                     myOwnRecordIds = snap.data().records || [];
@@ -3357,6 +3366,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ============================================================
+    // 📋 MY QR PANEL — renders like the admin panel
+    // Shows the logged-in student's own saved records with QR
+    // ============================================================
+
+    // Called when user navigates to myqr section
     function nav(mode) {
         _navBase(mode);
         if (mode === 'myqr') {
@@ -3367,7 +3382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function renderMyQRPanel() {
         if (!currentUser) return;
 
-     
+        // Update header
         const titleEl    = document.getElementById('myqrUserTitle');
         const subtitleEl = document.getElementById('myqrUserSubtitle');
         const avatarEl   = document.getElementById('myqrUserAvatar');
@@ -3386,9 +3401,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const emptyEl   = document.getElementById('myqr-empty');
         const gridEl    = document.getElementById('myqr-grid');
 
+        // Use in-memory myOwnRecordIds (kept fresh by onSnapshot listener)
+        // No need to re-fetch — loadMyRecordIds already set up the listener
         if (loadingEl) loadingEl.style.display = 'none';
 
-    
+        // Stats
         const countEl  = document.getElementById('myqr-stat-count');
         const latestEl = document.getElementById('myqr-stat-latest');
         if (countEl)  countEl.textContent  = myOwnRecordIds.length;
@@ -3454,12 +3471,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             style="flex:1; background:#475569; color:white; border:none; padding:9px 8px; border-radius:10px; cursor:pointer; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:5px;">
                             <i class="fas fa-eye"></i> View
                         </button>
+                        <button onclick="deleteMyQRRecord('${record.id}', '${(record.name||'Notes').replace(/'/g,"\'")}', this)"
+                            style="flex:1; background:#dc2626; color:white; border:none; padding:9px 8px; border-radius:10px; cursor:pointer; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:5px;">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
                     </div>
                 `;
 
                 gridEl.appendChild(card);
 
-                
+                // Generate QR after card is in DOM
                 setTimeout(() => {
                     const qrTarget = document.getElementById(`qrpanel-${record.id}-${idx}`);
                     if (!qrTarget || qrTarget.childElementCount > 0) return; // skip if already rendered
@@ -3481,7 +3502,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    
+    // QR panel helper actions
     function copyQRLink(recordId, btn) {
         const url = window.location.origin + window.location.pathname + '?view=' + recordId;
         navigator.clipboard.writeText(url).then(() => {
@@ -3504,7 +3525,90 @@ document.addEventListener('DOMContentLoaded', () => {
         window.open(window.location.origin + window.location.pathname + '?view=' + recordId, '_blank');
     }
 
-   
+    // ============================================================
+    // 🗑️ DELETE MY OWN QR RECORD (Student panel)
+    // Removes from student_qr_map AND from edu_logs
+    // ============================================================
+    async function deleteMyQRRecord(recordId, recordName, btnEl) {
+        if (!currentUser) return;
+        const confirmed = confirm(`🗑️ Delete "${recordName}"?
+
+This will permanently remove:
+• Your QR code for this save
+• The saved note from the cloud
+
+This cannot be undone.`);
+        if (!confirmed) return;
+
+        // Animate card out
+        const card = btnEl?.closest('div[style*="border-radius:18px"]') || btnEl?.closest('[style*="animation"]');
+
+        try {
+            showToast("Deleting...");
+
+            // 1. Remove from edu_logs (the actual note)
+            await db.collection("edu_logs").doc(recordId).delete();
+
+            // 2. Remove from student_qr_map (the QR record index)
+            const freshDoc = await db.collection("student_qr_map").doc(currentUser.uid).get();
+            if (freshDoc.exists) {
+                const records = freshDoc.data().records || [];
+                const updated = records.filter(r => r.id !== recordId);
+                await db.collection("student_qr_map").doc(currentUser.uid).set({ records: updated });
+                myOwnRecordIds = updated;
+            }
+
+            showToast("✅ Record deleted successfully!");
+            // Re-render panel after deletion
+            setTimeout(() => renderMyQRPanel(), 300);
+
+        } catch(e) {
+            console.error("Delete error:", e);
+            showToast("❌ Delete failed. Check permissions.");
+        }
+    }
+
+    // ============================================================
+    // 🗑️ DELETE ADMIN RECORD (Admin panel)
+    // Permanently deletes from edu_logs collection
+    // ============================================================
+    async function deleteAdminRecord(docId, studentName, cardIndex) {
+        if (!docId) { showToast("❌ No document ID found."); return; }
+        const confirmed = confirm(`🗑️ Delete record for "${studentName}"?
+
+This will permanently remove this student's saved note from the cloud.
+
+This cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            showToast(`Deleting ${studentName}'s record...`);
+            await db.collection("edu_logs").doc(docId).delete();
+
+            // Animate card removal
+            const card = document.getElementById(`log-card-${cardIndex}`);
+            if (card) {
+                card.style.transition = 'all 0.4s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                card.style.maxHeight = card.offsetHeight + 'px';
+                setTimeout(() => {
+                    card.style.maxHeight = '0';
+                    card.style.padding = '0';
+                    card.style.margin = '0';
+                    card.style.overflow = 'hidden';
+                    setTimeout(() => card.remove(), 300);
+                }, 400);
+            }
+
+            showToast(`✅ ${studentName}'s record deleted!`);
+        } catch(e) {
+            console.error("Admin delete error:", e);
+            showToast("❌ Delete failed. Check admin permissions.");
+        }
+    }
+
+    // Sentiment Analysis Dictionary
     const posSet = new Set(['excellent','great','improved','happy','focused','success','amazing','brilliant','proud','achieved','perfect','creative','confident','solved','correct','mastered','progressing','wonderful','kind','determined','bright','eager','energetic','intelligent','motivated','patient','reliable','thoughtful']);
     const negSet = new Set(['struggled','difficult','upset','tired','distracted','hard','slow','confused','refused','forgot','unfinished','sad','angry','noisy','frustrated','crying','failed','mistake','poor','bored','unfocused','ignored','incomplete','aggressive','anxious','defiant','hostile','irritable','lazy','nervous','rude','stubborn']);
 
@@ -3518,6 +3622,382 @@ document.addEventListener('DOMContentLoaded', () => {
         else return { emoji: '😐', color: '#6366f1' };
     }
 
+    // ============================================================
+    // 📺 VIDEO + NOTES PANEL — Full implementation
+    // Supports: YouTube, Facebook, TikTok, direct .mp4/.webm
+    // Instagram reels require direct video URL (platform blocks embed)
+    // ============================================================
+
+    function openVideoPanel() {
+        const overlay = document.getElementById('videoNotesOverlay');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        // Focus URL input
+        setTimeout(() => document.getElementById('vnUrlInput')?.focus(), 200);
+        showToast("📺 Watch + Notes mode opened!");
+    }
+
+    function closeVideoPanel() {
+        const overlay = document.getElementById('videoNotesOverlay');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        // Stop any playing video to free resources
+        const iframe = document.getElementById('vnVideoFrame');
+        const native = document.getElementById('vnVideoNative');
+        if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
+        if (native) { native.pause(); native.src = ''; native.style.display = 'none'; }
+        showPlaceholder();
+    }
+
+    function showPlaceholder() {
+        document.getElementById('vnPlaceholder').style.display = 'flex';
+        document.getElementById('vnVideoFrame').style.display = 'none';
+        document.getElementById('vnVideoNative').style.display = 'none';
+        document.getElementById('vnVideoError').style.display = 'none';
+        setVnLoading(false);
+    }
+
+    function setVnLoading(show) {
+        const el = document.getElementById('vnLoading');
+        if (el) show ? el.classList.add('show') : el.classList.remove('show');
+    }
+
+    function loadVideo() {
+        const input = document.getElementById('vnUrlInput');
+        const rawUrl = (input?.value || '').trim();
+        if (!rawUrl) { showToast("⚠️ Please paste a video URL first!"); input?.focus(); return; }
+
+        // Reset states
+        document.getElementById('vnPlaceholder').style.display = 'none';
+        document.getElementById('vnVideoFrame').style.display = 'none';
+        document.getElementById('vnVideoNative').style.display = 'none';
+        document.getElementById('vnVideoError').style.display = 'none';
+        setVnLoading(true);
+
+        const embedUrl = resolveEmbedUrl(rawUrl);
+
+        if (embedUrl.type === 'iframe') {
+            const iframe = document.getElementById('vnVideoFrame');
+            iframe.src = embedUrl.url;
+            iframe.style.display = 'block';
+            iframe.onload = () => setVnLoading(false);
+            // Fallback: hide loading after 5s regardless
+            setTimeout(() => setVnLoading(false), 5000);
+        } else if (embedUrl.type === 'native') {
+            const video = document.getElementById('vnVideoNative');
+            video.src = embedUrl.url;
+            video.style.display = 'block';
+            setVnLoading(false);
+            video.play().catch(() => {});
+        } else {
+            // Error / not embeddable
+            setVnLoading(false);
+            const errDiv = document.getElementById('vnVideoError');
+            const errText = document.getElementById('vnErrorText');
+            const errLink = document.getElementById('vnErrorLink');
+            errText.textContent = embedUrl.message || 'Could not embed this video.';
+            errLink.href = rawUrl;
+            errDiv.style.display = 'flex';
+        }
+    }
+
+    function resolveEmbedUrl(url) {
+        try {
+            // ── YouTube ──
+            // Handles: youtube.com/watch?v=, youtu.be/, youtube.com/shorts/
+            const ytMatch =
+                url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/) ||
+                url.match(/youtube\.com\/embed\/([\w-]{11})/);
+            if (ytMatch) {
+                const videoId = ytMatch[1];
+                const startMatch = url.match(/[?&]t=([\d]+)/);
+                const start = startMatch ? `&start=${startMatch[1]}` : '';
+                return {
+                    type: 'iframe',
+                    url: `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0${start}`
+                };
+            }
+
+            // ── YouTube Music ──
+            const ytMusicMatch = url.match(/music\.youtube\.com\/watch\?v=([\w-]+)/);
+            if (ytMusicMatch) {
+                return { type: 'iframe', url: `https://www.youtube.com/embed/${ytMusicMatch[1]}?autoplay=1` };
+            }
+
+            // ── Facebook video ──
+            // fb.watch short links and facebook.com/watch/?v= and /videos/
+            if (url.includes('facebook.com') || url.includes('fb.watch')) {
+                const fbEmbed = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true&width=560`;
+                return { type: 'iframe', url: fbEmbed };
+            }
+
+            // ── TikTok ──
+            const ttMatch = url.match(/tiktok\.com\/@[\w.]+\/video\/(\d+)/);
+            if (ttMatch) {
+                return { type: 'iframe', url: `https://www.tiktok.com/embed/v2/${ttMatch[1]}` };
+            }
+
+            // ── Instagram ──
+            // Instagram blocks all iframes. We can try the /embed/ endpoint.
+            const igMatch = url.match(/instagram\.com\/(p|reel|tv)\/([\w-]+)/);
+            if (igMatch) {
+                const code = igMatch[2];
+                return {
+                    type: 'iframe',
+                    url: `https://www.instagram.com/${igMatch[1]}/${code}/embed/`
+                };
+            }
+
+            // ── Direct video file (.mp4, .webm, .ogg, .mov) ──
+            if (/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url)) {
+                return { type: 'native', url: url };
+            }
+
+            // ── Vimeo ──
+            const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+            if (vimeoMatch) {
+                return { type: 'iframe', url: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1` };
+            }
+
+            // ── Dailymotion ──
+            const dmMatch = url.match(/dailymotion\.com\/video\/([\w]+)/);
+            if (dmMatch) {
+                return { type: 'iframe', url: `https://www.dailymotion.com/embed/video/${dmMatch[1]}?autoplay=1` };
+            }
+
+            // ── Twitch clip ──
+            const twitchClip = url.match(/clips\.twitch\.tv\/([\w-]+)/);
+            if (twitchClip) {
+                return { type: 'iframe', url: `https://clips.twitch.tv/embed?clip=${twitchClip[1]}&parent=${window.location.hostname}` };
+            }
+            const twitchVod = url.match(/twitch\.tv\/videos\/(\d+)/);
+            if (twitchVod) {
+                return { type: 'iframe', url: `https://player.twitch.tv/?video=${twitchVod[1]}&parent=${window.location.hostname}&autoplay=true` };
+            }
+
+            // ── Unknown: try iframe as last resort ──
+            return {
+                type: 'error',
+                message: 'This URL is not from a supported platform. For Instagram/Facebook, try right-clicking the video and copying the direct video address (.mp4 URL).',
+            };
+
+        } catch(e) {
+            return { type: 'error', message: 'Invalid URL. Please check the link and try again.' };
+        }
+    }
+
+    // Transfer video notes into main student editor
+    function vnTransferNotes() {
+        const vnEditor = document.getElementById('vnNoteEditor');
+        const mainEditor = document.getElementById('studentEditor');
+        if (!vnEditor || !mainEditor) return;
+        const notesHTML = vnEditor.innerHTML.trim();
+        if (!notesHTML) { showToast("⚠️ No notes to transfer!"); return; }
+
+        // Wrap in a styled "from video" block
+        const videoUrl = document.getElementById('vnUrlInput')?.value?.trim() || '';
+        const wrapper = `<div style="border-left:4px solid #6366f1; padding:12px 16px; margin:12px 0; background:#f8fafc; border-radius:0 8px 8px 0;">
+            <p style="margin:0 0 8px; font-size:11px; color:#6366f1; font-weight:700; text-transform:uppercase; letter-spacing:1px;">
+                📺 Video Notes${videoUrl ? ' — <a href="'+videoUrl+'" target="_blank" style="color:#6366f1;">source</a>' : ''}
+            </p>
+            ${notesHTML}
+        </div><br>`;
+
+        // Insert at cursor position or append
+        mainEditor.focus();
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && mainEditor.contains(sel.anchorNode)) {
+            const range = sel.getRangeAt(0);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = wrapper;
+            const frag = document.createDocumentFragment();
+            Array.from(tempDiv.childNodes).forEach(n => frag.appendChild(n));
+            range.insertNode(frag);
+        } else {
+            mainEditor.innerHTML += wrapper;
+        }
+
+        isSaved = false;
+        showToast("✅ Notes transferred to editor!");
+    }
+
+    // Save video notes and close panel
+    function vnSaveAndClose() {
+        vnTransferNotes();
+        setTimeout(() => closeVideoPanel(), 400);
+    }
+
+    function vnClearNotes() {
+        const confirmed = confirm("Clear all video notes?");
+        if (confirmed) {
+            const ed = document.getElementById('vnNoteEditor');
+            if (ed) ed.innerHTML = '';
+        }
+    }
+
+    // Keyboard shortcut: Ctrl+S inside notes = transfer to main editor
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 's') {
+            const overlay = document.getElementById('videoNotesOverlay');
+            if (overlay && overlay.classList.contains('active')) {
+                e.preventDefault();
+                vnTransferNotes();
+            }
+        }
+        // Escape closes panel
+        if (e.key === 'Escape') {
+            const overlay = document.getElementById('videoNotesOverlay');
+            if (overlay && overlay.classList.contains('active')) closeVideoPanel();
+        }
+    });
+
+    // ================================================================
+    // 🎛️ FULL RESIZE SYSTEM — horizontal drag + vertical drag + buttons
+    // ================================================================
+
+    // ── State tracking ──
+    let vnResizeDragging = null; // 'horizontal' | 'vertical' | null
+
+    // Default size percentages (will be set properly on open)
+    const VN_DEFAULTS = { videoWidthPct: 55, videoHeightPct: 100 };
+
+    // ── Button-based resizing ──
+    function vnResizeVideo(deltaPx) {
+        const videoSide = document.getElementById('vnVideoSide');
+        const notesSide = document.getElementById('vnNotesSide');
+        const body      = document.getElementById('vnBody');
+        if (!videoSide || !notesSide || !body) return;
+        const totalW    = body.offsetWidth - 10; // subtract handle width
+        const curVideoW = videoSide.offsetWidth;
+        const newVideoW = Math.max(240, Math.min(totalW - 240, curVideoW + deltaPx));
+        const newNotesW = totalW - newVideoW;
+        videoSide.style.flex = 'none';
+        videoSide.style.width = newVideoW + 'px';
+        notesSide.style.width = newNotesW + 'px';
+    }
+
+    function vnResizeNotes(deltaPx) {
+        vnResizeVideo(-deltaPx); // notes expand = video shrinks
+    }
+
+    function vnResizeHeight(deltaPx) {
+        const content = document.getElementById('vnVideoContent');
+        if (!content) return;
+        const cur = content.offsetHeight;
+        const newH = Math.max(120, Math.min(window.innerHeight - 120, cur + deltaPx));
+        content.style.flex = 'none';
+        content.style.height = newH + 'px';
+        // hide/show below area
+        const below = document.getElementById('vnVideoBelowArea');
+        if (below) below.style.display = deltaPx < 0 ? 'flex' : 'none';
+    }
+
+    function vnResetSizes() {
+        const videoSide = document.getElementById('vnVideoSide');
+        const notesSide = document.getElementById('vnNotesSide');
+        const content   = document.getElementById('vnVideoContent');
+        const below     = document.getElementById('vnVideoBelowArea');
+        if (videoSide) { videoSide.style.flex = '1'; videoSide.style.width = ''; }
+        if (notesSide) { notesSide.style.width = '400px'; }
+        if (content)   { content.style.flex = '1'; content.style.height = ''; }
+        if (below)     { below.style.display = 'none'; }
+        showToast("↺ Layout reset to default");
+    }
+
+    // ── Horizontal drag-to-resize (video width ↔ notes width) ──
+    (function setupHorizontalResize() {
+        const handle    = document.getElementById('vnResizeHandle');
+        const videoSide = document.getElementById('vnVideoSide');
+        const notesSide = document.getElementById('vnNotesSide');
+        const body      = document.getElementById('vnBody');
+        if (!handle || !videoSide || !notesSide) return;
+
+        let dragging = false, startX = 0, startVideoW = 0;
+
+        function startH(e) {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            dragging = true;
+            startX = clientX;
+            startVideoW = videoSide.offsetWidth;
+            handle.classList.add('dragging');
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            // Prevent iframe from stealing mouse events
+            document.getElementById('vnVideoFrame').style.pointerEvents = 'none';
+        }
+        function moveH(e) {
+            if (!dragging) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const totalW  = (body || document.getElementById('vnBody')).offsetWidth - 10;
+            const delta   = clientX - startX;
+            const newVideoW = Math.max(240, Math.min(totalW - 240, startVideoW + delta));
+            const newNotesW = totalW - newVideoW;
+            videoSide.style.flex = 'none';
+            videoSide.style.width = newVideoW + 'px';
+            notesSide.style.width = newNotesW + 'px';
+        }
+        function stopH() {
+            if (!dragging) return;
+            dragging = false;
+            handle.classList.remove('dragging');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            document.getElementById('vnVideoFrame').style.pointerEvents = '';
+        }
+
+        handle.addEventListener('mousedown',  startH);
+        handle.addEventListener('touchstart', startH, { passive: true });
+        document.addEventListener('mousemove',  moveH);
+        document.addEventListener('touchmove',  moveH, { passive: true });
+        document.addEventListener('mouseup',  stopH);
+        document.addEventListener('touchend', stopH);
+    })();
+
+    // ── Vertical drag-to-resize (video height) ──
+    (function setupVerticalResize() {
+        const handle  = document.getElementById('vnVerticalHandle');
+        const content = document.getElementById('vnVideoContent');
+        const below   = document.getElementById('vnVideoBelowArea');
+        if (!handle || !content) return;
+
+        let dragging = false, startY = 0, startH = 0;
+
+        function startV(e) {
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            dragging = true;
+            startY   = clientY;
+            startH   = content.offsetHeight;
+            handle.classList.add('dragging');
+            document.body.style.cursor = 'row-resize';
+            document.body.style.userSelect = 'none';
+            document.getElementById('vnVideoFrame').style.pointerEvents = 'none';
+        }
+        function moveV(e) {
+            if (!dragging) return;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const delta   = clientY - startY;
+            const newH    = Math.max(100, Math.min(window.innerHeight - 160, startH + delta));
+            content.style.flex = 'none';
+            content.style.height = newH + 'px';
+            if (below) below.style.display = newH < startH ? 'flex' : 'none';
+        }
+        function stopV() {
+            if (!dragging) return;
+            dragging = false;
+            handle.classList.remove('dragging');
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            document.getElementById('vnVideoFrame').style.pointerEvents = '';
+        }
+
+        handle.addEventListener('mousedown',  startV);
+        handle.addEventListener('touchstart', startV, { passive: true });
+        document.addEventListener('mousemove',  moveV);
+        document.addEventListener('touchmove',  moveV, { passive: true });
+        document.addEventListener('mouseup',  stopV);
+        document.addEventListener('touchend', stopV);
+    })();
+
 </script>
 
 <div id="section-single-view" class="view-div hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; overflow-y: auto; padding: 20px;">
@@ -3527,7 +4007,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="single-view-container" style="max-width: 800px; margin: 20px auto; opacity: 0; transition: opacity 0.5s;"></div>
 </div>
 
-
+<!-- General QR Modal: Used by teacher board and admin share -->
 <div id="qrModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center;">
     <div style="background:white; padding:22px 20px; border-radius:15px; text-align:center; min-width:250px; max-width:280px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
         <h3 style="color:#1e293b; margin-bottom:12px; font-family:sans-serif; font-size:15px;">Share Record</h3>
@@ -3541,12 +4021,514 @@ document.addEventListener('DOMContentLoaded', () => {
     from { top: -100px; opacity: 0; }
     to { top: 20px; opacity: 1; }
 }
+
+/* =============================================
+   📺 VIDEO + NOTES PANEL
+   ============================================= */
+#videoNotesOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: #0b0f1a;
+    flex-direction: column;
+}
+#videoNotesOverlay.active { display: flex; }
+
+.vn-topbar {
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    z-index: 10;
+}
+.vn-topbar-title {
+    font-weight: 800;
+    font-size: 14px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.vn-url-row {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    min-width: 200px;
+}
+.vn-url-input {
+    flex: 1;
+    padding: 9px 14px;
+    background: #0f172a;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    color: white;
+    font-size: 13px;
+    outline: none;
+    min-width: 0;
+}
+.vn-url-input:focus { border-color: #6366f1; }
+.vn-url-input::placeholder { color: #64748b; }
+.vn-load-btn {
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+.vn-load-btn:hover { opacity: 0.85; }
+.vn-close-btn {
+    padding: 9px 14px;
+    background: rgba(239,68,68,0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.vn-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    gap: 0;
+}
+
+/* Video side */
+.vn-video-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    min-width: 0;
+    border-right: 2px solid #1e293b;
+}
+
+.vn-video-placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    gap: 16px;
+    padding: 30px;
+    text-align: center;
+}
+.vn-video-placeholder .vp-icon {
+    font-size: 64px;
+    opacity: 0.4;
+}
+.vn-video-placeholder p {
+    font-size: 13px;
+    line-height: 1.7;
+    max-width: 320px;
+    color: #64748b;
+}
+.vn-video-placeholder .platform-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 4px;
+}
+.vn-video-placeholder .chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+.chip-yt   { background: rgba(255,0,0,0.15);    color: #ff4444;  border: 1px solid rgba(255,0,0,0.2); }
+.chip-ig   { background: rgba(193,53,132,0.15); color: #e1306c;  border: 1px solid rgba(193,53,132,0.2); }
+.chip-fb   { background: rgba(24,119,242,0.15); color: #4267B2;  border: 1px solid rgba(24,119,242,0.2); }
+.chip-tt   { background: rgba(105,201,208,0.15);color: #69c9d0;  border: 1px solid rgba(105,201,208,0.2); }
+.chip-gen  { background: rgba(99,102,241,0.15); color: #818cf8;  border: 1px solid rgba(99,102,241,0.2); }
+
+#vnVideoFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: none;
+}
+#vnVideoNative {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: none;
+    background: #000;
+}
+.vn-video-error {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    padding: 30px;
+    text-align: center;
+    gap: 12px;
+    flex: 1;
+}
+.vn-video-error i { font-size: 40px; opacity: 0.7; }
+.vn-video-error p { font-size: 13px; color: #94a3b8; max-width: 300px; line-height: 1.6; }
+.vn-video-error a { color: #6366f1; font-weight: 700; font-size: 12px; }
+
+/* Notes side */
+.vn-notes-side {
+    width: 400px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: #0f172a;
+    min-width: 0;
+}
+.vn-notes-header {
+    background: #1e293b;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0;
+}
+.vn-notes-header h4 {
+    margin: 0;
+    font-size: 13px;
+    color: white;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.vn-notes-actions {
+    display: flex;
+    gap: 6px;
+}
+.vn-notes-actions button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+}
+#vnNoteEditor {
+    flex: 1;
+    padding: 16px;
+    outline: none;
+    color: #e2e8f0;
+    font-size: 14px;
+    line-height: 1.8;
+    background: #0f172a;
+    overflow-y: auto;
+    resize: none;
+    border: none;
+    font-family: 'Inter', sans-serif;
+}
+#vnNoteEditor:empty::before {
+    content: "📝 Write your notes here while watching the video...Tip: click save to transfer notes to your main editor.";
+    color: #475569;
+    pointer-events: none;
+    white-space: pre-line;
+}
+
+/* ── Resize handle ── */
+.vn-resize-handle {
+    width: 10px;
+    background: #1e293b;
+    cursor: col-resize;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.vn-resize-handle:hover, .vn-resize-handle.dragging { background: #6366f1; }
+.vn-resize-handle::after {
+    content: '⋮⋮';
+    color: #475569;
+    font-size: 12px;
+    letter-spacing: -2px;
+    pointer-events: none;
+    line-height: 1;
+}
+.vn-resize-handle:hover::after { color: white; }
+
+/* ── Size control bars (video and notes headers) ── */
+.vn-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.vn-size-btn {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.vn-size-btn:hover { transform: scale(1.15); }
+.vn-size-btn.btn-expand { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+.vn-size-btn.btn-shrink { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+.vn-size-btn.btn-reset  { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-size: 10px; }
+
+/* Video header bar (above video) */
+.vn-video-header {
+    background: #0d1117;
+    border-bottom: 1px solid #1e293b;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    min-height: 40px;
+}
+.vn-video-header-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Vertical resize handle (between video header and content) */
+.vn-vertical-handle {
+    height: 8px;
+    background: #0d1117;
+    cursor: row-resize;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    border-top: 1px solid #1e293b;
+    border-bottom: 1px solid #1e293b;
+}
+.vn-vertical-handle:hover, .vn-vertical-handle.dragging { background: #6366f1; }
+.vn-vertical-handle::after {
+    content: '···';
+    color: #475569;
+    font-size: 10px;
+    letter-spacing: 1px;
+    pointer-events: none;
+}
+.vn-vertical-handle:hover::after { color: white; }
+
+/* Mobile: stack vertically, hide drag handles, show buttons only */
+@media (max-width: 768px) {
+    .vn-body { flex-direction: column; }
+    .vn-video-side {
+        height: 240px;
+        flex: none;
+        border-right: none;
+        border-bottom: 2px solid #1e293b;
+    }
+    .vn-notes-side { flex: 1; width: 100% !important; }
+    .vn-resize-handle { display: none; }
+    .vn-vertical-handle { display: none; }
+}
+
+/* Video loading spinner */
+.vn-loading {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    flex-direction: column;
+    gap: 12px;
+}
+.vn-loading.show { display: flex; }
+.vn-spinner {
+    width: 44px; height: 44px;
+    border: 3px solid rgba(99,102,241,0.2);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: loginSpin 0.8s linear infinite;
+}
 @keyframes qrCardIn {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 </style>
 
+    </div><!-- end main-container -->
+
+<!-- =============================================
+     📺 VIDEO + NOTES PANEL OVERLAY
+     Full-screen overlay: video left, notes right
+     Supports YouTube, Instagram, Facebook, TikTok
+     ============================================= -->
+<div id="videoNotesOverlay">
+
+    <!-- Top bar: URL input + controls -->
+    <div class="vn-topbar">
+        <div class="vn-topbar-title">
+            <i class="fab fa-youtube" style="color:#ef4444;"></i>
+            Watch + Notes
+        </div>
+        <div class="vn-url-row">
+            <input type="text" id="vnUrlInput" class="vn-url-input" 
+                placeholder="Paste YouTube / Instagram / Facebook / TikTok link..."
+                onkeydown="if(event.key==='Enter') loadVideo()">
+            <button class="vn-load-btn" onclick="loadVideo()">
+                <i class="fas fa-play"></i> Load
+            </button>
+        </div>
+        <button class="vn-close-btn" onclick="closeVideoPanel()">
+            <i class="fas fa-times"></i> Close
+        </button>
     </div>
+
+    <!-- Main body: video + H-resize + notes -->
+    <div class="vn-body" id="vnBody">
+
+        <!-- ═══════════════ VIDEO SIDE ═══════════════ -->
+        <div class="vn-video-side" id="vnVideoSide">
+
+            <!-- Video header with size controls -->
+            <div class="vn-video-header">
+                <span class="vn-video-header-title">
+                    <i class="fab fa-youtube" style="color:#ef4444;"></i> Video Player
+                </span>
+                <div class="vn-size-controls">
+                    <span style="font-size:10px; color:#475569; margin-right:4px; text-transform:uppercase; letter-spacing:1px;">Width:</span>
+                    <button class="vn-size-btn btn-shrink" onclick="vnResizeVideo(-80)" title="Shrink video (←)">−</button>
+                    <button class="vn-size-btn btn-reset"  onclick="vnResetSizes()"      title="Reset to 50/50">⟳</button>
+                    <button class="vn-size-btn btn-expand" onclick="vnResizeVideo(80)"   title="Expand video (→)">+</button>
+                    <div style="width:1px; height:16px; background:#1e293b; margin:0 4px;"></div>
+                    <span style="font-size:10px; color:#475569; margin-right:4px; text-transform:uppercase; letter-spacing:1px;">Height:</span>
+                    <button class="vn-size-btn btn-shrink" onclick="vnResizeHeight(-60)" title="Shrink height">↑</button>
+                    <button class="vn-size-btn btn-expand" onclick="vnResizeHeight(60)"  title="Expand height">↓</button>
+                </div>
+            </div>
+
+            <!-- Video content area (resizable height) -->
+            <div id="vnVideoContent" style="flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative; min-height:120px;">
+
+                <!-- Loading overlay -->
+                <div class="vn-loading" id="vnLoading">
+                    <div class="vn-spinner"></div>
+                    <span style="color:#94a3b8; font-size:12px; letter-spacing:2px; text-transform:uppercase;">Loading video...</span>
+                </div>
+
+                <!-- Placeholder -->
+                <div class="vn-video-placeholder" id="vnPlaceholder">
+                    <div class="vp-icon">📺</div>
+                    <h3 style="color:#94a3b8; margin:0; font-size:1.1rem; font-weight:700;">Paste a video link above</h3>
+                    <p>Watch any video and take notes side-by-side without leaving EduFlow.</p>
+                    <div class="platform-chips">
+                        <span class="chip chip-yt"><i class="fab fa-youtube"></i> YouTube</span>
+                        <span class="chip chip-ig"><i class="fab fa-instagram"></i> Instagram</span>
+                        <span class="chip chip-fb"><i class="fab fa-facebook"></i> Facebook</span>
+                        <span class="chip chip-tt"><i class="fab fa-tiktok"></i> TikTok</span>
+                        <span class="chip chip-gen"><i class="fas fa-link"></i> Any .mp4</span>
+                    </div>
+                    <p style="font-size:11px; color:#475569; margin-top:8px;">
+                        <i class="fas fa-lock" style="color:#6366f1;"></i>
+                        Instagram & Facebook reels may require direct video URLs due to platform restrictions.
+                    </p>
+                </div>
+
+                <!-- Embedded iframe -->
+                <iframe id="vnVideoFrame" allowfullscreen
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+                    style="width:100%; height:100%; border:none; display:none; flex:1;">
+                </iframe>
+
+                <!-- Native video -->
+                <video id="vnVideoNative" controls playsinline
+                    style="width:100%; height:100%; object-fit:contain; display:none; background:#000; flex:1;">
+                    Your browser does not support HTML5 video.
+                </video>
+
+                <!-- Error state -->
+                <div class="vn-video-error" id="vnVideoError">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p id="vnErrorText">Could not embed this video.</p>
+                    <a id="vnErrorLink" href="#" target="_blank" rel="noopener">
+                        <i class="fas fa-external-link-alt"></i> Open in new tab
+                    </a>
+                    <p style="font-size:11px; color:#475569; margin-top:8px;">
+                        For Instagram/Facebook, right-click the video → Copy video address → paste that direct URL.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Vertical drag handle (resize video height on desktop) -->
+            <div class="vn-vertical-handle" id="vnVerticalHandle" title="Drag to resize video height"></div>
+
+            <!-- Bottom area below video (expands when video shrinks vertically) -->
+            <div id="vnVideoBelowArea" style="flex:1; background:#0a0e1a; overflow:hidden; min-height:0; display:flex; align-items:center; justify-content:center;">
+                <p style="color:#1e293b; font-size:12px; text-align:center; padding:10px;">
+                    <i class="fas fa-arrows-alt-v" style="color:#334155;"></i><br>
+                    <span style="color:#334155;">Drag handle above to resize</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- ═══════════ HORIZONTAL DRAG HANDLE ═══════════ -->
+        <div class="vn-resize-handle" id="vnResizeHandle" title="Drag to resize panels"></div>
+
+        <!-- ═══════════════ NOTES SIDE ═══════════════ -->
+        <div class="vn-notes-side" id="vnNotesSide">
+            <div class="vn-notes-header">
+                <h4><i class="fas fa-pencil-alt" style="color:#6366f1;"></i> My Video Notes</h4>
+                <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
+                    <!-- Notes width controls -->
+                    <div class="vn-size-controls">
+                        <span style="font-size:10px; color:#475569; margin-right:2px; text-transform:uppercase; letter-spacing:1px;">Width:</span>
+                        <button class="vn-size-btn btn-shrink" onclick="vnResizeNotes(-80)"  title="Shrink notes">−</button>
+                        <button class="vn-size-btn btn-expand" onclick="vnResizeNotes(80)"   title="Expand notes">+</button>
+                    </div>
+                    <div style="width:1px; height:16px; background:#1e293b; margin:0 2px;"></div>
+                    <!-- Action buttons -->
+                    <div class="vn-notes-actions">
+                        <button onclick="vnClearNotes()" style="background:rgba(239,68,68,0.12); color:#ef4444;" title="Clear notes">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button onclick="vnTransferNotes()" style="background:linear-gradient(135deg,#10b981,#059669); color:white;" title="Transfer to main editor (Ctrl+S)">
+                            <i class="fas fa-file-export"></i> Transfer
+                        </button>
+                        <button onclick="vnSaveAndClose()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white;">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="vnNoteEditor" contenteditable="true" spellcheck="true"></div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
