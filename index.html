@@ -1602,7 +1602,7 @@ body.sharing-active .toolbar-top {
 </style>
 
                 <button id="collabToggleBtn" onclick="handleCollabMode()" style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; width: 100%; max-width: 220px;">
-                    Enable Collab Writing
+                   Enable Collab Writing
                 </button>
             </div>
         </div>
@@ -2857,7 +2857,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         let roomId = urlParams.get('room');
         let subject = document.getElementById('subjectInput')?.value;
-        if (!roomId && !subject) { alert("Please enter a subject name to start!"); return; }
+        if (!roomId && !subject) { alert("This feature comming soon!"); return; }
         if (roomId && !subject) subject = "Joined Session";
         const auth = firebase.auth();
         const provider = new firebase.auth.GoogleAuthProvider();
@@ -4532,6 +4532,7 @@ This cannot be undone.`);
 </div>
 </body>
 </html>
+
 
 
 
