@@ -1783,9 +1783,10 @@ document.addEventListener("visibilitychange", () => {
         }
     }
 });
+//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
 
-
- const GROQ_API_KEY = "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"; 
+ const GROQ_API_KEY = " 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"; 
+   
 
 
 async function getGroqGrade(question, studentAnswer, maxMarks) {
@@ -1932,124 +1933,9 @@ async function bulkAiGrade() {
     }, 5000);
 }
 
-// async function generateAiExam(event) {
-//     if(event) event.preventDefault();
-
-//     const subject = document.getElementById('ai-subject').value.trim();
-//     const mcqCount = parseInt(document.getElementById('ai-mcq-count').value) || 0;
-//     const longCount = parseInt(document.getElementById('ai-long-count').value) || 0;
-//     const passMarks = document.getElementById('ai-pass-marks').value || 40;
-//     const expiryInput = document.getElementById('ai-expiry').value;
-//     const difficulty = document.getElementById('ai-difficulty').value;
-//     const durationInput = document.getElementById('ai-duration');
-//     const duration = durationInput ? parseInt(durationInput.value) : 60;
-
-//     if (!subject || (mcqCount === 0 && longCount === 0)) {
-//         return alert("Please fill in subject and question counts.");
-//     }
-
-//     // --- STRENGTHENED PROMPT: Ultra-strict instructions ---
-//     const prompt = `Act as a professional exam setter. Create a ${difficulty} level exam about ${subject}.
-//     1. Generate EXACTLY ${mcqCount} Multiple Choice Questions (type: "mcq").
-//     2. Generate EXACTLY ${longCount} Long Answer Questions (type: "long").
-    
-//     Rules:
-//     - For "mcq": Must include "options" array (4 choices) and "correct" index (0-3).
-//     - Use the key "text" for the question content.
-//     - Output ONLY valid JSON. No preamble.
-    
-//     Structure:
-//     {
-//       "questions": [
-//         { "type": "mcq", "text": "...", "options": ["...", "...", "...", "..."], "correct": 0, "marks": 2 },
-//         { "type": "long", "text": "...", "marks": 10 }
-//       ]
-//     }`;
-
-//     const btn = event.currentTarget || event.target;
-//     const originalText = btn.innerHTML;
-//     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI Crafting Paper...`;
-//     btn.disabled = true;
-
-//     // --- EXPIRY FIX: Default to 11:59 PM today if no date picked ---
-//     let expiryValue = expiryInput;
-//     if (!expiryValue) {
-//         const now = new Date();
-//         expiryValue = now.toISOString().slice(0, 10) + "T23:59";
-//     }
-
-//     try {
-//         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-//             method: "POST",
-//             headers: { 
-//                 "Content-Type": "application/json", 
-//                 "Authorization": `Bearer ${GROQ_API_KEY}` 
-//             },
-//             body: JSON.stringify({
-//                 model: "llama-3.3-70b-versatile",
-//                 messages: [
-//                     { role: "system", content: "You are an automated exam generator. You only output valid JSON. You never leave question text empty." }, 
-//                     { role: "user", content: prompt }
-//                 ],
-//                 response_format: { "type": "json_object" },
-//                 temperature: 0.5 
-//             })
-//         });
-
-//         const result = await response.json();
-//         const generated = JSON.parse(result.choices[0].message.content);
-        
-//         // --- IMPROVED PARSER: Checks for options to identify MCQs ---
-//         const finalQuestions = (generated.questions || []).map((q) => {
-//              // Logic: If it has options, it MUST be an MCQ, even if AI mislabeled the type
-//              const hasOptions = Array.isArray(q.options) && q.options.length > 0;
-             
-//              if (hasOptions) {
-//                 return { 
-//                     type: 'mcq', 
-//                     text: q.text || q.question || "Discuss " + subject, 
-//                     options: q.options, 
-//                     correct: (q.correct !== undefined) ? Number(q.correct) : 0, 
-//                     marks: Number(q.marks) || 2 
-//                 };
-//             } else {
-//                 return { 
-//                     type: 'long', 
-//                     text: q.text || q.question || "Provide a detailed explanation of " + subject, 
-//                     marks: Number(q.marks) || 10 
-//                 };
-//             }
-//         });
-
-//         const aiTestId = "AI-" + Math.floor(1000 + Math.random() * 9000);
-
-//         await db.ref(`teachers/${currentTeacher}/exams/${aiTestId}`).set({
-//             questions: finalQuestions,
-//             config: {
-//                 expiry: expiryValue,
-//                 passLimit: parseInt(passMarks),
-//                 duration: duration, 
-//                 createdAt: Date.now(),
-//                 subject: subject
-//             }
-//         });
-
-//         alert("✨ AI Exam Generated Successfully! Code: " + aiTestId);
-//         if (typeof loadTeacherHistory === "function") loadTeacherHistory();
-
-//     } catch (err) {
-//         alert("Generation Failed: " + err.message);
-//     } finally {
-//         btn.innerHTML = originalText;
-//         btn.disabled = false;
-//     }
-// }
-
-
-    async function generateAiExam(event) {
+async function generateAiExam(event) {
     if(event) event.preventDefault();
 
-    // 1. Get Inputs
     const subject = document.getElementById('ai-subject').value.trim();
     const mcqCount = parseInt(document.getElementById('ai-mcq-count').value) || 0;
     const longCount = parseInt(document.getElementById('ai-long-count').value) || 0;
@@ -2063,19 +1949,35 @@ async function bulkAiGrade() {
         return alert("Please fill in subject and question counts.");
     }
 
-    // 2. UI Loading State
+    // --- STRENGTHENED PROMPT: Ultra-strict instructions ---
+    const prompt = `Act as a professional exam setter. Create a ${difficulty} level exam about ${subject}.
+    1. Generate EXACTLY ${mcqCount} Multiple Choice Questions (type: "mcq").
+    2. Generate EXACTLY ${longCount} Long Answer Questions (type: "long").
+    
+    Rules:
+    - For "mcq": Must include "options" array (4 choices) and "correct" index (0-3).
+    - Use the key "text" for the question content.
+    - Output ONLY valid JSON. No preamble.
+    
+    Structure:
+    {
+      "questions": [
+        { "type": "mcq", "text": "...", "options": ["...", "...", "...", "..."], "correct": 0, "marks": 2 },
+        { "type": "long", "text": "...", "marks": 10 }
+      ]
+    }`;
+
     const btn = event.currentTarget || event.target;
     const originalText = btn.innerHTML;
     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI Crafting Paper...`;
     btn.disabled = true;
 
-    // 3. Prompt Configuration
-    const prompt = `Create a ${difficulty} level exam about ${subject}. 
-    Return a JSON object with a "questions" array containing ${mcqCount} MCQ and ${longCount} long questions.
-    MCQs must have "options" (array of 4) and "correct" (index 0-3).`;
-
-    // 4. Expiry Setup
-    let expiryValue = expiryInput || (new Date().toISOString().slice(0, 10) + "T23:59");
+    // --- EXPIRY FIX: Default to 11:59 PM today if no date picked ---
+    let expiryValue = expiryInput;
+    if (!expiryValue) {
+        const now = new Date();
+        expiryValue = now.toISOString().slice(0, 10) + "T23:59";
+    }
 
     try {
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -2085,50 +1987,42 @@ async function bulkAiGrade() {
                 "Authorization": `Bearer ${GROQ_API_KEY}` 
             },
             body: JSON.stringify({
-                // TRY CHANGING THIS TO "llama-3-8b-8192" IF IT STILL FAILS
                 model: "llama-3.3-70b-versatile",
                 messages: [
-                    { role: "system", content: "You are an exam generator. Output ONLY valid JSON." }, 
+                    { role: "system", content: "You are an automated exam generator. You only output valid JSON. You never leave question text empty." }, 
                     { role: "user", content: prompt }
                 ],
                 response_format: { "type": "json_object" },
-                temperature: 0.6 
+                temperature: 0.5 
             })
         });
 
         const result = await response.json();
-
-        // --- CRITICAL ERROR CHECKING ---
-        if (result.error) {
-            throw new Error(`API Error: ${result.error.message}`);
-        }
-
-        if (!result.choices || result.choices.length === 0) {
-            throw new Error("AI returned an empty response. You might be out of API credits/quota.");
-        }
-
-        const rawContent = result.choices[0].message.content;
-        const generated = JSON.parse(rawContent);
+        const generated = JSON.parse(result.choices[0].message.content);
         
-        // 5. Data Parsing
+        // --- IMPROVED PARSER: Checks for options to identify MCQs ---
         const finalQuestions = (generated.questions || []).map((q) => {
-             const isMcq = Array.isArray(q.options) && q.options.length > 0;
-             return {
-                type: isMcq ? 'mcq' : 'long',
-                text: q.text || q.question || `Question regarding ${subject}`,
-                options: isMcq ? q.options : null,
-                correct: isMcq ? (Number(q.correct) || 0) : null,
-                marks: Number(q.marks) || (isMcq ? 2 : 10)
-             };
+             // Logic: If it has options, it MUST be an MCQ, even if AI mislabeled the type
+             const hasOptions = Array.isArray(q.options) && q.options.length > 0;
+             
+             if (hasOptions) {
+                return { 
+                    type: 'mcq', 
+                    text: q.text || q.question || "Discuss " + subject, 
+                    options: q.options, 
+                    correct: (q.correct !== undefined) ? Number(q.correct) : 0, 
+                    marks: Number(q.marks) || 2 
+                };
+            } else {
+                return { 
+                    type: 'long', 
+                    text: q.text || q.question || "Provide a detailed explanation of " + subject, 
+                    marks: Number(q.marks) || 10 
+                };
+            }
         });
 
-        if (finalQuestions.length === 0) throw new Error("No questions were generated.");
-
-        // 6. Save to Firebase
         const aiTestId = "AI-" + Math.floor(1000 + Math.random() * 9000);
-        
-        // Ensure currentTeacher is defined
-        if (typeof currentTeacher === 'undefined') throw new Error("User session expired. Please refresh.");
 
         await db.ref(`teachers/${currentTeacher}/exams/${aiTestId}`).set({
             questions: finalQuestions,
@@ -2141,17 +2035,124 @@ async function bulkAiGrade() {
             }
         });
 
-        alert("✨ Success! Exam Code: " + aiTestId);
+        alert("✨ AI Exam Generated Successfully! Code: " + aiTestId);
         if (typeof loadTeacherHistory === "function") loadTeacherHistory();
 
     } catch (err) {
-        console.error("Debug Info:", err);
-        alert("🚨 " + err.message);
+        alert("Generation Failed: " + err.message);
     } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
 }
+
+
+//     async function generateAiExam(event) {
+//     if(event) event.preventDefault();
+
+//     // 1. Get Inputs
+//     const subject = document.getElementById('ai-subject').value.trim();
+//     const mcqCount = parseInt(document.getElementById('ai-mcq-count').value) || 0;
+//     const longCount = parseInt(document.getElementById('ai-long-count').value) || 0;
+//     const passMarks = document.getElementById('ai-pass-marks').value || 40;
+//     const expiryInput = document.getElementById('ai-expiry').value;
+//     const difficulty = document.getElementById('ai-difficulty').value;
+//     const durationInput = document.getElementById('ai-duration');
+//     const duration = durationInput ? parseInt(durationInput.value) : 60;
+
+//     if (!subject || (mcqCount === 0 && longCount === 0)) {
+//         return alert("Please fill in subject and question counts.");
+//     }
+
+//     // 2. UI Loading State
+//     const btn = event.currentTarget || event.target;
+//     const originalText = btn.innerHTML;
+//     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI Crafting Paper...`;
+//     btn.disabled = true;
+
+//     // 3. Prompt Configuration
+//     const prompt = `Create a ${difficulty} level exam about ${subject}. 
+//     Return a JSON object with a "questions" array containing ${mcqCount} MCQ and ${longCount} long questions.
+//     MCQs must have "options" (array of 4) and "correct" (index 0-3).`;
+
+//     // 4. Expiry Setup
+//     let expiryValue = expiryInput || (new Date().toISOString().slice(0, 10) + "T23:59");
+
+//     try {
+//         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+//             method: "POST",
+//             headers: { 
+//                 "Content-Type": "application/json", 
+//                 "Authorization": `Bearer ${GROQ_API_KEY}` 
+//             },
+//             body: JSON.stringify({
+//                 // TRY CHANGING THIS TO "llama-3-8b-8192" IF IT STILL FAILS
+//                 model: "llama-3.3-70b-versatile",
+//                 messages: [
+//                     { role: "system", content: "You are an exam generator. Output ONLY valid JSON." }, 
+//                     { role: "user", content: prompt }
+//                 ],
+//                 response_format: { "type": "json_object" },
+//                 temperature: 0.6 
+//             })
+//         });
+
+//         const result = await response.json();
+
+//         // --- CRITICAL ERROR CHECKING ---
+//         if (result.error) {
+//             throw new Error(`API Error: ${result.error.message}`);
+//         }
+
+//         if (!result.choices || result.choices.length === 0) {
+//             throw new Error("AI returned an empty response. You might be out of API credits/quota.");
+//         }
+
+//         const rawContent = result.choices[0].message.content;
+//         const generated = JSON.parse(rawContent);
+        
+//         // 5. Data Parsing
+//         const finalQuestions = (generated.questions || []).map((q) => {
+//              const isMcq = Array.isArray(q.options) && q.options.length > 0;
+//              return {
+//                 type: isMcq ? 'mcq' : 'long',
+//                 text: q.text || q.question || `Question regarding ${subject}`,
+//                 options: isMcq ? q.options : null,
+//                 correct: isMcq ? (Number(q.correct) || 0) : null,
+//                 marks: Number(q.marks) || (isMcq ? 2 : 10)
+//              };
+//         });
+
+//         if (finalQuestions.length === 0) throw new Error("No questions were generated.");
+
+//         // 6. Save to Firebase
+//         const aiTestId = "AI-" + Math.floor(1000 + Math.random() * 9000);
+        
+//         // Ensure currentTeacher is defined
+//         if (typeof currentTeacher === 'undefined') throw new Error("User session expired. Please refresh.");
+
+//         await db.ref(`teachers/${currentTeacher}/exams/${aiTestId}`).set({
+//             questions: finalQuestions,
+//             config: {
+//                 expiry: expiryValue,
+//                 passLimit: parseInt(passMarks),
+//                 duration: duration, 
+//                 createdAt: Date.now(),
+//                 subject: subject
+//             }
+//         });
+
+//         alert("✨ Success! Exam Code: " + aiTestId);
+//         if (typeof loadTeacherHistory === "function") loadTeacherHistory();
+
+//     } catch (err) {
+//         console.error("Debug Info:", err);
+//         alert("🚨 " + err.message);
+//     } finally {
+//         btn.innerHTML = originalText;
+//         btn.disabled = false;
+//     }
+// }
 
 
 
