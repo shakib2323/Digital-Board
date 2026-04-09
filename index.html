@@ -2365,16 +2365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shareUrl = window.location.origin + window.location.pathname + '?view=' + recordId;
         const shareUrl = window.location.origin + window.location.pathname + '?view=' + recordId;
         // Ask for expiry when student generates their own QR
-const minsRaw = prompt("QR expires in how many minutes?\n(Enter 0 for no expiry)", "0");
-const mins = minsRaw !== null ? (parseInt(minsRaw) || 0) : 0;
-if (mins > 0) {
-    const expiresAt = Date.now() + mins * 60 * 1000;
-    db.collection("edu_logs").doc(recordId).set({ qrExpiresAt: expiresAt }, { merge: true })
-      .catch(e => console.warn("Could not save expiry:", e));
-} else {
-    db.collection("edu_logs").doc(recordId).set({ qrExpiresAt: 0 }, { merge: true })
-      .catch(e => console.warn("Could not clear expiry:", e));
-}
+
 
 
         
