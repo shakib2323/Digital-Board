@@ -2950,51 +2950,51 @@ document.addEventListener('DOMContentLoaded', () => {
     //     }
 
         // ✅ SHOW expiry badge if set but not yet expired
-        let expiryBadge = '';
-        if (data.qrExpiresAt && data.qrExpiresAt > 0) {
-            const remaining = data.qrExpiresAt - Date.now();
-            const remMins = Math.ceil(remaining / 60000);
-            expiryBadge = `<span style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">⏰ Expires in ~${remMins} min</span>`;
-        } else {
-            expiryBadge = `<span style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">✅ No expiry</span>`;
-        }
+//         let expiryBadge = '';
+//         if (data.qrExpiresAt && data.qrExpiresAt > 0) {
+//             const remaining = data.qrExpiresAt - Date.now();
+//             const remMins = Math.ceil(remaining / 60000);
+//             expiryBadge = `<span style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">⏰ Expires in ~${remMins} min</span>`;
+//         } else {
+//             expiryBadge = `<span style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">✅ No expiry</span>`;
+//         }
 
-        container.innerHTML = `
-            <div style="background:white; color:#1e293b; padding:40px; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
-                    <div>
-                        <h1 style="margin:0; color:#0f172a; font-size:1.8rem;">${data.studentName}'s Record</h1>
-                        <small style="color:#64748b;">Recorded on: ${data.dateString || 'N/A'}</small>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        ${expiryBadge}
-                        <div style="font-size:1.5rem;">${data.mood || '😊'}</div>
-                    </div>
-                </div>
-                <hr style="border:0; border-top:1px solid #f1f5f9; margin:20px 0;">
-                <div id="content-canvas-wrapper" style="position: relative; min-height: 400px; line-height: 1.6;">
-                    <div style="position: relative; z-index: 1; font-size: 1.1rem;">${data.data}</div>
-                    ${data.shapes ? `<img src="${data.shapes}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; object-fit: contain;">` : ''}
-                </div>
-                <div style="margin-top:30px; padding-top:20px; border-top:1px dashed #e2e8f0; color:#94a3b8; font-size:0.8rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                    <span>Reference: ${id}</span>
-                    <span>Time Spent: ${data.totalActiveTime || 'N/A'}</span>
-                </div>
-            </div>
-            <p style="text-align:center; margin-top:20px;">
-                <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none; font-weight:bold;">
-                    ← Return to Platform
-                </a>
-            </p>`;
+//         container.innerHTML = `
+//             <div style="background:white; color:#1e293b; padding:40px; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;">
+//                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+//                     <div>
+//                         <h1 style="margin:0; color:#0f172a; font-size:1.8rem;">${data.studentName}'s Record</h1>
+//                         <small style="color:#64748b;">Recorded on: ${data.dateString || 'N/A'}</small>
+//                     </div>
+//                     <div style="display:flex; align-items:center; gap:10px;">
+//                         ${expiryBadge}
+//                         <div style="font-size:1.5rem;">${data.mood || '😊'}</div>
+//                     </div>
+//                 </div>
+//                 <hr style="border:0; border-top:1px solid #f1f5f9; margin:20px 0;">
+//                 <div id="content-canvas-wrapper" style="position: relative; min-height: 400px; line-height: 1.6;">
+//                     <div style="position: relative; z-index: 1; font-size: 1.1rem;">${data.data}</div>
+//                     ${data.shapes ? `<img src="${data.shapes}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; object-fit: contain;">` : ''}
+//                 </div>
+//                 <div style="margin-top:30px; padding-top:20px; border-top:1px dashed #e2e8f0; color:#94a3b8; font-size:0.8rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+//                     <span>Reference: ${id}</span>
+//                     <span>Time Spent: ${data.totalActiveTime || 'N/A'}</span>
+//                 </div>
+//             </div>
+//             <p style="text-align:center; margin-top:20px;">
+//                 <a href="${window.location.origin}${window.location.pathname}" style="color:#94a3b8; text-decoration:none; font-weight:bold;">
+//                     ← Return to Platform
+//                 </a>
+//             </p>`;
 
-        container.style.opacity = "0";
-        setTimeout(() => { container.style.transition = "opacity 0.5s"; container.style.opacity = "1"; }, 100);
+//         container.style.opacity = "0";
+//         setTimeout(() => { container.style.transition = "opacity 0.5s"; container.style.opacity = "1"; }, 100);
 
-    } catch (error) {
-        console.error("Firebase Error:", error);
-        container.innerHTML = "<h2 style='color:white; text-align:center;'>Connection Error.</h2>";
-    }
-}
+//     } catch (error) {
+//         console.error("Firebase Error:", error);
+//         container.innerHTML = "<h2 style='color:white; text-align:center;'>Connection Error.</h2>";
+//     }
+// }
 
     function filterByMood(moodEmoji) {
         const filtered = allCloudLogs.filter(log => log.mood === moodEmoji);
