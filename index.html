@@ -2733,30 +2733,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🔒 ADMIN shareRecordQR — Admin can share any student's record
     // This is intentionally separate from student QR (admin-only feature)
     // ============================================================
-    // async function loadSingleSharedRecord(id)(index) {
-    //     if (!allCloudLogs || !allCloudLogs[index]) { alert("Error: Record data missing."); return; }
-    //     const logEntry = allCloudLogs[index];
-    //     const recordId = logEntry.id; 
-    //     if (!recordId) { alert("Cannot share: Record has no ID."); return; }
-    //     const hours = prompt("Link expires in how many hours?", "24");
-    //     if (hours === null) return;
-    //     const shareUrl = `${window.location.origin}${window.location.pathname}?view=${logEntry.id}`;
-    //     const qrModal = document.getElementById('qrModal');
-    //     const qrContainer = document.getElementById("qrcode");
-    //     if (!qrModal || !qrContainer) { alert("HTML Error: qrModal missing!"); return; }
-    //     qrContainer.innerHTML = `<p style="color:#1e293b; margin-bottom:10px; font-size:12px; font-weight:bold;">Scan to view ${logEntry.studentName}'s record</p>`;
-    //     qrModal.style.display = 'flex';
-    //     try {
-    //         new QRCode(qrContainer, {
-    //             text: shareUrl,
-    //             width: 180,
-    //             height: 180,
-    //             colorDark: "#1e293b",
-    //             colorLight: "#ffffff",
-    //             correctLevel: QRCode.CorrectLevel.M
-    //         });
-    //     } catch (e) { alert("QR Library not loaded!"); }
-    // }
+    async function loadSingleSharedRecord(id)(index) {
+        if (!allCloudLogs || !allCloudLogs[index]) { alert("Error: Record data missing."); return; }
+        const logEntry = allCloudLogs[index];
+        const recordId = logEntry.id; 
+        if (!recordId) { alert("Cannot share: Record has no ID."); return; }
+        const hours = prompt("Link expires in how many hours?", "24");
+        if (hours === null) return;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?view=${logEntry.id}`;
+        const qrModal = document.getElementById('qrModal');
+        const qrContainer = document.getElementById("qrcode");
+        if (!qrModal || !qrContainer) { alert("HTML Error: qrModal missing!"); return; }
+        qrContainer.innerHTML = `<p style="color:#1e293b; margin-bottom:10px; font-size:12px; font-weight:bold;">Scan to view ${logEntry.studentName}'s record</p>`;
+        qrModal.style.display = 'flex';
+        try {
+            new QRCode(qrContainer, {
+                text: shareUrl,
+                width: 180,
+                height: 180,
+                colorDark: "#1e293b",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        } catch (e) { alert("QR Library not loaded!"); }
+    }
 
 
     function shareRecordQR(index) {
@@ -2907,57 +2907,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    async function loadSingleSharedRecord(id) {
-    const container = document.getElementById('single-view-container');
-    if (!container || !id) return;
+    // async function loadSingleSharedRecord(id) {
+    // const container = document.getElementById('single-view-container');
+    // if (!container || !id) return;
 
-    try {
-        const doc = await db.collection("edu_logs").doc(id).get();
+    // try {
+    //     const doc = await db.collection("edu_logs").doc(id).get();
 
-        if (!doc.exists) {
-            container.innerHTML = `
-                <div style="text-align:center; color:white; padding:50px;">
-                    <div style="font-size:64px; margin-bottom:16px;">🔍</div>
-                    <h2 style="font-size:1.4rem;">Record Not Found</h2>
-                    <p style="color:#94a3b8; margin-top:8px;">This link may have expired or the record was deleted.</p>
-                </div>`;
-            return;
-        }
+    //     if (!doc.exists) {
+    //         container.innerHTML = `
+    //             <div style="text-align:center; color:white; padding:50px;">
+    //                 <div style="font-size:64px; margin-bottom:16px;">🔍</div>
+    //                 <h2 style="font-size:1.4rem;">Record Not Found</h2>
+    //                 <p style="color:#94a3b8; margin-top:8px;">This link may have expired or the record was deleted.</p>
+    //             </div>`;
+    //         return;
+    //     }
 
-        const data = doc.data();
+    //     const data = doc.data();
 
-        // ✅ CHECK EXPIRY
-        if (data.qrExpiresAt && data.qrExpiresAt > 0 && Date.now() > data.qrExpiresAt) {
-            container.innerHTML = `
-                <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #ef4444; padding: 48px 32px; border-radius: 20px; text-align: center; max-width: 480px; margin: 0 auto; box-shadow: 0 0 40px rgba(239,68,68,0.15);">
-                    <div style="width: 80px; height: 80px; background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px;">⏰</div>
-                    <h2 style="color: #ef4444; font-size: 1.6rem; margin: 0 0 10px; font-weight: 800; letter-spacing: -0.5px;">This QR Code Has Expired</h2>
-                    <p style="color: #94a3b8; font-size: 14px; margin: 0 0 8px; line-height: 1.6;">The link you scanned is no longer valid. The owner set this QR code to expire and the time limit has passed.</p>
-                    <p style="color: #475569; font-size: 12px; margin: 0 0 28px;">Expired: ${new Date(data.qrExpiresAt).toLocaleString()}</p>
-                    <div style="background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-                        <p style="color: #fca5a5; font-size: 12px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                            <span style="font-size:16px;">🔒</span> 
-                            Contact the note owner to get a fresh QR code with a new expiry time.
-                        </p>
-                    </div>
-                    <a href="${window.location.origin}${window.location.pathname}" style="display: inline-block; background: #6366f1; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 13px;">
-                        ← Go to EduFlow
-                    </a>
-                </div>`;
-            container.style.opacity = "0";
-            setTimeout(() => { container.style.transition = "opacity 0.5s"; container.style.opacity = "1"; }, 100);
-            return;
-        }
+    //     // ✅ CHECK EXPIRY
+    //     if (data.qrExpiresAt && data.qrExpiresAt > 0 && Date.now() > data.qrExpiresAt) {
+    //         container.innerHTML = `
+    //             <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #ef4444; padding: 48px 32px; border-radius: 20px; text-align: center; max-width: 480px; margin: 0 auto; box-shadow: 0 0 40px rgba(239,68,68,0.15);">
+    //                 <div style="width: 80px; height: 80px; background: rgba(239,68,68,0.1); border: 2px solid #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px;">⏰</div>
+    //                 <h2 style="color: #ef4444; font-size: 1.6rem; margin: 0 0 10px; font-weight: 800; letter-spacing: -0.5px;">This QR Code Has Expired</h2>
+    //                 <p style="color: #94a3b8; font-size: 14px; margin: 0 0 8px; line-height: 1.6;">The link you scanned is no longer valid. The owner set this QR code to expire and the time limit has passed.</p>
+    //                 <p style="color: #475569; font-size: 12px; margin: 0 0 28px;">Expired: ${new Date(data.qrExpiresAt).toLocaleString()}</p>
+    //                 <div style="background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+    //                     <p style="color: #fca5a5; font-size: 12px; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+    //                         <span style="font-size:16px;">🔒</span> 
+    //                         Contact the note owner to get a fresh QR code with a new expiry time.
+    //                     </p>
+    //                 </div>
+    //                 <a href="${window.location.origin}${window.location.pathname}" style="display: inline-block; background: #6366f1; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 700; font-size: 13px;">
+    //                     ← Go to EduFlow
+    //                 </a>
+    //             </div>`;
+    //         container.style.opacity = "0";
+    //         setTimeout(() => { container.style.transition = "opacity 0.5s"; container.style.opacity = "1"; }, 100);
+    //         return;
+    //     }
 
-        // ✅ SHOW expiry badge if set but not yet expired
-        let expiryBadge = '';
-        if (data.qrExpiresAt && data.qrExpiresAt > 0) {
-            const remaining = data.qrExpiresAt - Date.now();
-            const remMins = Math.ceil(remaining / 60000);
-            expiryBadge = `<span style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">⏰ Expires in ~${remMins} min</span>`;
-        } else {
-            expiryBadge = `<span style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">✅ No expiry</span>`;
-        }
+    //     // ✅ SHOW expiry badge if set but not yet expired
+    //     let expiryBadge = '';
+    //     if (data.qrExpiresAt && data.qrExpiresAt > 0) {
+    //         const remaining = data.qrExpiresAt - Date.now();
+    //         const remMins = Math.ceil(remaining / 60000);
+    //         expiryBadge = `<span style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">⏰ Expires in ~${remMins} min</span>`;
+    //     } else {
+    //         expiryBadge = `<span style="background:#dcfce7; color:#166534; border:1px solid #bbf7d0; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">✅ No expiry</span>`;
+    //     }
 
 //         container.innerHTML = `
 //             <div style="background:white; color:#1e293b; padding:40px; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;">
