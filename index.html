@@ -2733,30 +2733,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🔒 ADMIN shareRecordQR — Admin can share any student's record
     // This is intentionally separate from student QR (admin-only feature)
     // ============================================================
-    async function loadSingleSharedRecord(id)(index) {
-        if (!allCloudLogs || !allCloudLogs[index]) { alert("Error: Record data missing."); return; }
-        const logEntry = allCloudLogs[index];
-        const recordId = logEntry.id; 
-        if (!recordId) { alert("Cannot share: Record has no ID."); return; }
-        const hours = prompt("Link expires in how many hours?", "24");
-        if (hours === null) return;
-        const shareUrl = `${window.location.origin}${window.location.pathname}?view=${logEntry.id}`;
-        const qrModal = document.getElementById('qrModal');
-        const qrContainer = document.getElementById("qrcode");
-        if (!qrModal || !qrContainer) { alert("HTML Error: qrModal missing!"); return; }
-        qrContainer.innerHTML = `<p style="color:#1e293b; margin-bottom:10px; font-size:12px; font-weight:bold;">Scan to view ${logEntry.studentName}'s record</p>`;
-        qrModal.style.display = 'flex';
-        try {
-            new QRCode(qrContainer, {
-                text: shareUrl,
-                width: 180,
-                height: 180,
-                colorDark: "#1e293b",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
-            });
-        } catch (e) { alert("QR Library not loaded!"); }
-    }
+    // async function loadSingleSharedRecord(id)(index) {
+    //     if (!allCloudLogs || !allCloudLogs[index]) { alert("Error: Record data missing."); return; }
+    //     const logEntry = allCloudLogs[index];
+    //     const recordId = logEntry.id; 
+    //     if (!recordId) { alert("Cannot share: Record has no ID."); return; }
+    //     const hours = prompt("Link expires in how many hours?", "24");
+    //     if (hours === null) return;
+    //     const shareUrl = `${window.location.origin}${window.location.pathname}?view=${logEntry.id}`;
+    //     const qrModal = document.getElementById('qrModal');
+    //     const qrContainer = document.getElementById("qrcode");
+    //     if (!qrModal || !qrContainer) { alert("HTML Error: qrModal missing!"); return; }
+    //     qrContainer.innerHTML = `<p style="color:#1e293b; margin-bottom:10px; font-size:12px; font-weight:bold;">Scan to view ${logEntry.studentName}'s record</p>`;
+    //     qrModal.style.display = 'flex';
+    //     try {
+    //         new QRCode(qrContainer, {
+    //             text: shareUrl,
+    //             width: 180,
+    //             height: 180,
+    //             colorDark: "#1e293b",
+    //             colorLight: "#ffffff",
+    //             correctLevel: QRCode.CorrectLevel.M
+    //         });
+    //     } catch (e) { alert("QR Library not loaded!"); }
+    // }
 
 
     function shareRecordQR(index) {
