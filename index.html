@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduFlow Ultimate-ZinqFitness | Pro Teaching Board</title>
+    <!-- PWA Meta Tags -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Service Worker Registration Script -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker registered successfully!', reg))
+        .catch(err => console.log('Service Worker registration failed:', err));
+    });
+  }
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1436,7 +1452,8 @@ body.sharing-active .toolbar-top {
         <i class="fas fa-qrcode" id="nav-myqr" onclick="nav('myqr')" title="My QR Codes" style="color:#94a3b8;"></i>
         <i class="fas fa-user-shield" id="nav-admin" onclick="openAdmin()" title="Admin Control"></i>
         <i class="fas fa-file-pdf" onclick="downloadMasterPDF()" title="Download as PDF"></i>
-        <a href="index12.html" style="text-decoration: none; color: white;"><h6>TakeTest</h6></a>
+        <a href="index2.html" style="text-decoration: none; color: white;"><h6>TakeTest</h6></a>
+        <a href="video.html" style="text-decoration: none; color: rgb(217, 16, 16);"><h6>Watch Videos</h6></a>
 
         <!-- User profile avatar — shown when logged in -->
         <div id="sidebarUserProfile" class="sidebar-user-profile" style="display:none;" onclick="toggleUserTooltip(event)" title="Your profile">
@@ -1508,11 +1525,13 @@ body.sharing-active .toolbar-top {
         <label for="studentPdfInp" style="background:#f59e0b; color:white; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; text-align:center; font-size:13px; font-weight:bold;">
             <i class="fas fa-file-pdf"></i> Upload PDF
         </label>
+       
         <input type="file" id="studentPdfInp" hidden accept="application/pdf" onchange="uploadStudentPdf()">
 
         <button onclick="openVideoPanel()" id="videoPanelBtn" title="Watch Video + Take Notes" style="background:linear-gradient(135deg,#e11d48,#be185d); color:white; border:none; padding:10px; min-width:110px; flex:1; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:6px;">
             <i class="fab fa-youtube"></i> Watch + Notes
         </button>
+        <a href="video.html" style="color: wheat; text-decoration: none;">Watch + Notes 1st</a>
     </div>
 
     <div id="student-workspace-ui" style="max-width: 900px; margin: 10px auto; padding: 0 10px; transition: opacity 0.3s ease;">
@@ -4681,7 +4700,6 @@ This cannot be undone.`);
 </div>
 </body>
 </html>
-
 
 
 

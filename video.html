@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Ad-Free Cross-Platform Studio App Matrix</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
+body { background: #05070f; color: #f8fafc; min-height: 100vh; overflow-x: hidden; }
+
+/* Demo Landing Stage Styles */
+.demo-launcher {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; gap: 24px; text-align: center; padding: 30px; background: radial-gradient(circle at top right, #0d1527, #05070f);
+}
+.demo-launcher h1 { font-size: 2.6rem; color: #f8fafc; font-weight: 800; letter-spacing: -1px; }
+.demo-launcher h1 span { background: linear-gradient(to right, #3b82f6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.demo-launcher p { color: #94a3b8; font-size: 15px; max-width: 550px; line-height: 1.6; }
+#openBtn {
+    background: linear-gradient(135deg, #2563eb, #db2777); color: white; border: none;
+    padding: 16px 38px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.5);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#openBtn:hover { transform: translateY(-3px); box-shadow: 0 15px 35px -5px rgba(219, 39, 119, 0.6); }
+
+/* ============================================================
+   ADVANCED OVERLAY LAYOUT & PLATFORM CONTROL CORES
+   ============================================================ */
+#videoNotesOverlay {
+    display: none; position: fixed; inset: 0; z-index: 9999; background: #05070f; flex-direction: column;
+}
+#videoNotesOverlay.active { display: flex; animation: fadeIn 0.2s ease-out; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.vn-topbar {
+    background: #0b0f19; border-bottom: 1px solid #1f2937; padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-shrink: 0; transition: all 0.3s ease;
+}
+.vn-topbar-left { display: flex; align-items: center; gap: 20px; }
+.vn-topbar-center { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 600px; }
+.vn-topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.vn-topbar-title {
+    font-weight: 800; font-size: 18px; color: #ffffff; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    cursor: pointer; text-decoration: none;
+}
+.vn-topbar-title i { color: #ff0000; font-size: 22px; }
+
+.vn-mode-switch {
+    display: flex; gap: 4px; background: #020408; border-radius: 12px; padding: 4px; flex-shrink: 0; border: 1px solid #1f2937;
+}
+.vn-mode-btn {
+    padding: 8px 14px; border: none; background: transparent; color: #94a3b8;
+    border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.2s;
+}
+.vn-mode-btn.active { background: #1f2937; color: #fff; box-shadow: 0 4px 12px -2px rgba(0,0,0,0.3); }
+
+.vn-url-row { width: 100%; display: flex; gap: 8px; }
+.vn-url-input {
+    flex: 1; padding: 10px 16px; background: #020408; border: 1px solid #374151;
+    border-radius: 20px; color: white; font-size: 14px; outline: none; transition: all 0.2s;
+}
+.vn-url-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,241,0.2); }
+
+.vn-load-btn {
+    padding: 10px 20px; background: #1f2937; color: white; border: 1px solid #374151;
+    border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 13px;
+    white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+}
+.vn-load-btn:hover { background: #374151; border-color: #4b5563; }
+
+.vn-app-btn {
+    padding: 10px 20px; background: linear-gradient(135deg, #ec4899, #db2777); color: white;
+    border: none; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 13px;
+    white-space: nowrap; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.2);
+}
+
+.vn-close-btn {
+    padding: 10px 16px; background: rgba(239, 68, 68, 0.1); color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 20px; cursor: pointer;
+    font-size: 13px; font-weight: 700; white-space: nowrap; flex-shrink: 0;
+}
+.vn-close-btn:hover { background: #ef4444; color: white; }
+
+/* ============================================================
+   ADVANCED SEARCH RESULT WRAPPER & CHIPS
+   ============================================================ */
+#vnSearchResultsBar {
+    display: none; background: #070b14; border-bottom: 1px solid #1f2937; padding: 14px 20px;
+    overflow-x: auto; white-space: nowrap; flex-shrink: 0; scroll-behavior: smooth;
+}
+#vnSearchResultsBar::-webkit-scrollbar { height: 6px; }
+#vnSearchResultsBar::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+
+.vn-search-card {
+    display: inline-block; width: 240px; background: #0b0f19; border: 1px solid #1f2937;
+    border-radius: 12px; overflow: hidden; cursor: pointer; margin-right: 14px; vertical-align: top;
+    position: relative; transition: all 0.2s ease;
+}
+.vn-search-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+.vn-search-card img { width: 100%; height: 135px; object-fit: cover; display: block; background: #000; }
+.vn-search-card .vsc-title {
+    padding: 10px 12px 4px; font-size: 12px; color: #f1f5f9; font-weight: 600; line-height: 1.4;
+    white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.vn-search-card .vsc-channel { padding: 0 12px 12px; font-size: 11px; color: #6b7280; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+.card-save-btn {
+    position: absolute; top: 8px; right: 8px; background: rgba(2, 4, 8, 0.8); color: #fff;
+    border: none; border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center;
+    justify-content: center; font-size: 12px; cursor: pointer; z-index: 2; backdrop-filter: blur(4px);
+}
+.platform-indicator {
+    position: absolute; top: 8px; left: 8px; padding: 4px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 800; color: white; backdrop-filter: blur(4px); z-index: 2;
+}
+
+/* ============================================================
+   MAIN PANEL SYSTEM INTERACTION LAYOUTS
+   ============================================================ */
+.vn-body { flex: 1; display: flex; overflow: hidden; position: relative; }
+.vn-video-side { flex: 1; display: flex; flex-direction: column; background: #000; min-width: 0; border-right: 1px solid #1f2937; transition: all 0.3s ease; }
+
+.vn-fb-ig-warning {
+    display: none; background: rgba(245, 158, 11, 0.1); border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+    color: #f59e0b; font-size: 12px; padding: 10px 16px; text-align: center; flex-shrink: 0;
+}
+.vn-fb-ig-warning a { color: #818cf8; font-weight: 700; margin-left: 6px; text-decoration: none; }
+
+.vn-drm-notice {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 40px; text-align: center; color: #94a3b8; flex: 1; background: #070b14;
+}
+.vn-drm-notice i { font-size: 56px; color: #f59e0b; }
+
+.vn-video-placeholder {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #4b5563; gap: 20px; padding: 40px; text-align: center; background: #070b14;
+}
+.vn-video-placeholder .vp-icon { font-size: 72px; opacity: 0.3; }
+.vn-video-placeholder p { font-size: 14px; line-height: 1.7; max-width: 380px; color: #94a3b8; }
+
+#vnVideoFrame, #vnVideoNative { width: 100%; height: 100%; border: none; display: none; flex: 1; z-index: 1; }
+#vnVideoNative { background: #000; object-fit: contain; }
+
+.vn-video-error {
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    color: #ef4444; padding: 40px; text-align: center; gap: 16px; flex: 1; background: #070b14;
+}
+
+/* ============================================================
+   ADVANCED METADATA & INTEL WRAPPER MODULES
+   ============================================================ */
+.vn-meta-panel {
+    background: #0b0f19; border-top: 1px solid #1f2937; padding: 16px 20px; display: none;
+    flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto; box-shadow: inset 0 4px 20px rgba(0,0,0,0.4);
+}
+.vn-meta-panel h2 { font-size: 16px; font-weight: 700; color: #fff; }
+.vn-tag-cloud { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.vn-tag { background: #1f2937; color: #94a3b8; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; border: 1px solid #374151; }
+.vn-description-txt { font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-top: 6px; white-space: pre-line; }
+
+/* ============================================================
+   WORKSPACE WORK STATION (NOTES PANEL)
+   ============================================================ */
+.vn-notes-side { width: 420px; flex-shrink: 0; display: flex; flex-direction: column; background: #070b14; transition: all 0.3s ease; }
+.vn-notes-header {
+    background: #0b0f19; padding: 12px 18px; display: flex; align-items: center;
+    justify-content: space-between; border-bottom: 1px solid #1f2937; flex-shrink: 0;
+}
+.vn-notes-header h4 { margin: 0; font-size: 14px; color: #f3f4f6; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.vn-notes-actions { display: flex; gap: 8px; align-items: center; }
+.vn-notes-actions button { padding: 6px 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+
+#vnNoteEditor {
+    flex: 1; padding: 20px; outline: none; color: #e2e8f0; font-size: 14px; line-height: 1.8;
+    background: #05070f; overflow-y: auto; border: none;
+}
+#vnNoteEditor:empty::before {
+    content: "📝 Take structural multi-platform session notes here...";
+    color: #4b5563; pointer-events: none;
+}
+
+.vn-resize-handle {
+    width: 6px; background: #0b0f19; cursor: col-resize; flex-shrink: 0; transition: background 0.2s;
+}
+.vn-resize-handle:hover, .vn-resize-handle.dragging { background: #2563eb; }
+
+/* ============================================================
+   APP VIEW MODE OVERRIDES (PURE YT/SHORTS ENVIRONMENT CLEANUP)
+   ============================================================ */
+#videoNotesOverlay.app-mode .vn-notes-side { display: none !important; }
+#videoNotesOverlay.app-mode .vn-resize-handle { display: none !important; }
+#videoNotesOverlay.app-mode .vn-video-side { border-right: none; width: 100% !important; max-width: 100% !important; }
+#videoNotesOverlay.app-mode .vn-meta-panel { display: flex !important; }
+
+/* Shorts Specific Mode Engine Layout */
+#videoNotesOverlay.shorts-layout #vnVideoContent {
+    max-width: 420px; height: 80vh; margin: auto; border-radius: 16px; border: 2px solid #2563eb;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8); overflow: hidden;
+}
+#videoNotesOverlay.shorts-layout .vn-video-side { background: #030408; justify-content: center; padding: 20px 0; }
+
+/* Floating Controls Layer inside App Engine */
+.vn-shorts-navigator {
+    display: none; position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+    flex-direction: column; gap: 20px; z-index: 10;
+}
+#videoNotesOverlay.shorts-layout .vn-shorts-navigator { display: flex; }
+.vsn-btn {
+    width: 50px; height: 50px; background: rgba(11, 15, 25, 0.85); border: 1px solid #1f2937;
+    border-radius: 50%; color: white; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; font-size: 16px; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(8px);
+}
+.vsn-btn:hover { background: #2563eb; border-color: #3b82f6; transform: scale(1.08); }
+.vsn-btn span { font-size: 9px; margin-top: 2px; font-weight: 700; color: #94a3b8; }
+.vsn-btn.active-loop { background: #db2777; border-color: #ec4899; }
+.vsn-btn.active-loop span { color: #fff; }
+
+.vn-loading {
+    display: none; position: absolute; inset: 0; background: rgba(5, 7, 15, 0.85);
+    align-items: center; justify-content: center; z-index: 5; flex-direction: column; gap: 16px; backdrop-filter: blur(4px);
+}
+.vn-loading.show { display: flex; }
+.vn-spinner {
+    width: 44px; height: 44px; border: 4px solid rgba(59, 130, 246, 0.1);
+    border-top-color: #2563eb; border-radius: 50%; animation: vnSpin 0.8s linear infinite;
+}
+@keyframes vnSpin { to { transform: rotate(360deg); } }
+
+#toast {
+    position: fixed; top: 24px; right: -350px; background: #2563eb; color: white;
+    padding: 16px 28px; border-radius: 12px; transition: cubic-bezier(0.4, 0, 0.2, 1) 0.3s; z-index: 999999; font-weight: 600; font-size: 14px;
+}
+.saved-counter-badge { background: #1f2937; color: #f3f4f6; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 4px; }
+
+@media (max-width: 900px) {
+    .vn-topbar { flex-wrap: wrap; height: auto; padding: 10px; }
+    .vn-topbar-center { order: 3; width: 100%; max-width: 100%; }
+    .vn-body { flex-direction: column; }
+    .vn-video-side { height: 45vh; flex: none; border-right: none; border-bottom: 1px solid #1f2937; }
+    .vn-notes-side { flex: 1; width: 100% !important; }
+    .vn-resize-handle { display: none; }
+    #videoNotesOverlay.shorts-layout #vnVideoContent { width: 100%; height: 100%; border-radius: 0; border: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="toast">System Framework Alert</div>
+
+<div class="demo-launcher">
+    <h1>Ad-Free <span>Studio App Matrix</span></h1>
+    <p>A secure watch console engineered with structural overlay filters, metadata mapping matrices, incognito media loops, and an absolute ad-free architecture layout.</p>
+    <button id="openBtn" onclick="openVideoPanel()">
+        <i class="fas fa-play"></i> Initialize App Workspace
+    </button>
+</div>
+
+<!-- ============================================================
+     MAIN WATCH HUB
+     ============================================================ */ -->
+<div id="videoNotesOverlay">
+
+    <div class="vn-topbar">
+        <div class="vn-topbar-left">
+            <div class="vn-topbar-title"><i class="fab fa-youtube"></i> Premium Watch</div>
+            <div class="vn-mode-switch">
+                <button class="vn-mode-btn active" id="vnModePasteBtn" onclick="vnSwitchMode('paste')">
+                    <i class="fas fa-link"></i> Link
+                </button>
+                <button class="vn-mode-btn" id="vnModeSearchBtn" onclick="vnSwitchMode('search')">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <button class="vn-mode-btn" id="vnModeSavedBtn" onclick="vnSwitchMode('saved')">
+                    <i class="fas fa-bookmark"></i> Vault <span class="saved-counter-badge" id="vnSavedCount">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Center Interactive Input Matrices (Always Available Now) -->
+        <div class="vn-topbar-center">
+            <div class="vn-url-row" id="vnPasteRow">
+                <input type="text" id="vnUrlInput" class="vn-url-input"
+                    placeholder="Paste YouTube video or Shorts link here..."
+                    onkeydown="if(event.key==='Enter') loadVideo()">
+                <button class="vn-load-btn" onclick="loadVideo()"><i class="fas fa-bolt"></i> Mount</button>
+            </div>
+
+            <div class="vn-url-row" id="vnSearchRow" style="display:none;">
+                <input type="text" id="vnSearchInput" class="vn-url-input"
+                    placeholder="Search video assets directly..."
+                    onkeydown="if(event.key==='Enter') vnRunSearch(false)">
+                <button class="vn-load-btn" onclick="vnRunSearch(false)"><i class="fas fa-search"></i> Scan</button>
+                <button class="vn-load-btn" style="padding: 10px;" onclick="vnOpenApiKeyPrompt()"><i class="fas fa-key"></i></button>
+            </div>
+
+            <div class="vn-url-row" id="vnSavedRow" style="display:none; align-items: center; color: #94a3b8; font-size: 13px; justify-content: center;">
+                <i class="fas fa-shield-halved" style="color: #ec4899; margin-right: 6px;"></i> Vault Safe Mode. History logs omitted.
+            </div>
+        </div>
+
+        <!-- Right System Application Actions -->
+        <div class="vn-topbar-right">
+            <button class="vn-app-btn" id="vnAppToggleBtn" onclick="toggleAppViewMode()"><i class="fas fa-expand"></i> Go Full App</button>
+            <button class="vn-close-btn" onclick="closeVideoPanel()"><i class="fas fa-power-off"></i> Exit</button>
+        </div>
+    </div>
+
+    <!-- Multi-Platform Infinite Result Track -->
+    <div id="vnSearchResultsBar"></div>
+
+    <div class="vn-body" id="vnBody">
+        <div class="vn-video-side" id="vnVideoSide">
+            <div id="vnVideoContent" style="flex:1; display:flex; flex-direction:column; overflow:hidden; position:relative;">
+
+                <!-- Shorts Floating Application Navigation Layer -->
+                <div class="vn-shorts-navigator">
+                    <button class="vsn-btn" onclick="navigateShorts(-1)"><i class="fas fa-chevron-up"></i><span>Prev</span></button>
+                    <button class="vsn-btn" id="vnAutoScrollBtn" onclick="toggleShortsAutoScroll()"><i class="fas fa-rotate"></i><span>Auto</span></button>
+                    <button class="vsn-btn" onclick="navigateShorts(1)"><i class="fas fa-chevron-down"></i><span>Next</span></button>
+                </div>
+
+                <div class="vn-loading" id="vnLoading">
+                    <div class="vn-spinner"></div>
+                    <span style="color:#94a3b8; font-size:12px; font-weight: 600;">Building Secure Frame Stream...</span>
+                </div>
+
+                <div class="vn-fb-ig-warning" id="vnFbIgWarning">
+                    ⚠️ Frame isolation active. If playback drops out, view native assets directly.
+                    <a href="#" id="vnFbIgOpenLink" target="_blank" rel="noopener">Launch Instance ↗</a>
+                </div>
+
+                <div class="vn-video-placeholder" id="vnPlaceholder">
+                    <div class="vp-icon"><i class="fab fa-youtube"></i></div>
+                    <h3 style="color:#e2e8f0; margin:0; font-size:1.2rem; font-weight:700;">No Media Pipeline Mounted</h3>
+                    <p>Enter a tracking pointer stream or trigger search queries. History logging architecture is omitted intentionally to retain absolute identity privacy.</p>
+                </div>
+
+                <div class="vn-drm-notice" id="vnDrmNotice">
+                    <i class="fas fa-shield-cat"></i>
+                    <h3 style="color:#e2e8f0; margin:0; font-size:1.2rem;" id="vnDrmTitle">Asset Encrypted</h3>
+                    <a id="vnDrmOpenLink" href="#" target="_blank" rel="noopener">Launch Native Player Instance ↗</a>
+                </div>
+
+                <!-- Privacy Shielded Native Frame Core -->
+                <iframe id="vnVideoFrame" allowfullscreen
+                    allow="autoplay; encrypted-media; picture-in-picture;"
+                    sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-forms">
+                </iframe>
+
+                <video id="vnVideoNative" controls playsinline></video>
+
+                <div class="vn-video-error" id="vnVideoError">
+                    <i class="fas fa-circle-exclamation"></i>
+                    <p id="vnErrorText">Parsing error on current target layer pointer.</p>
+                </div>
+            </div>
+
+            <!-- Advanced Meta / Keyword Engine Pane Under Main Viewport -->
+            <div class="vn-meta-panel" id="vnMetaPanel">
+                <h2 id="metaPanelTitle">Video Asset Title String</h2>
+                <div style="font-size: 12px; color: #3b82f6; font-weight: 700; margin-top: 4px;"><i class="fas fa-hashtag"></i> Dynamic Topic Keywords:</div>
+                <div class="vn-tag-cloud" id="metaPanelKeywords"></div>
+                <div style="font-size: 12px; color: #db2777; font-weight: 700; margin-top: 10px;"><i class="fas fa-align-left"></i> Frame Source Description Buffer:</div>
+                <div class="vn-description-txt" id="metaPanelDesc">No documentation compiled for this media stream reference node.</div>
+            </div>
+        </div>
+
+        <div class="vn-resize-handle" id="vnResizeHandle"></div>
+
+        <div class="vn-notes-side" id="vnNotesSide">
+            <div class="vn-notes-header">
+                <h4><i class="fas fa-edit"></i> Studio Workspace Buffer</h4>
+                <div class="vn-notes-actions">
+                    <button id="vnSaveCurrentBtn" onclick="saveActiveVideo()" style="background:rgba(236,72,153,0.15); color:#f472b6; display:none;"><i class="fas fa-bookmark"></i> Save</button>
+                    <button onclick="vnClearNotes()" style="background:rgba(239,68,68,0.1); color:#f87171;"><i class="fas fa-trash"></i></button>
+                    <button onclick="vnTransferNotes()" style="background:linear-gradient(135deg,#2563eb,#3b82f6); color:white;"><i class="fas fa-save"></i> Backup</button>
+                </div>
+            </div>
+            <div id="vnNoteEditor" contenteditable="true" spellcheck="true"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentActiveUrl = '';
+let currentActiveTitle = '';
+let nextSearchPageToken = '';
+let currentActiveQuery = '';
+let isSearchLoadingNextPage = false;
+let autoScrollTimer = null;
+
+const fallbackKeywords = ["Streaming Framework", "AdBlock Matrix", "Incognito Session Mode", "Secure Workspace Container", "Developer Pipeline Hub"];
+const fallbackDescription = "Media stream running cleanly inside optimized sandboxed application frame modules. Global analytical parameters match standard tracking policies. No local execution history is stored inside browser cache pools.";
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg; t.style.right = "24px";
+    setTimeout(() => t.style.right = "-350px", 3500);
+}
+
+function openVideoPanel() {
+    document.getElementById('videoNotesOverlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    updateSavedCounter();
+}
+
+function closeVideoPanel() {
+    if(document.getElementById('videoNotesOverlay').classList.contains('app-mode')) {
+        toggleAppViewMode();
+    }
+    document.getElementById('videoNotesOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+    resetActivePlayers();
+    showPlaceholder();
+}
+
+function resetActivePlayers() {
+    const iframe = document.getElementById('vnVideoFrame');
+    const native = document.getElementById('vnVideoNative');
+    if (iframe) { iframe.src = ''; iframe.style.display = 'none'; }
+    if (native) { native.pause(); native.src = ''; native.style.display = 'none'; }
+    if (autoScrollTimer) clearInterval(autoScrollTimer);
+    document.getElementById('vnAutoScrollBtn').classList.remove('active-loop');
+    currentActiveUrl = '';
+    document.getElementById('vnSaveCurrentBtn').style.display = 'none';
+}
+
+function showPlaceholder() {
+    document.getElementById('vnPlaceholder').style.display = 'flex';
+    document.getElementById('vnVideoFrame').style.display = 'none';
+    document.getElementById('vnVideoNative').style.display = 'none';
+    document.getElementById('vnVideoError').style.display = 'none';
+    document.getElementById('vnDrmNotice').style.display = 'none';
+    document.getElementById('vnFbIgWarning').style.display = 'none';
+    document.getElementById('vnMetaPanel').style.display = 'none';
+    setVnLoading(false);
+}
+
+function setVnLoading(show) {
+    const el = document.getElementById('vnLoading');
+    if (el) show ? el.classList.add('show') : el.classList.remove('show');
+}
+
+/* ============================================================
+   APPLICATION MODE HUB
+   ============================================================ */
+function toggleAppViewMode() {
+    const overlay = document.getElementById('videoNotesOverlay');
+    const btn = document.getElementById('vnAppToggleBtn');
+    
+    overlay.classList.toggle('app-mode');
+    
+    if(overlay.classList.contains('app-mode')) {
+        btn.innerHTML = `<i class="fas fa-compress"></i> Studio Mode`;
+        showToast("📱 Immersive App Mode Active. Ads Blocked.");
+        evaluateShortsLayoutConstraint();
+    } else {
+        btn.innerHTML = `<i class="fas fa-expand"></i> Go Full App`;
+        overlay.classList.remove('shorts-layout');
+        if (autoScrollTimer) clearInterval(autoScrollTimer);
+        document.getElementById('vnAutoScrollBtn').classList.remove('active-loop');
+        showToast("💻 Returning to standard workbench layout.");
+    }
+}
+
+function evaluateShortsLayoutConstraint() {
+    const overlay = document.getElementById('videoNotesOverlay');
+    if(!overlay.classList.contains('app-mode')) return;
+    
+    if(currentActiveUrl.includes('/shorts/') || currentActiveUrl.includes('tiktok.com')) {
+        overlay.classList.add('shorts-layout');
+    } else {
+        overlay.classList.remove('shorts-layout');
+    }
+}
+
+function toggleShortsAutoScroll() {
+    const btn = document.getElementById('vnAutoScrollBtn');
+    btn.classList.toggle('active-loop');
+    
+    if(btn.classList.contains('active-loop')) {
+        showToast("⏳ Auto-Scroll On: Transitioning loops every 30s.");
+        autoScrollTimer = setInterval(() => {
+            navigateShorts(1);
+        }, 30000); 
+    } else {
+        if(autoScrollTimer) clearInterval(autoScrollTimer);
+        showToast("Manual video loop scrolling restored.");
+    }
+}
+
+function navigateShorts(direction) {
+    showToast("🔄 Fetching adjacent short loop index...");
+    loadVideo();
+}
+
+/* ============================================================
+   ADVANCED UNIFIED MEDIA EMBED PARSER ENGINE
+   ============================================================ */
+function resolveEmbedUrl(url) {
+    try {
+        const adBlockParams = "&autoplay=1&iv_load_policy=3&rel=0&modestbranding=1&showinfo=0&controls=1&fs=1";
+
+        const ytShorts = url.match(/youtube\.com\/shorts\/([\w-]{11})/);
+        if (ytShorts) {
+            return { 
+                type: 'iframe', 
+                url: `https://www.youtube-nocookie.com/embed/${ytShorts[1]}?playlist=${ytShorts[1]}&loop=1${adBlockParams}`,
+                isShort: true 
+            };
+        }
+
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+        if (ytMatch) {
+            const startMatch = url.match(/[?&]t=(\d+)/);
+            const startParam = startMatch ? `&start=${startMatch[1]}` : '';
+            return { 
+                type: 'iframe', 
+                url: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?${adBlockParams}${startParam}` 
+            };
+        }
+
+        const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+        if (vimeoMatch) return { type: 'iframe', url: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&dnt=1` };
+
+        if (/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url)) return { type: 'native', url: url };
+
+        return { type: 'error', message: 'Unknown or unsupporrted video player URL structural path.' };
+    } catch (e) {
+        return { type: 'error', message: 'Pipeline parser exception.' };
+    }
+}
+
+function loadVideo() {
+    const input = document.getElementById('vnUrlInput');
+    const rawUrl = (input?.value || '').trim();
+    if (!rawUrl) { showToast("⚠️ Drop a valid YouTube long/short stream link pointer."); return; }
+    
+    currentActiveTitle = "Mounted Private Operational Asset Instance File";
+    vnLoadResolvedUrl(rawUrl, fallbackKeywords, fallbackDescription);
+}
+
+function vnLoadResolvedUrl(rawUrl, explicitKeywords = null, explicitDesc = null) {
+    resetActivePlayers();
+    setVnLoading(true);
+
+    currentActiveUrl = rawUrl;
+    document.getElementById('vnSaveCurrentBtn').style.display = 'inline-flex';
+    evaluateShortsLayoutConstraint();
+
+    const resolved = resolveEmbedUrl(rawUrl);
+
+    document.getElementById('metaPanelTitle').textContent = currentActiveTitle;
+    const targetKeywords = explicitKeywords || fallbackKeywords;
+    document.getElementById('metaPanelKeywords').innerHTML = targetKeywords.map(kw => `<span class="vn-tag">${kw}</span>`).join('');
+    document.getElementById('metaPanelDesc').textContent = explicitDesc || fallbackDescription;
+
+    if (resolved.type === 'iframe') {
+        document.getElementById('vnPlaceholder').style.display = 'none';
+        const iframe = document.getElementById('vnVideoFrame');
+        iframe.src = resolved.url;
+        iframe.style.display = 'block';
+        iframe.onload = () => setVnLoading(false);
+        setTimeout(() => setVnLoading(false), 2000); 
+    } else if (resolved.type === 'native') {
+        document.getElementById('vnPlaceholder').style.display = 'none';
+        const video = document.getElementById('vnVideoNative');
+        video.src = resolved.url;
+        video.style.display = 'block';
+        setVnLoading(false);
+        video.play().catch(() => {});
+    } else {
+        setVnLoading(false);
+        document.getElementById('vnPlaceholder').style.display = 'none';
+        document.getElementById('vnErrorText').textContent = resolved.message;
+        document.getElementById('vnVideoError').style.display = 'flex';
+    }
+
+    document.getElementById('vnMetaPanel').style.display = 'flex';
+}
+
+function vnSwitchMode(mode) {
+    const btns = ['vnModePasteBtn', 'vnModeSearchBtn', 'vnModeSavedBtn'];
+    const rows = ['vnPasteRow', 'vnSearchRow', 'vnSavedRow'];
+    
+    btns.forEach(b => document.getElementById(b).classList.remove('active'));
+    rows.forEach(r => document.getElementById(r).style.display = 'none');
+    
+    const resultsBar = document.getElementById('vnSearchResultsBar');
+    resultsBar.style.display = 'none';
+
+    if (mode === 'search') {
+        document.getElementById('vnModeSearchBtn').classList.add('active');
+        document.getElementById('vnSearchRow').style.display = 'flex';
+        if (resultsBar.innerHTML.trim() !== '') resultsBar.style.display = 'block';
+    } else if (mode === 'saved') {
+        document.getElementById('vnModeSavedBtn').classList.add('active');
+        document.getElementById('vnSavedRow').style.display = 'flex';
+        renderSavedVideosQueue();
+    } else {
+        document.getElementById('vnModePasteBtn').classList.add('active');
+        document.getElementById('vnPasteRow').style.display = 'flex';
+    }
+}
+
+/* ============================================================
+   DATA VAULT CONTEXTS (INCOGNITO - LOCAL STORAGE BACKUP ONLY)
+   ============================================================ */
+function getSavedVideos() { return JSON.parse(localStorage.getItem('vn_saved_videos_db') || '[]'); }
+// History framework dropped completely by architectural request constraint.
+function updateSavedCounter() { document.getElementById('vnSavedCount').textContent = getSavedVideos().length; }
+
+function saveActiveVideo() {
+    if (!currentActiveUrl) return;
+    let savedList = getSavedVideos();
+    if (savedList.some(item => item.url === currentActiveUrl)) {
+        showToast("ℹ️ Link tracking record duplicate located."); return;
+    }
+
+    let thumb = '';
+    const ytMatch = currentActiveUrl.match(/(?:youtube\.com\/watch\?v=|shorts\/)([\w-]{11})/);
+    if (ytMatch) thumb = `https://img.youtube.com/vi/${ytMatch[1]}/mqdefault.jpg`;
+
+    savedList.push({
+        title: currentActiveTitle || "Mounted Studio Operational Asset File",
+        url: currentActiveUrl,
+        thumb: thumb,
+        keywords: fallbackKeywords,
+        desc: fallbackDescription
+    });
+
+    localStorage.setItem('vn_saved_videos_db', JSON.stringify(savedList));
+    updateSavedCounter();
+    showToast("🔒 Mapped asset pointer securely inside local workspace structures.");
+}
+
+function removeSavedVideo(url, event) {
+    if (event) event.stopPropagation();
+    let savedList = getSavedVideos().filter(item => item.url !== url);
+    localStorage.setItem('vn_saved_videos_db', JSON.stringify(savedList));
+    updateSavedCounter();
+    if (document.getElementById('vnSavedRow').style.display !== 'none') renderSavedVideosQueue();
+    showToast("🗑️ Asset removed.");
+}
+
+function renderSavedVideosQueue() {
+    const bar = document.getElementById('vnSearchResultsBar');
+    const savedList = getSavedVideos();
+    bar.style.display = 'block';
+
+    if (savedList.length === 0) {
+        bar.innerHTML = `<span style="color:#4b5563; font-size:13px; font-weight:600; padding: 10px; display:block;"><i class="fas fa-folder-open"></i> Vault tracking registers are empty. Save streams above.</span>`;
+        return;
+    }
+
+    bar.innerHTML = savedList.map(item => {
+        const cleanTitle = item.title.replace(/"/g, '&quot;');
+        const defThumb = item.thumb || `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70"><rect width="100%" height="100%" fill="%230b0f19"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23374151">ASSET</text></svg>`;
+        const kwJson = JSON.stringify(item.keywords || fallbackKeywords).replace(/"/g, '&quot;');
+        const descEscaped = (item.desc || fallbackDescription).replace(/"/g, '&quot;').replace(/'/g, "\\'");
+        
+        return `
+            <div class="vn-search-card" onclick="currentActiveTitle='${cleanTitle}'; vnLoadResolvedUrl('${item.url}', ${kwJson}, '${descEscaped}')">
+                <button class="card-save-btn" onclick="removeSavedVideo('${item.url}', event)" style="background:#ef4444;"><i class="fas fa-trash"></i></button>
+                <img src="${defThumb}" alt="" loading="lazy">
+                <div class="vsc-title">${item.title}</div>
+                <div class="vsc-channel"><i class="fas fa-lock"></i> Encrypted Vault Node</div>
+            </div>`;
+    }).join('');
+}
+
+function inlinePlayFromSearch(url, title, kwJson, descStr) {
+    currentActiveTitle = decodeURIComponent(title);
+    vnLoadResolvedUrl(url, JSON.parse(decodeURIComponent(kwJson)), decodeURIComponent(descStr));
+}
+
+function vnOpenApiKeyPrompt() {
+    const current = localStorage.getItem('yt_persistent_api_key') || '';
+    const key = prompt("Inject YouTube V3 Developer Cloud Key Layer Framework:", current);
+    if (key !== null) {
+        localStorage.setItem('yt_persistent_api_key', key.trim());
+        showToast(key.trim() ? "✅ Cloud API engine linked." : "Cloud layer unmapped.");
+    }
+}
+
+/* ============================================================
+   ADVANCED SEARCH SCROLL INTERACTION
+   ============================================================ */
+async function vnRunSearch(isPaginationTrigger = false) {
+    const inputEl = document.getElementById('vnSearchInput');
+    const query = inputEl ? inputEl.value.trim() : '';
+    
+    if (!isPaginationTrigger && !query) { showToast("⚠️ Operational filter arguments expected."); return; }
+
+    const apiKey = localStorage.getItem('yt_persistent_api_key');
+    const resultsBar = document.getElementById('vnSearchResultsBar');
+    resultsBar.style.display = 'block';
+
+    if (!apiKey) {
+        const encQ = encodeURIComponent(isPaginationTrigger ? currentActiveQuery : query);
+        resultsBar.innerHTML = `
+            <div style="display:inline-flex; align-items:center; gap:14px; color:#94a3b8; font-size:13px; white-space:normal; padding: 4px 10px;">
+                <span><i class="fas fa-circle-exclamation" style="color:#db2777;"></i> Cloud Key Empty. Access external asset pools directly:</span>
+                <a href="https://www.youtube.com/results?search_query=${encQ}" target="_blank" style="color:#ef4444; font-weight:700; text-decoration:none;"><i class="fab fa-youtube"></i> YouTube ↗</a>
+            </div>`;
+        return;
+    }
+
+    if (!isPaginationTrigger) {
+        currentActiveQuery = query; nextSearchPageToken = '';
+        resultsBar.innerHTML = `<span style="color:#6b7280; font-size:13px; padding:10px; display:block;"><i class="fas fa-spinner fa-spin"></i> Parsing remote platform repositories...</span>`;
+    } else {
+        if (isSearchLoadingNextPage || !nextSearchPageToken) return;
+        isSearchLoadingNextPage = true;
+    }
+
+    try {
+        let endpoint = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&type=video&q=${encodeURIComponent(currentActiveQuery)}&key=${apiKey}`;
+        if (isPaginationTrigger && nextSearchPageToken) endpoint += `&pageToken=${nextSearchPageToken}`;
+
+        const res = await fetch(endpoint);
+        const data = await res.json();
+
+        if (data.error) {
+            if (!isPaginationTrigger) resultsBar.innerHTML = `<span style="color:#ef4444; font-size:13px; padding:10px; display:block;"><i class="fas fa-bug"></i> API Fault: ${data.error.message}</span>`;
+            isSearchLoadingNextPage = false; return;
+        }
+
+        nextSearchPageToken = data.nextPageToken || '';
+        const cardsHTML = (data.items || []).map(item => {
+            const vid = item.id.videoId; if (!vid) return '';
+            const url = `https://www.youtube.com/watch?v=${vid}`;
+            const title = (item.snippet.title || '').replace(/"/g, '&quot;');
+            const ch = item.snippet.channelTitle || 'Platform Stream';
+            const img = item.snippet.thumbnails?.medium?.url || '';
+            
+            const mockKeywords = [item.snippet.channelTitle || "Media", "Video Engine", "Ad-Free Stream", "Studio Framework"];
+            const desc = (item.snippet.description || fallbackDescription).replace(/"/g, '&quot;').replace(/'/g, "\\'");
+
+            return `
+                <div class="vn-search-card" onclick="inlinePlayFromSearch('${url}', '${encodeURIComponent(title)}', '${encodeURIComponent(JSON.stringify(mockKeywords))}', '${encodeURIComponent(desc)}')">
+                    <span class="platform-indicator" style="background:#ef4444;">YT</span>
+                    <button class="card-save-btn" onclick="event.stopPropagation(); currentActiveUrl='${url}'; currentActiveTitle='${title}'; saveActiveVideo();"><i class="fas fa-bookmark"></i></button>
+                    <img src="${img}" alt="" loading="lazy">
+                    <div class="vsc-title">${title}</div>
+                    <div class="vsc-channel"><i class="fas fa-check-circle" style="color:#2563eb;"></i> ${ch}</div>
+                </div>`;
+        }).join('');
+
+        if (isPaginationTrigger) {
+            const container = document.createElement('span'); container.innerHTML = cardsHTML;
+            resultsBar.appendChild(container); isSearchLoadingNextPage = false;
+        } else {
+            resultsBar.innerHTML = data.items?.length ? cardsHTML : `<span style="color:#6b7280; font-size:13px; padding:10px; display:block;">No asset matches returned.</span>`;
+        }
+    } catch (e) {
+        isSearchLoadingNextPage = false;
+    }
+}
+
+document.getElementById('vnSearchResultsBar').addEventListener('scroll', function(e) {
+    const el = e.target;
+    if ((el.scrollLeft + el.clientWidth) >= (el.scrollWidth - 300)) {
+        if (document.getElementById('vnModeSearchBtn').classList.contains('active')) vnRunSearch(true);
+    }
+});
+
+function vnClearNotes() {
+    if (confirm("Flush notes drafts entirely? Data cannot be restored.")) {
+        document.getElementById('vnNoteEditor').innerHTML = '';
+    }
+}
+function vnTransferNotes() {
+    showToast("💾 Content cache snapshot saved successfully.");
+}
+
+/* ============================================================
+   RESIZE DEPLOYMENT CONSTRUCTS
+   ============================================================ */
+(function setupAdvancedResizeMechanics() {
+    const bar = document.getElementById('vnResizeHandle');
+    const vSide = document.getElementById('vnVideoSide');
+    const nSide = document.getElementById('vnNotesSide');
+    const body = document.getElementById('vnBody');
+    if (!bar || !vSide || !nSide) return;
+    let isActive = false, initialX = 0, initialVideoWidth = 0;
+
+    function engage(e) {
+        isActive = true;
+        initialX = e.touches ? e.touches[0].clientX : e.clientX;
+        initialVideoWidth = vSide.offsetWidth;
+        bar.classList.add('dragging');
+    }
+    function track(e) {
+        if (!isActive) return;
+        const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+        const maxLimit = body.offsetWidth - 20;
+        const computedW = Math.max(280, Math.min(maxLimit - 280, initialVideoWidth + (currentX - initialX)));
+        vSide.style.flex = 'none'; vSide.style.width = computedW + 'px';
+        nSide.style.width = (maxLimit - computedW) + 'px';
+    }
+    function disengage() {
+        if (!isActive) return; isActive = false; bar.classList.remove('dragging');
+    }
+    bar.addEventListener('mousedown', engage);
+    document.addEventListener('mousemove', track);
+    document.addEventListener('mouseup', disengage);
+})();
+</script>
+</body>
+</html>
